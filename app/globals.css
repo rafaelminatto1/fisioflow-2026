@@ -1,0 +1,115 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #f8fafc;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --text-primary: #0f172a;
+  --accent-color: #0ea5e9;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+  --bg-primary: #020617;
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(51, 65, 85, 0.5);
+  --text-primary: #f1f5f9;
+  --accent-color: #38bdf8;
+  --card-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--card-shadow);
+}
+
+.neon-glow {
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
+}
+
+.dark .neon-glow {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+
+.anatomy-mesh {
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+}
+
+@keyframes pulse-neon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.pain-hotspot {
+  animation: pulse-neon 2s infinite ease-in-out;
+}
+
+/* Custom Scrollbar Modern */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+}
+
+/* Print Styles for Professional Reports */
+@media print {
+  /* Hide System UI */
+  aside, header, button, .no-print {
+    display: none !important;
+  }
+
+  /* Reset layout for print */
+  body, main {
+    background: white;
+    color: black;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Ensure content expands */
+  .flex-1 {
+    flex: none !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Force background colors/images for charts and badges */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+  
+  /* Remove shadows and borders */
+  .shadow-sm, .shadow-md, .shadow-lg, .glass-card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

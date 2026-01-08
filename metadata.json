@@ -1,0 +1,5 @@
+{
+  "name": "FisioFlow Dashboard",
+  "description": "Executive dashboard for FisioFlow clinic management, featuring KPIs, financial charts, and schedule management.",
+  "requestFramePermissions": []
+}
