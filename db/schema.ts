@@ -61,6 +61,18 @@ export const patients = pgTable('patients', {
 	isActive: boolean('is_active').default(true).notNull(),
 	totalPoints: integer('total_points').default(0).notNull(),
 	level: integer('level').default(1).notNull(),
+	currentStreak: integer('current_streak').default(0).notNull(),
+	lastActiveDate: timestamp('last_active_date'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const painLogs = pgTable('pain_logs', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	level: integer('level').notNull(), // 0-10
+	notes: text('notes'),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -127,6 +139,13 @@ export const prescriptionsRelations = relations(prescriptions, ({ one }) => ({
 export const dailyTasksRelations = relations(dailyTasks, ({ one }) => ({
 	patient: one(patients, {
 		fields: [dailyTasks.patientId],
+		references: [patients.id],
+	}),
+}));
+
+export const painLogsRelations = relations(painLogs, ({ one }) => ({
+	patient: one(patients, {
+		fields: [painLogs.patientId],
 		references: [patients.id],
 	}),
 }));

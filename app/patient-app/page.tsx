@@ -6,7 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from '../../lib/auth-client';
-import { getPatientProfile, getDailyTasks, toggleTask, getUpcomingAppointment } from '../actions/patient';
+import { getPatientProfile, getDailyTasks, toggleTask, getUpcomingAppointment, logPainLevel, getPatientWorkouts } from '../actions/patient';
+import { getLevelProgress } from '../utils/gamification';
 import {
     CalendarIcon,
     CheckCircleIcon,
@@ -60,6 +61,7 @@ export default function PatientAppPage() {
     const [activeTab, setActiveTab] = useState('home');
     const [painLevel, setPainLevel] = useState(3);
     const [tasks, setTasks] = useState<DailyTask[]>([]);
+    const [workouts, setWorkouts] = useState<any[]>([]);
     const [patient, setPatient] = useState<any>(null);
     const [nextAppointment, setNextAppointment] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -77,6 +79,9 @@ export default function PatientAppPage() {
 
                     const apt = await getUpcomingAppointment(p.id);
                     setNextAppointment(apt);
+
+                    const w = await getPatientWorkouts(p.id);
+                    setWorkouts(w);
                 }
             } catch (error) {
                 console.error("Error loading patient data", error);
@@ -131,7 +136,7 @@ export default function PatientAppPage() {
         </div>
     );
 
-    const levelProgress = 75; // TODO: Calculate based on points structure
+    const levelProgress = patient ? getLevelProgress(patient.totalPoints) : 0;
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20 max-w-md mx-auto shadow-2xl relative overflow-hidden">
@@ -143,6 +148,11 @@ export default function PatientAppPage() {
                 <div>
                     <p className="text-indigo-100 text-sm font-medium">Bom dia,</p>
                     <h1 className="text-2xl font-bold">{patient.name}</h1>
+                    {patient.currentStreak > 1 && (
+                        <div className="flex items-center gap-1 mt-1 text-xs font-bold text-amber-300 bg-white/10 w-fit px-2 py-0.5 rounded-full">
+                            <span className="text-lg">🔥</span> {patient.currentStreak} dias seguidos
+                        </div>
+                    )}
                 </div>
                 <div className="w-12 h-12 rounded-full border-2 border-white/30 bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden">
                     <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(patient.name)}&background=random`} alt="Profile" className="w-full h-full object-cover" />
@@ -219,7 +229,15 @@ export default function PatientAppPage() {
                             />
                             <div className="mt-4 flex justify-between items-center">
                                 <span className="text-2xl font-bold text-indigo-600">{painLevel}</span>
-                                <button className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg font-bold transition-colors">
+                                <button
+                                    onClick={async () => {
+                                        if (patient) {
+                                            await logPainLevel(patient.id, painLevel);
+                                            // Optional: Show toast
+                                        }
+                                    }}
+                                    className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg font-bold transition-colors"
+                                >
                                     Registrar
                                 </button>
                             </div>
@@ -267,14 +285,10 @@ export default function PatientAppPage() {
                             </div>
 
                             <div className="space-y-4">
-                                {[
-                                    { name: 'Agachamento Livre', sets: '3x12', img: 'https://images.unsplash.com/photo-1574680096141-1cddd32e0340?w=400&q=80' },
-                                    { name: 'Ponte Unilateral', sets: '3x15', img: 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=400&q=80' },
-                                    { name: 'Prancha Frontal', sets: '3x 45s', img: 'https://images.unsplash.com/photo-1566241440091-ec10de8db2e1?w=400&q=80' }
-                                ].map((ex, i) => (
+                                {workouts.length > 0 ? workouts.map((ex, i) => (
                                     <div key={i} className="flex gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors cursor-pointer group">
                                         <div className="w-20 h-20 bg-slate-200 rounded-lg overflow-hidden shrink-0 relative">
-                                            <img src={ex.img} alt={ex.name} className="w-full h-full object-cover" />
+                                            <img src="https://images.unsplash.com/photo-1574680096141-1cddd32e0340?w=400&q=80" alt={ex.exerciseTitle} className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                                                 <div className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                                     <PlayIcon className="w-4 h-4 text-indigo-600 ml-0.5" />
@@ -282,14 +296,18 @@ export default function PatientAppPage() {
                                             </div>
                                         </div>
                                         <div className="flex flex-col justify-center">
-                                            <h4 className="font-bold text-slate-800">{ex.name}</h4>
+                                            <h4 className="font-bold text-slate-800">{ex.exerciseTitle}</h4>
                                             <p className="text-xs text-slate-500 mb-2">{ex.sets}</p>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-500">Membros Inferiores</span>
+                                                <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-500">{ex.frequency}</span>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                        <p className="text-slate-500 text-sm">Nenhum treino prescrito no momento.</p>
+                                    </div>
+                                )}
                             </div>
 
                             <button className="w-full mt-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">

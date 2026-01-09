@@ -72,6 +72,7 @@ export interface Patient {
   email: string;
   phone: string;
   isActive: boolean;
+  cpf?: string;
   createdAt: string;
   tags?: string[];
   condition?: string;
@@ -255,149 +256,149 @@ export interface ExecutiveReportData {
 // ... (Mantenha Postural Analysis, Pain Map, Assessment Engine, Assets) ...
 
 export interface Landmark {
-    x: number;
-    y: number;
-    z?: number;
-    visibility?: number;
+  x: number;
+  y: number;
+  z?: number;
+  visibility?: number;
 }
 
 export type PoseLandmarks = {
-    nose?: Landmark;
-    leftEye?: Landmark;
-    rightEye?: Landmark;
-    leftEar?: Landmark;
-    rightEar?: Landmark;
-    leftShoulder?: Landmark;
-    rightShoulder?: Landmark;
-    leftElbow?: Landmark;
-    rightElbow?: Landmark;
-    leftWrist?: Landmark;
-    rightWrist?: Landmark;
-    leftHip?: Landmark;
-    rightHip?: Landmark;
-    leftKnee?: Landmark;
-    rightKnee?: Landmark;
-    leftAnkle?: Landmark;
-    rightAnkle?: Landmark;
-    c7?: Landmark;
-    l5?: Landmark;
-    leftHeel?: Landmark;
-    rightHeel?: Landmark;
+  nose?: Landmark;
+  leftEye?: Landmark;
+  rightEye?: Landmark;
+  leftEar?: Landmark;
+  rightEar?: Landmark;
+  leftShoulder?: Landmark;
+  rightShoulder?: Landmark;
+  leftElbow?: Landmark;
+  rightElbow?: Landmark;
+  leftWrist?: Landmark;
+  rightWrist?: Landmark;
+  leftHip?: Landmark;
+  rightHip?: Landmark;
+  leftKnee?: Landmark;
+  rightKnee?: Landmark;
+  leftAnkle?: Landmark;
+  rightAnkle?: Landmark;
+  c7?: Landmark;
+  l5?: Landmark;
+  leftHeel?: Landmark;
+  rightHeel?: Landmark;
 };
 
 export interface PostureMetrics {
-    headTiltDeg?: number;
-    shoulderHeightDiff?: number;
-    pelvicTiltDeg?: number;
-    trunkLeanDeg?: number;
-    kneeValgus?: { left: number; right: number };
-    scapularAsymmetry?: number;
-    anklePronationEstimate?: { left: number; right: number };
-    spineDeviation?: number;
-    forwardHead?: number;
-    thoracicKyphosis?: number;
-    lumbarLordosis?: number;
+  headTiltDeg?: number;
+  shoulderHeightDiff?: number;
+  pelvicTiltDeg?: number;
+  trunkLeanDeg?: number;
+  kneeValgus?: { left: number; right: number };
+  scapularAsymmetry?: number;
+  anklePronationEstimate?: { left: number; right: number };
+  spineDeviation?: number;
+  forwardHead?: number;
+  thoracicKyphosis?: number;
+  lumbarLordosis?: number;
 }
 
 export interface PosturalAssessment {
-    id: string;
-    patientId: string;
-    date: string;
-    images: {
-        front?: string;
-        side?: string;
-        back?: string;
-    };
-    landmarks: {
-        front?: PoseLandmarks;
-        side?: PoseLandmarks;
-        back?: PoseLandmarks;
-    };
-    metrics: PostureMetrics;
-    status: 'draft' | 'completed';
-    notes?: string;
+  id: string;
+  patientId: string;
+  date: string;
+  images: {
+    front?: string;
+    side?: string;
+    back?: string;
+  };
+  landmarks: {
+    front?: PoseLandmarks;
+    side?: PoseLandmarks;
+    back?: PoseLandmarks;
+  };
+  metrics: PostureMetrics;
+  status: 'draft' | 'completed';
+  notes?: string;
 }
 
 export interface PainPoint {
-    id: string;
-    x: number;
-    y: number; 
-    angle: number;
-    intensity: number;
-    type: string;
-    muscleGroup?: string;
-    notes?: string;
-    agravantes?: string[];
-    aliviantes?: string[];
+  id: string;
+  x: number;
+  y: number;
+  angle: number;
+  intensity: number;
+  type: string;
+  muscleGroup?: string;
+  notes?: string;
+  agravantes?: string[];
+  aliviantes?: string[];
 }
 
 export interface AssessmentField {
-    id: string;
-    label: string;
-    type: 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'scale_10' | 'range_motion' | 'body_map';
-    required?: boolean;
-    placeholder?: string;
-    options?: string[];
-    min?: number;
-    max?: number;
-    suffix?: string;
-    helperText?: string;
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'scale_10' | 'range_motion' | 'body_map';
+  required?: boolean;
+  placeholder?: string;
+  options?: string[];
+  min?: number;
+  max?: number;
+  suffix?: string;
+  helperText?: string;
 }
 
 export interface AssessmentStep {
-    id: string;
-    title: string;
-    fields: AssessmentField[];
+  id: string;
+  title: string;
+  fields: AssessmentField[];
 }
 
 export interface AssessmentTemplate {
-    id: string;
-    title: string;
-    category: string;
-    description: string;
-    steps: AssessmentStep[];
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  steps: AssessmentStep[];
 }
 
 export type AnnotationType = 'pan' | 'ruler' | 'angle' | 'arrow' | 'circle' | 'text';
 
 export interface AnnotationPoint {
-    x: number;
-    y: number;
+  x: number;
+  y: number;
 }
 
 export interface Annotation {
-    id: string;
-    type: AnnotationType;
-    points: AnnotationPoint[];
-    color: string;
-    strokeWidth: number;
-    text?: string;
-    metadata?: any;
+  id: string;
+  type: AnnotationType;
+  points: AnnotationPoint[];
+  color: string;
+  strokeWidth: number;
+  text?: string;
+  metadata?: any;
 }
 
 export interface AnnotationVersion {
-    id: string;
-    assetId: string;
-    versionNumber: number;
-    data: Annotation[];
-    thumbnailUrl?: string;
-    createdAt: string;
-    createdBy: string;
+  id: string;
+  assetId: string;
+  versionNumber: number;
+  data: Annotation[];
+  thumbnailUrl?: string;
+  createdAt: string;
+  createdBy: string;
 }
 
 export interface Asset {
-    id: string;
-    clinicId: string;
-    patientId?: string;
-    sessionId?: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-    url: string;
-    thumbnailUrl?: string;
-    type: 'image' | 'video' | 'pdf';
-    status: 'uploading' | 'processing' | 'ready' | 'error';
-    hash?: string;
-    metadata?: any;
-    createdAt: string;
+  id: string;
+  clinicId: string;
+  patientId?: string;
+  sessionId?: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  url: string;
+  thumbnailUrl?: string;
+  type: 'image' | 'video' | 'pdf';
+  status: 'uploading' | 'processing' | 'ready' | 'error';
+  hash?: string;
+  metadata?: any;
+  createdAt: string;
 }

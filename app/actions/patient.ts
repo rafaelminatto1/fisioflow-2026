@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { patients, dailyTasks, appointments } from '@/db/schema';
+import { patients, dailyTasks, appointments, painLogs, prescriptions, exercises } from '@/db/schema';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
@@ -111,4 +111,36 @@ export async function getUpcomingAppointment(patientId: string) {
     // For now, let's just return the appointment. treating physioId as string.
 
     return correctAppointment;
+}
+
+export async function logPainLevel(patientId: string, level: number) {
+    if (level < 0 || level > 10) throw new Error('Invalid pain level');
+
+    await db.insert(painLogs).values({
+        patientId,
+        level,
+    });
+
+    return { success: true };
+}
+
+export async function getPatientWorkouts(patientId: string) {
+    const activePrescriptions = await db.query.prescriptions.findMany({
+        where: and(
+            eq(prescriptions.patientId, patientId),
+            eq(prescriptions.active, true)
+        ),
+        with: {
+            exercise: true
+        }
+    });
+
+    return activePrescriptions.map(p => ({
+        id: p.id,
+        exerciseTitle: p.exercise.title,
+        sets: p.notes || '3 séries de 10 repetições', // Default fallback if notes are empty
+        frequency: p.frequency === 'daily' ? 'Diário' : 'Semanal',
+        videoUrl: p.exercise.videoUrl,
+        category: p.exercise.category
+    }));
 }

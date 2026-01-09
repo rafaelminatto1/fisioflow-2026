@@ -3,15 +3,15 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Asset, Annotation, AnnotationType, AnnotationVersion, AnnotationPoint } from '../types';
-import { 
-    ZoomInIcon, 
-    ZoomOutIcon, 
-    RefreshCwIcon, 
-    RulerIcon, 
-    AngleIcon, 
-    PencilIcon, 
-    TrashIcon, 
-    DownloadIcon, 
+import {
+    ZoomInIcon,
+    ZoomOutIcon,
+    RefreshCwIcon,
+    RulerIcon,
+    AngleIcon,
+    PencilIcon,
+    TrashIcon,
+    DownloadIcon,
     CheckCircleIcon,
     XIcon,
     ChevronLeftIcon,
@@ -24,13 +24,13 @@ import { api } from '../services/api';
 
 // Icons for Specific Shapes
 const CircleIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10" /></svg>
 );
 const ArrowIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
 );
 const TypeIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" y1="20" x2="15" y2="20" /><line x1="12" y1="4" x2="12" y2="20" /></svg>
 );
 
 interface AssetViewerProps {
@@ -45,12 +45,12 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
     const [rotation, setRotation] = useState(0);
     const [brightness, setBrightness] = useState(100);
     const [contrast, setContrast] = useState(100);
-    
+
     // --- State: Interaction ---
     const [activeTool, setActiveTool] = useState<AnnotationType | 'none' | 'pan'>('pan');
     const [isDrawing, setIsDrawing] = useState(false);
     const [currentPoints, setCurrentPoints] = useState<AnnotationPoint[]>([]);
-    
+
     // --- State: Annotations & Data ---
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
     const [versions, setVersions] = useState<AnnotationVersion[]>([]);
@@ -62,7 +62,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [numPages, setNumPages] = useState(1);
     // In a real app, use PDF.js to render pages. Here we mock pages.
-    
+
     // --- Refs ---
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
@@ -92,7 +92,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                 draw();
             };
         }
-        
+
         loadVersions();
     }, [asset]);
 
@@ -109,11 +109,11 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
         const scaleW = cw / iw;
         const scaleH = ch / ih;
         const newScale = Math.min(scaleW, scaleH) * 0.9;
-        
+
         setScale(newScale);
-        setOffset({ 
-            x: (cw - iw * newScale) / 2, 
-            y: (ch - ih * newScale) / 2 
+        setOffset({
+            x: (cw - iw * newScale) / 2,
+            y: (ch - ih * newScale) / 2
         });
     };
 
@@ -204,11 +204,11 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                 ctx.stroke();
                 // Label
                 const angle = Math.abs(
-                    Math.atan2(pts[2].y - pts[1].y, pts[2].x - pts[1].x) - 
+                    Math.atan2(pts[2].y - pts[1].y, pts[2].x - pts[1].x) -
                     Math.atan2(pts[0].y - pts[1].y, pts[0].x - pts[1].x)
                 ) * (180 / Math.PI);
                 const displayAngle = angle > 180 ? 360 - angle : angle;
-                
+
                 ctx.font = `${14 / scale}px sans-serif`;
                 ctx.fillStyle = 'white';
                 ctx.strokeText(`${displayAngle.toFixed(1)}°`, pts[1].x + 10, pts[1].y);
@@ -219,7 +219,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                 const dx = pts[1].x - pts[0].x;
                 const dy = pts[1].y - pts[0].y;
                 const angle = Math.atan2(dy, dx);
-                
+
                 ctx.moveTo(pts[0].x, pts[0].y);
                 ctx.lineTo(pts[1].x, pts[1].y);
                 ctx.lineTo(pts[1].x - headlen * Math.cos(angle - Math.PI / 6), pts[1].y - headlen * Math.sin(angle - Math.PI / 6));
@@ -240,13 +240,13 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
         };
 
         annotations.forEach(a => drawAnnotation(a));
-        
+
         // Draw Current Interaction
-        if (isDrawing && currentPoints.length > 0 && activeTool !== 'pan') {
+        if (isDrawing && currentPoints.length > 0 && activeTool !== 'pan' && activeTool !== 'none') {
             // Create a temp annotation for visualization
             const tempAnn: Annotation = {
                 id: 'temp',
-                type: activeTool,
+                type: activeTool as AnnotationType,
                 points: currentPoints,
                 color: '#f43f5e', // Highlight color while drawing
                 strokeWidth: 3
@@ -268,7 +268,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
             setIsDrawing(true);
             return;
         }
-        
+
         const pos = getMousePos(e);
         // Inverse transform to get image local coordinates
         // Simplified inverse for Pan/Zoom (Rotation makes this math harder, usually need a Matrix lib)
@@ -286,20 +286,20 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
         ly /= scale;
         // 3. Rotate back (around center)
         // Ignoring rotation for MVP drawing simplicity or locking drawing when rotated
-        
+
         // Normalize 0-1
         const nx = lx / img.width;
         const ny = ly / img.height;
 
         setIsDrawing(true);
-        
+
         if (activeTool === 'text') {
             const text = prompt("Digite o texto:");
             if (text) {
                 const newAnn: Annotation = {
                     id: Date.now().toString(),
                     type: 'text',
-                    points: [{x: nx, y: ny}],
+                    points: [{ x: nx, y: ny }],
                     text,
                     color: '#ef4444',
                     strokeWidth: 2
@@ -310,7 +310,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
             return;
         }
 
-        setCurrentPoints([{x: nx, y: ny}]);
+        setCurrentPoints([{ x: nx, y: ny }]);
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -334,11 +334,11 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
         const ny = ly / img.height;
 
         if (activeTool === 'ruler' || activeTool === 'arrow' || activeTool === 'circle') {
-            setCurrentPoints(prev => [prev[0], {x: nx, y: ny}]);
+            setCurrentPoints(prev => [prev[0], { x: nx, y: ny }]);
         } else if (activeTool === 'angle') {
             // For angle we need 3 clicks, but preview shows line to 2nd/3rd point
-            if (currentPoints.length === 1) setCurrentPoints(prev => [prev[0], {x: nx, y: ny}]);
-            if (currentPoints.length === 2) setCurrentPoints(prev => [prev[0], prev[1], {x: nx, y: ny}]);
+            if (currentPoints.length === 1) setCurrentPoints(prev => [prev[0], { x: nx, y: ny }]);
+            if (currentPoints.length === 2) setCurrentPoints(prev => [prev[0], prev[1], { x: nx, y: ny }]);
         }
     };
 
@@ -375,7 +375,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                 setIsDrawing(false);
             } else if (currentPoints.length < 3) {
                 // Keep drawing for next point
-                return; 
+                return;
             }
         }
     };
@@ -418,7 +418,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                         <h2 className="font-bold text-sm">{asset.filename}</h2>
                         <div className="text-xs text-slate-400 flex items-center gap-2">
                             {asset.type.toUpperCase()} • V{versions.length}
-                            {isSaving && <span className="text-amber-400 flex gap-1"><RefreshCwIcon className="w-3 h-3 animate-spin"/> Salvando...</span>}
+                            {isSaving && <span className="text-amber-400 flex gap-1"><RefreshCwIcon className="w-3 h-3 animate-spin" /> Salvando...</span>}
                         </div>
                     </div>
                 </div>
@@ -426,7 +426,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                 {/* Tools */}
                 <div className="flex bg-slate-900 rounded-lg p-1 gap-1">
                     {[
-                        { id: 'pan', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 9l4-4 4 4"/><path d="M5 15l4 4 4-4"/><path d="M9 5v14"/><path d="M15 9l4-4 4 4"/><path d="M15 15l4 4 4-4"/><path d="M19 5v14"/></svg> },
+                        { id: 'pan', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 9l4-4 4 4" /><path d="M5 15l4 4 4-4" /><path d="M9 5v14" /><path d="M15 9l4-4 4 4" /><path d="M15 15l4 4 4-4" /><path d="M19 5v14" /></svg> },
                         { id: 'ruler', icon: <RulerIcon className="w-5 h-5" /> },
                         { id: 'angle', icon: <AngleIcon className="w-5 h-5" /> },
                         { id: 'arrow', icon: <ArrowIcon className="w-5 h-5" /> },
@@ -451,7 +451,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                     <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 hover:bg-slate-700 rounded transition-colors ${isSidebarOpen ? 'text-primary' : 'text-slate-400'}`}>
                         <HistoryIcon className="w-5 h-5" />
                     </button>
-                    <button 
+                    <button
                         onClick={handleSave}
                         className="bg-primary hover:bg-sky-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2"
                     >
@@ -463,7 +463,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
             {/* Main Area */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Canvas Container */}
-                <div 
+                <div
                     ref={containerRef}
                     className="flex-1 bg-black relative overflow-hidden flex items-center justify-center cursor-crosshair"
                     onMouseDown={handleMouseDown}
@@ -477,7 +477,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                     }}
                 >
                     <canvas ref={canvasRef} className="absolute inset-0 block touch-none" />
-                    
+
                     {/* Floating Controls */}
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800/90 backdrop-blur border border-slate-700 p-2 rounded-xl flex items-center gap-4 text-slate-300 shadow-xl">
                         <div className="flex items-center gap-2">
@@ -493,9 +493,9 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                         <div className="w-px h-4 bg-slate-600"></div>
                         <div className="flex items-center gap-2" title="Brilho / Contraste">
                             <SunIcon className="w-4 h-4 text-amber-400" />
-                            <input 
-                                type="range" min="50" max="150" 
-                                value={brightness} 
+                            <input
+                                type="range" min="50" max="150"
+                                value={brightness}
                                 onChange={(e) => setBrightness(parseInt(e.target.value))}
                                 className="w-16 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-amber-400"
                             />
@@ -505,9 +505,9 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                     {/* PDF Navigation (if applicable) */}
                     {asset.type === 'pdf' && (
                         <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-slate-800 p-2 rounded-lg text-white">
-                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeftIcon className="w-5 h-5"/></button>
+                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeftIcon className="w-5 h-5" /></button>
                             <span className="text-sm">Pág {currentPage} / {numPages}</span>
-                            <button disabled={currentPage >= numPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRightIcon className="w-5 h-5"/></button>
+                            <button disabled={currentPage >= numPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRightIcon className="w-5 h-5" /></button>
                         </div>
                     )}
                 </div>
@@ -521,7 +521,7 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                             {versions.length === 0 && <p className="text-xs text-slate-500 text-center py-4">Nenhuma anotação salva.</p>}
                             {versions.map(v => (
-                                <div 
+                                <div
                                     key={v.id}
                                     onClick={() => handleLoadVersion(v)}
                                     className={`p-3 rounded-lg border cursor-pointer hover:border-primary transition-all ${selectedVersion === v.id ? 'bg-slate-700 border-primary' : 'bg-slate-700/50 border-slate-600'}`}

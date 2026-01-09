@@ -11,7 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { FinancialData } from '../types';
-import { ThemeContext } from '../App';
+import { ThemeContext } from './ThemeProvider';
 
 interface FinancialChartProps {
   data: FinancialData[];
@@ -42,7 +42,7 @@ const FinancialChart: React.FC<FinancialChartProps> = React.memo(({ data }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="flex-1 w-full min-h-[200px] relative z-10">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
@@ -57,24 +57,24 @@ const FinancialChart: React.FC<FinancialChartProps> = React.memo(({ data }) => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"} />
-            <XAxis 
-                dataKey="month" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 10, fontWeight: 700 }} 
-                dy={10}
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 10, fontWeight: 700 }}
+              dy={10}
             />
-            <Tooltip 
-                contentStyle={{ 
-                    backgroundColor: isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)', 
-                    borderRadius: '16px', 
-                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)',
-                    color: isDark ? '#fff' : '#0f172a'
-                }}
-                itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                cursor={{ stroke: '#0ea5e9', strokeWidth: 1, strokeDasharray: '4 4' }}
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '16px',
+                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)',
+                color: isDark ? '#fff' : '#0f172a'
+              }}
+              itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+              cursor={{ stroke: '#0ea5e9', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
             <Area
               type="monotone"
