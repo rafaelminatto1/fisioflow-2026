@@ -2,8 +2,8 @@ import './globals.css';
 import React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
+import MainLayout from '../components/MainLayout';
+import { ThemeProvider } from '../components/ThemeProvider';
 import AiAssistant from '../components/AiAssistant';
 import { NextRouterProvider } from '../components/NextRouterProvider';
 
@@ -17,26 +17,19 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
     <html lang="pt-BR">
       <body className={`${inter.className} bg-slate-50 text-slate-900`}>
-        <NextRouterProvider>
-          <div className="flex min-h-screen">
-            {/* Sidebar (Desktop) */}
-            <Sidebar className="hidden md:flex" />
-
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col md:pl-64 transition-all duration-300">
-              <Header />
-              <main className="flex-1">
-                  {children}
-              </main>
-            </div>
-          </div>
-          <AiAssistant />
-        </NextRouterProvider>
+        <ThemeProvider>
+          <NextRouterProvider>
+            <MainLayout>
+              {children}
+            </MainLayout>
+            <AiAssistant />
+          </NextRouterProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
