@@ -6,14 +6,14 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { 
-            key, 
-            fileUrl, 
+        const {
+            key,
+            fileUrl,
             thumbnailUrl, // From client-side generation
-            filename, 
-            mimeType, 
-            sizeBytes, 
-            hash, 
+            filename,
+            mimeType,
+            sizeBytes,
+            hash,
             metadata,
             patientId,
             sessionId
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         };
 
         // await db.insert(assets).values(newAsset);
-        console.log('[API] Asset Confirmed:', newAsset);
+
 
         return NextResponse.json(newAsset, { status: 201 });
 

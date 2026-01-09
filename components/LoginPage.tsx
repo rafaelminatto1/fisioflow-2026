@@ -37,9 +37,10 @@ const LoginPage: React.FC = () => {
                 if (signUpError) throw signUpError;
                 setSuccess('Conta criada com sucesso! Realizando login...');
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Auth error:", err);
-            setError(err.message || 'Falha na autenticação. Verifique suas credenciais.');
+            const errorMessage = err instanceof Error ? err.message : 'Falha na autenticação. Verifique suas credenciais.';
+            setError(errorMessage);
             setLoading(false);
         }
     };
@@ -49,7 +50,7 @@ const LoginPage: React.FC = () => {
             {/* Esquerda: Hero Section */}
             <div className="hidden lg:flex w-1/2 bg-slate-900 relative items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-transparent"></div>
-                
+
                 {/* Elementos Decorativos de Fundo */}
                 <div className="absolute top-20 left-20 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-20 right-20 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"></div>
@@ -64,7 +65,7 @@ const LoginPage: React.FC = () => {
                     <p className="text-xl text-slate-400 leading-relaxed font-light">
                         Gestão clínica inteligente potencializada por Neon DB e Better Auth. Performance e segurança em tempo real.
                     </p>
-                    
+
                     <div className="mt-8 flex items-center gap-6 text-sm font-medium text-slate-500">
                         <div className="flex items-center gap-2">
                             <CheckCircleIcon className="w-4 h-4 text-emerald-500" /> Alta Disponibilidade
@@ -94,8 +95,8 @@ const LoginPage: React.FC = () => {
                                 <label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Nome Completo</label>
                                 <div className="relative group">
                                     <UsersIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                                    <input 
-                                        type="text" required value={name} 
+                                    <input
+                                        type="text" required value={name}
                                         onChange={(e) => setInputName(e.target.value)}
                                         className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
                                         placeholder="Dr. Ricardo Marques"
@@ -108,8 +109,8 @@ const LoginPage: React.FC = () => {
                             <label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Email Profissional</label>
                             <div className="relative group">
                                 <MailIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                                <input 
-                                    type="email" required value={email} 
+                                <input
+                                    type="email" required value={email}
                                     onChange={(e) => setInputEmail(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
                                     placeholder="exemplo@fisioflow.com"
@@ -121,8 +122,8 @@ const LoginPage: React.FC = () => {
                             <label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Senha</label>
                             <div className="relative group">
                                 <LockIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                                <input 
-                                    type="password" required value={password} 
+                                <input
+                                    type="password" required value={password}
                                     onChange={(e) => setInputPassword(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
                                     placeholder="••••••••"
@@ -136,14 +137,14 @@ const LoginPage: React.FC = () => {
                                 <AlertCircleIcon className="w-4 h-4" /> {error}
                             </div>
                         )}
-                        
+
                         {success && (
                             <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold rounded-2xl animate-pulse flex items-center gap-2">
                                 <CheckCircleIcon className="w-4 h-4" /> {success}
                             </div>
                         )}
 
-                        <button 
+                        <button
                             disabled={loading}
                             className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                         >
@@ -162,7 +163,7 @@ const LoginPage: React.FC = () => {
                     </form>
 
                     <div className="text-center pt-4 border-t border-slate-100">
-                        <button 
+                        <button
                             onClick={() => { setError(''); setSuccess(''); setIsLogin(!isLogin); }}
                             className="text-sm font-bold text-primary hover:text-sky-600 transition-colors hover:underline underline-offset-4 disabled:opacity-50"
                             disabled={loading}
@@ -171,7 +172,7 @@ const LoginPage: React.FC = () => {
                         </button>
                     </div>
                 </div>
-                
+
                 {/* Footer simple */}
                 <div className="absolute bottom-6 text-[10px] text-slate-400 uppercase tracking-widest font-bold">
                     Powered by Neon & Better Auth
