@@ -19,5 +19,6 @@ export const auth = betterAuth({
         autoSignIn: true
     },
     // Configurações para produção na Vercel
+    baseURL: process.env.BETTER_AUTH_URL,
     trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"]
 });
