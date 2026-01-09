@@ -4,10 +4,10 @@ import { relations } from 'drizzle-orm';
 
 // --- Enums ---
 export const appointmentStatusEnum = pgEnum('appointment_status', [
-  'scheduled', 
-  'confirmed', 
-  'canceled', 
-  'pending', 
+  'scheduled',
+  'confirmed',
+  'canceled',
+  'pending',
   'realized'
 ]);
 
@@ -28,8 +28,8 @@ export const patients = pgTable('patients', {
   gender: genderEnum('gender'),
   address: text('address'),
   profession: varchar('profession', { length: 100 }),
-  clinicalHistory: text('clinical_history'), 
-  tags: jsonb('tags').$type<string[]>(), 
+  clinicalHistory: text('clinical_history'),
+  tags: jsonb('tags').$type<string[]>(),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -40,12 +40,12 @@ export const appointments = pgTable('appointments', {
   patientId: uuid('patient_id')
     .references(() => patients.id, { onDelete: 'cascade' })
     .notNull(),
-  physioId: uuid('physio_id').notNull(), 
+  physioId: uuid('physio_id').notNull(),
   startTime: timestamp('start_time').notNull(),
   endTime: timestamp('end_time').notNull(),
   durationMinutes: integer('duration_minutes').notNull(),
   status: appointmentStatusEnum('status').default('scheduled').notNull(),
-  type: varchar('type', { length: 50 }), 
+  type: varchar('type', { length: 50 }),
   notes: text('notes'),
   reminderSent: boolean('reminder_sent').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -59,11 +59,11 @@ export const sessions = pgTable('sessions', {
     .references(() => patients.id, { onDelete: 'cascade' })
     .notNull(),
   evolutionDate: timestamp('evolution_date').defaultNow().notNull(),
-  subjective: text('subjective'), 
-  objective: text('objective'),   
-  assessment: text('assessment'), 
-  plan: text('plan'),             
-  evaScore: integer('eva_score'), 
+  subjective: text('subjective'),
+  objective: text('objective'),
+  assessment: text('assessment'),
+  plan: text('plan'),
+  evaScore: integer('eva_score'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -72,8 +72,8 @@ export const painMaps = pgTable('pain_maps', {
   sessionId: uuid('session_id')
     .references(() => sessions.id, { onDelete: 'cascade' })
     .notNull(),
-  bodyPart: varchar('body_part', { length: 50 }), 
-  imageUrl: text('image_url').notNull(), 
+  bodyPart: varchar('body_part', { length: 50 }),
+  imageUrl: text('image_url').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -84,25 +84,25 @@ export const painPoints = pgTable('pain_points', {
     .notNull(),
   xCoord: integer('x_coord').notNull(),
   yCoord: integer('y_coord').notNull(),
-  intensity: integer('intensity').notNull(), 
-  type: varchar('type', { length: 50 }), 
+  intensity: integer('intensity').notNull(),
+  type: varchar('type', { length: 50 }),
   notes: text('notes'),
 });
 
 export const assets = pgTable('assets', {
   id: uuid('id').defaultRandom().primaryKey(),
-  clinicId: varchar('clinic_id', { length: 50 }).notNull(), 
+  clinicId: varchar('clinic_id', { length: 50 }).notNull(),
   patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'set null' }),
   sessionId: uuid('session_id').references(() => sessions.id, { onDelete: 'set null' }),
   filename: varchar('filename', { length: 255 }).notNull(),
   mimeType: varchar('mime_type', { length: 100 }).notNull(),
   sizeBytes: integer('size_bytes').notNull(),
-  url: text('url').notNull(), 
+  url: text('url').notNull(),
   thumbnailUrl: text('thumbnail_url'),
   type: assetTypeEnum('type').notNull(),
   status: assetStatusEnum('status').default('uploading').notNull(),
-  hash: varchar('hash', { length: 64 }), 
-  metadata: jsonb('metadata'), 
+  hash: varchar('hash', { length: 64 }),
+  metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (t) => ({
@@ -126,23 +126,73 @@ export const posturalAssessments = pgTable('postural_assessments', {
   id: uuid('id').defaultRandom().primaryKey(),
   patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'cascade' }).notNull(),
   date: timestamp('date').defaultNow().notNull(),
-  
+
   // Imagens
   frontImageUrl: text('front_image_url'),
   sideImageUrl: text('side_image_url'),
   backImageUrl: text('back_image_url'),
-  
+
   // Landmarks (JSON com coordenadas normalizadas 0-1)
   // Estrutura: { front: { nose: {x,y}, ... }, side: {...}, back: {...} }
   landmarks: jsonb('landmarks').notNull(),
-  
+
   // Métricas Calculadas
   metrics: jsonb('metrics'),
-  
+
   status: varchar('status', { length: 20 }).default('draft'), // draft, completed
   notes: text('notes'),
-  
+
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull(),
+  image: text("image"),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const session = pgTable("session", {
+  id: text("id").primaryKey(),
+  expiresAt: timestamp("expires_at").notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+});
+
+export const account = pgTable("account", {
+  id: text("id").primaryKey(),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at"),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const verification = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
 });
 
 // --- Relationships ---
@@ -216,5 +266,24 @@ export const posturalAssessmentsRelations = relations(posturalAssessments, ({ on
   patient: one(patients, {
     fields: [posturalAssessments.patientId],
     references: [patients.id],
+  }),
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
+}));
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+  }),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
   }),
 }));
