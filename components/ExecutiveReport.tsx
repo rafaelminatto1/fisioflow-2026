@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -48,14 +47,12 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
     };
 
     const handlePeriodChange = (period: string) => {
-        // Navegação via URL permite que o Server Component recarregue os dados
         router.push(`reports/executive?period=${period}`);
     };
 
     const generateAiAnalysis = async () => {
         setAnalyzing(true);
         try {
-            // Contexto otimizado para a IA (CFO Virtual)
             const contextData = {
                 periodo: currentPeriod,
                 financeiro: {
@@ -63,6 +60,7 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
                     despesa: initialData.financial.totalExpenses,
                     lucro: initialData.financial.netIncome
                 },
+                projecoes: initialData.projections,
                 saude: initialData.healthScore.score,
                 sucessoClinico: initialData.clinical.treatmentSuccessRate,
                 riscoChurn: initialData.marketing.churnRate
@@ -176,13 +174,13 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
                 </div>
             )}
 
-            {/* Main KPIs */}
+            {/* Main KPIs Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 print:grid-cols-4">
                 {/* Revenue */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-emerald-200 transition-all">
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Receita Bruta</p>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Receita Realizada</p>
                             <h3 className="text-2xl font-black text-slate-900 mt-1">R$ {(initialData.financial.totalRevenue / 1000).toFixed(1)}k</h3>
                         </div>
                         <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform">
@@ -211,33 +209,38 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
                     </div>
                 </div>
 
-                {/* Health Score */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-amber-200 transition-all">
-                    <div className="flex justify-between items-start mb-4">
+                {/* EBITDA Projection (New) */}
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-amber-200 transition-all relative overflow-hidden">
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-50 rounded-full blur-2xl opacity-50"></div>
+                    <div className="flex justify-between items-start mb-4 relative z-10">
                         <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Health Score</p>
-                            <h3 className="text-2xl font-black text-slate-900 mt-1">{initialData.healthScore.score}</h3>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">EBITDA (Proj.)</p>
+                            <h3 className="text-2xl font-black text-slate-900 mt-1">R$ {(initialData.projections.ebitda / 1000).toFixed(1)}k</h3>
                         </div>
                         <div className="p-2 bg-amber-50 text-amber-600 rounded-lg group-hover:scale-110 transition-transform">
                             <ActivityIcon className="w-6 h-6" />
                         </div>
                     </div>
-                    <p className="text-xs text-slate-400">Score composto de performance global.</p>
+                    <p className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded w-fit relative z-10">
+                        Run Rate: R$ {(initialData.projections.runRate / 1000).toFixed(0)}k/ano
+                    </p>
                 </div>
 
-                {/* Success Rate */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-blue-200 transition-all">
+                {/* Health Score */}
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-2xl border border-slate-700 shadow-sm flex flex-col justify-between text-white group hover:shadow-lg transition-all">
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Sucesso Clínico</p>
-                            <h3 className="text-2xl font-black text-slate-900 mt-1">{initialData.clinical.treatmentSuccessRate}%</h3>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Health Score</p>
+                            <h3 className="text-3xl font-black text-white mt-1">{initialData.healthScore.score}</h3>
                         </div>
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
+                        <div className="p-2 bg-white/10 text-white rounded-lg">
                             <TargetIcon className="w-6 h-6" />
                         </div>
                     </div>
-                    <div className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded w-fit">
-                        - {initialData.clinical.avgPainReduction}% na Escala de Dor
+                    <div className="flex gap-1">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className={`h-1.5 flex-1 rounded-full ${i < Math.floor(initialData.healthScore.score / 20) ? 'bg-emerald-400' : 'bg-slate-700'}`}></div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -247,12 +250,18 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
                 
                 {/* Financial Chart */}
                 <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm min-h-[400px] flex flex-col print:border-none print:shadow-none">
-                    <div className="mb-6">
-                        <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                            <TrendingUpIcon className="w-5 h-5 text-slate-400" />
-                            Composição Financeira
-                        </h3>
-                        <p className="text-sm text-slate-500">Fluxo de receita vs despesas com análise de margem.</p>
+                    <div className="mb-6 flex justify-between items-end">
+                        <div>
+                            <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                                <TrendingUpIcon className="w-5 h-5 text-slate-400" />
+                                Composição Financeira
+                            </h3>
+                            <p className="text-sm text-slate-500">Fluxo de receita vs despesas com análise de margem.</p>
+                        </div>
+                        <div className="text-right hidden sm:block">
+                            <p className="text-xs text-slate-400 font-bold uppercase">Projeção Mês Seguinte</p>
+                            <p className="text-lg font-bold text-slate-700">R$ {(initialData.projections.nextMonthRevenue / 1000).toFixed(1)}k</p>
+                        </div>
                     </div>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">

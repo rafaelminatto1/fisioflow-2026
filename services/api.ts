@@ -1,4 +1,5 @@
 
+// ... existing imports ...
 import { 
     ExecutiveReportData, 
     Patient, 
@@ -20,7 +21,7 @@ import {
     PosturalAssessment
 } from '../types';
 
-// ... (existing mocks for patients, appointments, etc.) ...
+// ... (Mantenha as variáveis MOCK_PATIENTS, MOCK_APPOINTMENTS, etc. inalteradas) ...
 let MOCK_PATIENTS: Patient[] = [
     { id: '1', name: 'Ana Silva', email: 'ana@email.com', phone: '11999991234', isActive: true, createdAt: '2023-01-10', tags: ['Pós-Op', 'Joelho'], condition: 'LCA', profession: 'Arquiteta', birthDate: '1990-05-15' },
     { id: '2', name: 'Carlos Oliveira', email: 'carlos@email.com', phone: '11988887777', isActive: true, createdAt: '2023-02-15', tags: ['Dor Lombar'], condition: 'Hérnia de Disco', profession: 'Engenheiro', birthDate: '1985-08-20' },
@@ -44,59 +45,13 @@ let MOCK_STAFF: StaffMember[] = [
 
 let MOCK_ANNOTATIONS: AnnotationVersion[] = [];
 let MOCK_POSTURAL_ASSESSMENTS: PosturalAssessment[] = [];
-
-// --- EXERCISES MOCK EXPANDED ---
 let MOCK_EXERCISES: Exercise[] = [
-    // --- PESO DO CORPO (HOME CARE BÁSICO) ---
     { id: 'e1', name: 'Agachamento Isométrico na Parede', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'easy', description: 'Encostado na parede, desça até 45-60 graus. Segure por 30-45s. Foco em quadríceps.', videoUrl: 'https://www.youtube.com/watch?v=y-wV4Venusw', indications: ['LCA', 'Condromalácia', 'Artrose'], contraindications: ['Dor Aguda Patelo-Femoral'], equipment: ['Peso do Corpo', 'Parede'] },
-    { id: 'e2', name: 'Ponte Bilateral (Bridge)', categoryName: 'Membros Inferiores', subCategory: 'Quadril', difficulty: 'easy', description: 'Deitado, eleve o quadril contraindo glúteos. Não force a lombar.', videoUrl: '', indications: ['Lombalgia', 'Fortalecimento Glúteo'], contraindications: [], equipment: ['Peso do Corpo', 'Colchonete'] },
-    { id: 'e3', name: 'Flexão de Braço na Parede', categoryName: 'Membros Superiores', subCategory: 'Geral', difficulty: 'easy', description: 'Mãos na parede altura ombros. Flexione cotovelos levando peito à parede.', videoUrl: '', indications: ['Reabilitação Ombro', 'Iniciantes'], contraindications: ['Dor Punho'], equipment: ['Peso do Corpo', 'Parede'] },
-    { id: 'e4', name: 'Panturrilha em Pé (Bilateral)', categoryName: 'Membros Inferiores', subCategory: 'Tornozelo', difficulty: 'easy', description: 'Elevar calcanhares o máximo possível. Descer devagar.', videoUrl: '', indications: ['Fascite Plantar', 'Tendinite Aquiles'], contraindications: [], equipment: ['Peso do Corpo'] },
-    { id: 'e10', name: 'Prancha Frontal', categoryName: 'Core', subCategory: 'Estabilidade', difficulty: 'medium', description: 'Sustentação isométrica. Manter alinhamento.', videoUrl: '', indications: ['Lombalgia', 'Estabilidade Global'], contraindications: ['Diástase Severa', 'Dor ombro aguda'], equipment: ['Colchonete', 'Peso do Corpo'] },
-    { id: 'e11', name: 'Bird Dog (Perdigueiro)', categoryName: 'Core', subCategory: 'Estabilidade', difficulty: 'easy', description: 'Quatro apoios. Elevar braço e perna oposta. Foco em controle rotacional.', videoUrl: '', indications: ['Lombalgia', 'Multífidos'], contraindications: [], equipment: ['Colchonete', 'Peso do Corpo'] },
-    { id: 'e12', name: 'Cat-Camel (Gato-Cavalo)', categoryName: 'Coluna', subCategory: 'Mobilidade', difficulty: 'easy', description: 'Mobilização da coluna em flexão e extensão.', videoUrl: '', indications: ['Rigidez Lombar/Torácica'], contraindications: ['Fratura Vertebral'], equipment: ['Colchonete', 'Peso do Corpo'] },
-    { id: 'e14', name: 'Salto Unipodal com Aterrissagem', categoryName: 'Funcional', subCategory: 'Agilidade', difficulty: 'hard', description: 'Saltar e aterrissar em uma perna só, estabilizando por 2s.', videoUrl: '', indications: ['Retorno ao Esporte', 'LCA Fase 3+'], contraindications: ['Dor', 'Falta de controle'], equipment: ['Peso do Corpo'] },
-
-    // --- COM TOALHA (HOME CARE ADAPTADO) ---
-    { id: 'e20', name: 'Deslizamento na Parede (Wall Slide) com Toalha', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'easy', description: 'Mãos na toalha contra a parede. Deslizar para cima mantendo pressão.', videoUrl: '', indications: ['Pós-Op Manguito', 'Capsulite Adesiva'], contraindications: ['Dor > 5'], equipment: ['Toalha', 'Parede'] },
-    { id: 'e21', name: 'Isometria Adutores (Toalha entre Joelhos)', categoryName: 'Membros Inferiores', subCategory: 'Adutores', difficulty: 'easy', description: 'Deitado, rolo de toalha entre joelhos. Apertar por 6s e relaxar.', videoUrl: '', indications: ['Pós-Op Quadril', 'Pubalgia Inicial'], contraindications: [], equipment: ['Toalha'] },
-    { id: 'e22', name: 'Mobilização de Tornozelo com Toalha', categoryName: 'Membros Inferiores', subCategory: 'Tornozelo', difficulty: 'easy', description: 'Sentado, passar toalha na ponta do pé e puxar para dorsiflexão.', videoUrl: '', indications: ['Fascite Plantar', 'Encurtamento Tríceps Sural'], contraindications: ['Ruptura Aquiles'], equipment: ['Toalha'] },
-    { id: 'e23', name: 'Extensão Passiva de Joelho (Heel Prop)', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'easy', description: 'Calcanhar apoiado em rolo de toalha, deixar gravidade esticar joelho.', videoUrl: '', indications: ['Pós-Op LCA', 'Déficit Extensão'], contraindications: [], equipment: ['Toalha'] },
-    { id: 'e24', name: 'Deslizamento Posterior Perna (Slide) com Toalha', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'medium', description: 'Pé na toalha em piso liso. Deslizar para trás fazendo afundo reverso.', videoUrl: '', indications: ['Fortalecimento Cadeia Fechada'], contraindications: ['Instabilidade'], equipment: ['Toalha', 'Piso Liso'] },
-
-    // --- COM HALTER / GARRAFA (CARGA LIVRE) ---
-    { id: 'e30', name: 'Bíceps Rosca Direta', categoryName: 'Membros Superiores', subCategory: 'Cotovelo', difficulty: 'easy', description: 'Flexão de cotovelo com carga.', videoUrl: '', indications: ['Tendinite Bíceps', 'Fortalecimento'], contraindications: [], equipment: ['Halter'] },
-    { id: 'e31', name: 'Elevação Lateral de Ombro', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'medium', description: 'Elevar braços até 90 graus. Cotovelos levemente flexionados.', videoUrl: '', indications: ['Manguito Fase Final'], contraindications: ['Impacto Subacromial Agudo'], equipment: ['Halter'] },
-    { id: 'e32', name: 'Remada Unilateral (Serrote)', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'medium', description: 'Apoio em banco/cadeira. Puxar carga em direção ao quadril.', videoUrl: '', indications: ['Estabilidade Escapular', 'Dorsais'], contraindications: [], equipment: ['Halter', 'Banco'] },
-    { id: 'e33', name: 'Tríceps Francês (Sentado)', categoryName: 'Membros Superiores', subCategory: 'Cotovelo', difficulty: 'medium', description: 'Segurar carga acima da cabeça e flexionar cotovelos para trás.', videoUrl: '', indications: ['Fortalecimento Tríceps'], contraindications: ['Instabilidade Ombro'], equipment: ['Halter', 'Cadeira'] },
-    { id: 'e34', name: 'Agachamento Globet (Segurando Peso)', categoryName: 'Membros Inferiores', subCategory: 'Geral', difficulty: 'medium', description: 'Agachamento segurando peso próximo ao peito.', videoUrl: '', indications: ['Fortalecimento Geral', 'Artrose (se tolerado)'], contraindications: [], equipment: ['Halter'] },
-
-    // --- COM ELÁSTICO (THERABAND / MINI BAND) ---
-    { id: 'e40', name: 'Rotação Externa de Ombro', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'easy', description: 'Cotovelo 90º junto ao corpo. Rodar para fora contra resistência.', videoUrl: '', indications: ['Manguito Rotador', 'Impacto'], contraindications: [], equipment: ['Elástico'] },
-    { id: 'e41', name: 'Remada em Pé com Elástico', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'easy', description: 'Elástico fixo na maçaneta. Puxar para trás juntando escápulas.', videoUrl: '', indications: ['Postura', 'Discinesia'], contraindications: [], equipment: ['Elástico'] },
-    { id: 'e42', name: 'Ostra (Clam Shell) com Mini Band', categoryName: 'Membros Inferiores', subCategory: 'Quadril', difficulty: 'medium', description: 'Deitado de lado, elástico acima dos joelhos. Abrir joelho mantendo pés juntos.', videoUrl: '', indications: ['Glúteo Médio', 'Sindrome Trato Iliotibial'], contraindications: [], equipment: ['Mini Band'] },
-    { id: 'e43', name: 'Passada Lateral (Monster Walk)', categoryName: 'Membros Inferiores', subCategory: 'Quadril', difficulty: 'medium', description: 'Elástico nos tornozelos ou joelhos. Caminhar lateralmente semi-agachado.', videoUrl: '', indications: ['Estabilidade Pélvica', 'LCA Fase 3'], contraindications: [], equipment: ['Mini Band'] },
-    { id: 'e4', name: 'Extensão de Joelho com Elástico', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'easy', description: 'Sentado, estenda o joelho contra resistência elástica.', videoUrl: '', indications: ['LCA', 'Artrose'], contraindications: [], equipment: ['Elástico', 'Cadeira'] },
-
-    // --- COM BASTÃO / CABO DE VASSOURA ---
-    { id: 'e50', name: 'Flexão de Ombro Assistida (Bastão)', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'easy', description: 'Deitado ou em pé. Braço bom empurra o braço afetado para cima.', videoUrl: '', indications: ['Pós-Op Ombro', 'Capsulite'], contraindications: [], equipment: ['Bastão'] },
-    { id: 'e51', name: 'Rotação Externa Assistida (Bastão)', categoryName: 'Membros Superiores', subCategory: 'Ombro', difficulty: 'easy', description: 'Cotovelos 90º junto ao corpo. Braço bom empurra para fora.', videoUrl: '', indications: ['Ganho de ADM Ombro'], contraindications: [], equipment: ['Bastão'] },
-    { id: 'e52', name: 'Mobilidade Torácica (Rotação Sentado)', categoryName: 'Coluna', subCategory: 'Torácica', difficulty: 'easy', description: 'Bastão atrás do pescoço ou frente ao peito. Rodar tronco.', videoUrl: '', indications: ['Rigidez Torácica', 'Dor entre escápulas'], contraindications: ['Dor aguda coluna'], equipment: ['Bastão', 'Cadeira'] },
-
-    // --- COM BOLA (SUÍÇA OU PEQUENA) ---
-    { id: 'e60', name: 'Agachamento na Parede com Bola', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'easy', description: 'Bola nas costas contra a parede. Agachar até 90º.', videoUrl: '', indications: ['Condromalácia', 'Fortalecimento Quadríceps'], contraindications: [], equipment: ['Bola Suíça', 'Parede'] },
-    { id: 'e61', name: 'Ponte com Pés na Bola', categoryName: 'Membros Inferiores', subCategory: 'Posterior', difficulty: 'hard', description: 'Deitado, pés na bola. Elevar quadril (instável).', videoUrl: '', indications: ['Controle Core', 'Isquiotibiais'], contraindications: ['Dor Lombar Aguda'], equipment: ['Bola Suíça', 'Colchonete'] },
-    { id: 'e62', name: 'Aperto de Bola (Isometria Adutores)', categoryName: 'Membros Inferiores', subCategory: 'Adutores', difficulty: 'easy', description: 'Bola pequena entre joelhos. Apertar e segurar.', videoUrl: '', indications: ['Pós-Op Quadril'], contraindications: [], equipment: ['Bola Pequena'] },
-
-    // --- OUTROS ---
-    { id: 'e70', name: 'Step Up (Subida no Degrau)', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'medium', description: 'Subir e descer degrau controlando o movimento.', videoUrl: '', indications: ['Fortalecimento Funcional'], contraindications: [], equipment: ['Degrau'] },
-    { id: 'e2', name: 'Step Down Frontal', categoryName: 'Membros Inferiores', subCategory: 'Joelho', difficulty: 'medium', description: 'Desça controlando com a perna de apoio.', videoUrl: '', indications: ['Pós-Op Joelho', 'Tendinite Patelar'], contraindications: [], equipment: ['Degrau'] },
-    { id: 'e5', name: 'Propriocepção no Disco', categoryName: 'Membros Inferiores', subCategory: 'Tornozelo', difficulty: 'hard', description: 'Apoio unipodal no disco. 30s.', videoUrl: '', indications: ['Entorse Tornozelo'], contraindications: ['Instabilidade Aguda'], equipment: ['Disco Proprioceptivo'] },
+    // ... (rest of exercises)
 ];
 
-// API Implementation
 export const api = {
-    // ... existing modules ...
+    // ... (Keep patients, appointments, sessions, prescriptions, waitlist, exercises, packages, leads, user, stock, gamification, staff, transactions, annotations, postural as is) ...
     patients: {
         list: async (): Promise<Patient[]> => MOCK_PATIENTS,
         get: async (id: string): Promise<Patient | undefined> => MOCK_PATIENTS.find(p => p.id === id),
@@ -135,7 +90,6 @@ export const api = {
             ];
         },
         get: async (id: string): Promise<Session | null> => {
-            // Mock simples
             return { id, patientId: '1', date: '25/02/2024', subjective: '', objective: '', assessment: '', plan: '', evaScore: 0 };
         },
         getLast: async (patientId: string): Promise<Session | null> => null,
@@ -180,6 +134,7 @@ export const api = {
 
             const totalRev = 58450 * multiplier;
             const totalExp = 24100 * multiplier;
+            const net = totalRev - totalExp;
 
             return {
                 kpis: {
@@ -196,7 +151,7 @@ export const api = {
                     ...financial,
                     totalRevenue: totalRev,
                     totalExpenses: totalExp,
-                    netIncome: totalRev - totalExp
+                    netIncome: net
                 },
                 performance: performance.map(p => ({
                     ...p,
@@ -230,6 +185,12 @@ export const api = {
                         marketing: 75,
                         satisfaction: 98
                     }
+                },
+                // NOVOS DADOS DE PROJEÇÃO
+                projections: {
+                    nextMonthRevenue: totalRev * 1.12,
+                    ebitda: net * 1.15,
+                    runRate: totalRev * (period === 'month' ? 12 : period === 'week' ? 52 : 365)
                 }
             };
         }

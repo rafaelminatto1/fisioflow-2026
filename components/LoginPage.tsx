@@ -2,135 +2,179 @@
 'use client';
 
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
-import { 
-  BrainCircuitIcon, 
-  LockIcon, 
-  MailIcon, 
-  CheckCircleIcon, 
-  GoogleIcon, 
-  ChevronRightIcon
-} from './Icons';
+import { signIn, signUp } from '../lib/auth-client';
+import { BrainCircuitIcon, LockIcon, MailIcon, ChevronRightIcon, UsersIcon, CheckCircleIcon, AlertCircleIcon } from './Icons';
 
-interface LoginPageProps {
-    onLogin: () => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [mode, setMode] = useState<'login' | 'register'>('login');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+const LoginPage: React.FC = () => {
+    const [isLogin, setIsLogin] = useState(true);
+    const [email, setInputEmail] = useState('');
+    const [password, setInputPassword] = useState('');
+    const [name, setInputName] = useState('');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
+        setLoading(true);
         setError('');
-        
-        try {
-            if (mode === 'login') {
-                await signInWithEmailAndPassword(auth, email, password);
-            } else {
-                await createUserWithEmailAndPassword(auth, email, password);
-            }
-            onLogin(); // Sucesso
-        } catch (err: any) {
-            console.error("Auth Error:", err);
-            if (err.code === 'auth/invalid-api-key' || err.message.includes('invalid-api-key')) {
-                setError('Configuração inválida. Verifique o arquivo .env.local.');
-            } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-                setError('Email ou senha incorretos.');
-            } else if (err.code === 'auth/email-already-in-use') {
-                setError('Este email já está cadastrado.');
-            } else {
-                setError('Erro ao autenticar. Tente novamente.');
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        setSuccess('');
 
-    const handleGoogleLogin = async () => {
-        setIsLoading(true);
-        const provider = new GoogleAuthProvider();
         try {
-            await signInWithPopup(auth, provider);
-            onLogin();
-        } catch (err: any) {
-            console.error("Google Auth Error:", err);
-            if (err.code === 'auth/invalid-api-key') {
-                setError('Configuração inválida (API Key).');
+            if (isLogin) {
+                const { error: signInError } = await signIn.email({
+                    email,
+                    password
+                });
+                if (signInError) throw signInError;
+                // O redirecionamento é automático pelo useSession no App.tsx
             } else {
-                setError('Erro ao autenticar com Google.');
+                const { error: signUpError } = await signUp.email({
+                    email,
+                    password,
+                    name
+                });
+                if (signUpError) throw signUpError;
+                setSuccess('Conta criada com sucesso! Realizando login...');
             }
-        } finally {
-            setIsLoading(false);
+        } catch (err: any) {
+            console.error("Auth error:", err);
+            setError(err.message || 'Falha na autenticação. Verifique suas credenciais.');
+            setLoading(false);
         }
     };
 
     return (
         <div className="min-h-screen w-full flex bg-white absolute inset-0 z-[100]">
-            {/* Left Side */}
-            <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/90 to-slate-900/90 z-10"></div>
-                <div className="relative z-20 text-white p-16 max-w-xl">
-                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-xl">
-                        <BrainCircuitIcon className="w-8 h-8 text-indigo-300" />
+            {/* Esquerda: Hero Section */}
+            <div className="hidden lg:flex w-1/2 bg-slate-900 relative items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-transparent"></div>
+                
+                {/* Elementos Decorativos de Fundo */}
+                <div className="absolute top-20 left-20 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 right-20 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"></div>
+
+                <div className="relative z-10 p-12 text-white max-w-lg">
+                    <div className="w-20 h-20 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-primary/10">
+                        <BrainCircuitIcon className="w-10 h-10 text-primary" />
                     </div>
-                    <h1 className="text-5xl font-bold mb-6">Gestão Inteligente</h1>
-                    <p className="text-lg text-slate-300 mb-10">FisioFlow: Prontuário, Agenda e Financeiro em um só lugar.</p>
+                    <h1 className="text-6xl font-black tracking-tighter mb-4 leading-tight">
+                        FisioFlow <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Pro</span>
+                    </h1>
+                    <p className="text-xl text-slate-400 leading-relaxed font-light">
+                        Gestão clínica inteligente potencializada por Neon DB e Better Auth. Performance e segurança em tempo real.
+                    </p>
+                    
+                    <div className="mt-8 flex items-center gap-6 text-sm font-medium text-slate-500">
+                        <div className="flex items-center gap-2">
+                            <CheckCircleIcon className="w-4 h-4 text-emerald-500" /> Alta Disponibilidade
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircleIcon className="w-4 h-4 text-emerald-500" /> Criptografia Ponta-a-Ponta
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Right Side */}
-            <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 bg-white">
-                <div className="w-full max-w-[420px] space-y-8">
-                    <div className="text-center lg:text-left space-y-2">
-                        <h2 className="text-3xl font-bold text-slate-900">
-                            {mode === 'login' ? 'Acessar Conta' : 'Criar Conta'}
+            {/* Direita: Formulário */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white relative">
+                <div className="w-full max-w-md space-y-8 animate-in slide-in-from-bottom-4 duration-700">
+                    <div className="text-center lg:text-left">
+                        <h2 className="text-4xl font-black text-slate-900 tracking-tight">
+                            {isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}
                         </h2>
-                        <p className="text-slate-500">Entre com seus dados para continuar.</p>
+                        <p className="text-slate-500 mt-2 font-medium">
+                            {isLogin ? 'Acesse o portal executivo da sua clínica.' : 'Comece a gerenciar com inteligência hoje.'}
+                        </p>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex p-1 bg-slate-100 rounded-xl">
-                        <button onClick={() => setMode('login')} className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${mode === 'login' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>Login</button>
-                        <button onClick={() => setMode('register')} className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${mode === 'register' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'}`}>Criar Conta</button>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-1">Email</label>
-                            <div className="relative">
-                                <MailIcon className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="block w-full pl-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="seu@email.com" />
+                    <form onSubmit={handleAuth} className="space-y-5">
+                        {!isLogin && (
+                            <div className="space-y-1">
+                                <label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Nome Completo</label>
+                                <div className="relative group">
+                                    <UsersIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                                    <input 
+                                        type="text" required value={name} 
+                                        onChange={(e) => setInputName(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
+                                        placeholder="Dr. Ricardo Marques"
+                                        disabled={loading}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <div className="space-y-1">
+                            <label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Email Profissional</label>
+                            <div className="relative group">
+                                <MailIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                                <input 
+                                    type="email" required value={email} 
+                                    onChange={(e) => setInputEmail(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
+                                    placeholder="exemplo@fisioflow.com"
+                                    disabled={loading}
+                                />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-1">Senha</label>
-                            <div className="relative">
-                                <LockIcon className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
-                                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="block w-full pl-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="••••••••" />
+                        <div className="space-y-1">
+                            <label className="text-xs font-black uppercase text-slate-400 tracking-widest ml-1">Senha</label>
+                            <div className="relative group">
+                                <LockIcon className="absolute left-4 top-3.5 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                                <input 
+                                    type="password" required value={password} 
+                                    onChange={(e) => setInputPassword(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
+                                    placeholder="••••••••"
+                                    disabled={loading}
+                                />
                             </div>
                         </div>
 
-                        {error && <p className="text-red-500 text-sm font-bold bg-red-50 p-3 rounded-lg border border-red-100">{error}</p>}
+                        {error && (
+                            <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-xs font-bold rounded-2xl animate-pulse flex items-center gap-2">
+                                <AlertCircleIcon className="w-4 h-4" /> {error}
+                            </div>
+                        )}
+                        
+                        {success && (
+                            <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold rounded-2xl animate-pulse flex items-center gap-2">
+                                <CheckCircleIcon className="w-4 h-4" /> {success}
+                            </div>
+                        )}
 
-                        <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-2 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all disabled:opacity-70">
-                            {isLoading ? 'Processando...' : (mode === 'login' ? 'Entrar' : 'Cadastrar')} <ChevronRightIcon className="w-4 h-4" />
+                        <button 
+                            disabled={loading}
+                            className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    <span>Processando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    {isLogin ? 'Entrar no Painel' : 'Finalizar Cadastro'}
+                                    <ChevronRightIcon className="w-5 h-5" />
+                                </>
+                            )}
                         </button>
                     </form>
 
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                        <div className="relative flex justify-center text-xs uppercase"><span className="px-2 bg-white text-slate-400 font-bold">Ou continue com</span></div>
+                    <div className="text-center pt-4 border-t border-slate-100">
+                        <button 
+                            onClick={() => { setError(''); setSuccess(''); setIsLogin(!isLogin); }}
+                            className="text-sm font-bold text-primary hover:text-sky-600 transition-colors hover:underline underline-offset-4 disabled:opacity-50"
+                            disabled={loading}
+                        >
+                            {isLogin ? 'Novo por aqui? Crie sua conta' : 'Já possui conta? Faça o login'}
+                        </button>
                     </div>
-
-                    <button type="button" onClick={handleGoogleLogin} className="w-full flex justify-center items-center gap-2 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 font-bold text-slate-700 transition-all">
-                        <GoogleIcon className="w-5 h-5" /> Google
-                    </button>
+                </div>
+                
+                {/* Footer simple */}
+                <div className="absolute bottom-6 text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                    Powered by Neon & Better Auth
                 </div>
             </div>
         </div>

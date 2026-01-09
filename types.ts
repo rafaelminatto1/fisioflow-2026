@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-// ... (Mantenha as outras interfaces inalteradas até Exercise) ...
+// ... (Mantenha as outras interfaces inalteradas até ExecutiveReportData) ...
 
 // --- Shared / Common ---
 export interface KPI {
@@ -11,7 +11,8 @@ export interface KPI {
   icon: any; // React.ElementType
 }
 
-// --- Financial ---
+// ... (Outras interfaces existentes) ...
+
 export interface FinancialData {
   month: string;
   revenue: number;
@@ -37,7 +38,8 @@ export interface Transaction {
   paymentMethod?: string;
 }
 
-// --- Staff & Performance ---
+// ... (Staff, Patient, Appointment, etc) ...
+
 export interface PhysioPerformance {
   therapistId: string;
   name: string;
@@ -64,7 +66,6 @@ export interface StaffMember {
   crefito?: string;
 }
 
-// --- Clinical / Patient ---
 export interface Patient {
   id: string;
   name: string;
@@ -125,7 +126,7 @@ export interface Session {
     points?: PainPoint[];
   };
   customData?: any;
-  homeCareExercises?: Exercise[]; // Novos exercícios prescritos nesta sessão
+  homeCareExercises?: Exercise[];
 }
 
 export interface Prescription {
@@ -141,7 +142,6 @@ export interface Prescription {
   }[];
 }
 
-// --- Exercises & Products ---
 export interface Exercise {
   id: string;
   name: string;
@@ -151,9 +151,9 @@ export interface Exercise {
   description: string;
   videoUrl?: string;
   thumbnailUrl?: string;
-  indications: string[]; // Ex: LCA, Tendinite, Lombalgia
-  contraindications: string[]; // Ex: Fase Aguda, Fratura
-  equipment?: string[]; // Ex: Elástico, Bola, Halter
+  indications: string[];
+  contraindications: string[];
+  equipment?: string[];
 }
 
 export interface Package {
@@ -175,7 +175,6 @@ export interface Product {
   lastRestock: string;
 }
 
-// --- CRM & Leads ---
 export type LeadStatus = 'new' | 'contacted' | 'scheduled' | 'won' | 'lost';
 
 export interface Lead {
@@ -188,7 +187,6 @@ export interface Lead {
   createdAt: string;
 }
 
-// --- Gamification ---
 export interface RankingEntry {
   patientId: string;
   patientName: string;
@@ -198,7 +196,6 @@ export interface RankingEntry {
   badges: string[];
 }
 
-// --- Waitlist ---
 export interface WaitlistEntry {
   id: string;
   patientName: string;
@@ -209,7 +206,6 @@ export interface WaitlistEntry {
   status?: 'waiting' | 'offered' | 'scheduled';
 }
 
-// --- Dashboard & Reports ---
 export interface DashboardKPIs {
   activePatients: number;
   monthlyRevenue: number;
@@ -248,14 +244,20 @@ export interface ExecutiveReportData {
       satisfaction: number;
     };
   };
+  // New Fields for Enhanced Executive Dashboard
+  projections: {
+    nextMonthRevenue: number;
+    ebitda: number;
+    runRate: number;
+  };
 }
 
-// --- Postural Analysis Types ---
+// ... (Mantenha Postural Analysis, Pain Map, Assessment Engine, Assets) ...
 
 export interface Landmark {
-    x: number; // 0-1 normalized
-    y: number; // 0-1 normalized
-    z?: number; // depth estimate
+    x: number;
+    y: number;
+    z?: number;
     visibility?: number;
 }
 
@@ -277,7 +279,6 @@ export type PoseLandmarks = {
     rightKnee?: Landmark;
     leftAnkle?: Landmark;
     rightAnkle?: Landmark;
-    // Auxiliary points for Back view or Manual
     c7?: Landmark;
     l5?: Landmark;
     leftHeel?: Landmark;
@@ -285,22 +286,17 @@ export type PoseLandmarks = {
 };
 
 export interface PostureMetrics {
-    // Frontal
-    headTiltDeg?: number; // Desvio lateral da cabeça
-    shoulderHeightDiff?: number; // Diferença de altura em % da altura do tronco
-    pelvicTiltDeg?: number; // Desnível pélvico
-    trunkLeanDeg?: number; // Desvio do tronco em relação à vertical
-    kneeValgus?: { left: number; right: number }; // Ângulo Q estimado (Hip-Knee-Ankle)
-    
-    // Dorsal
+    headTiltDeg?: number;
+    shoulderHeightDiff?: number;
+    pelvicTiltDeg?: number;
+    trunkLeanDeg?: number;
+    kneeValgus?: { left: number; right: number };
     scapularAsymmetry?: number;
-    anklePronationEstimate?: { left: number; right: number }; // Ângulo do tendão calcâneo (estimado)
+    anklePronationEstimate?: { left: number; right: number };
     spineDeviation?: number;
-
-    // Lateral (Sagittal)
-    forwardHead?: number; // Anteriorização (Ear vs Shoulder X-diff)
-    thoracicKyphosis?: number; // Estimativa visual
-    lumbarLordosis?: number; // Estimativa visual
+    forwardHead?: number;
+    thoracicKyphosis?: number;
+    lumbarLordosis?: number;
 }
 
 export interface PosturalAssessment {
@@ -322,7 +318,6 @@ export interface PosturalAssessment {
     notes?: string;
 }
 
-// --- Pain Map ---
 export interface PainPoint {
     id: string;
     x: number;
@@ -336,7 +331,6 @@ export interface PainPoint {
     aliviantes?: string[];
 }
 
-// --- Assessment Engine ---
 export interface AssessmentField {
     id: string;
     label: string;
@@ -364,7 +358,6 @@ export interface AssessmentTemplate {
     steps: AssessmentStep[];
 }
 
-// --- Assets & Annotations ---
 export type AnnotationType = 'pan' | 'ruler' | 'angle' | 'arrow' | 'circle' | 'text';
 
 export interface AnnotationPoint {

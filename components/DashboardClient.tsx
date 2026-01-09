@@ -4,18 +4,20 @@
 import React, { useState, useContext } from 'react';
 import { 
   SparklesIcon, 
-  TargetIcon, 
   WalletIcon, 
   TrendingUpIcon, 
   UsersIcon, 
   ChevronRightIcon,
   CalendarIcon,
   BrainCircuitIcon,
-  RefreshCwIcon
+  RefreshCwIcon,
+  ActivityIcon,
+  TargetIcon
 } from './Icons';
 import KPICard from './KPICard';
 import PhysioChart from './PhysioChart';
 import ScheduleTable from './ScheduleTable';
+import FinancialChart from './FinancialChart';
 import { KPI, FinancialData, PhysioPerformance, Appointment } from '../types';
 import { useRouter } from '../hooks/useRouter';
 import { ThemeContext } from '../App';
@@ -41,7 +43,6 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
   const refreshInsight = async () => {
       setLoadingInsight(true);
       try {
-          // Re-fetch using the server action but from client
           const result = await generateDashboardInsight(initialData.kpis);
           if (result.text) setInsight(result.text);
       } catch (e) {
@@ -52,64 +53,76 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
   };
 
   return (
-    <div className="space-y-10 max-w-[1600px] mx-auto pb-20">
-      {/* 1. Welcoming & AI Advisor */}
-      <div className="flex flex-col xl:flex-row gap-8">
-        <div className="flex-1 space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Status Executivo <span className="text-primary opacity-50">v3.0</span>
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">Performance consolidada da rede Activity.</p>
+    <div className="space-y-8 max-w-[1600px] mx-auto pb-20 animate-in fade-in duration-500">
+      {/* 1. Header & AI Advisor Section */}
+      <div className="flex flex-col xl:flex-row gap-6">
+        <div className="flex-1 space-y-4">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              Dashboard Executivo <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">Ao Vivo</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
+              Visão consolidada de performance clínica e financeira.
+            </p>
+          </div>
           
-          <div className="flex bg-slate-100 dark:bg-slate-900/50 p-1 rounded-2xl w-fit border border-slate-200 dark:border-slate-800 mt-6">
+          <div className="flex bg-white dark:bg-slate-900 p-1.5 rounded-xl w-fit border border-slate-200 dark:border-slate-800 shadow-sm">
             {['today', 'week', 'month'].map((p) => (
               <button
                 key={p}
                 onClick={() => setFilterPeriod(p as any)}
-                className={`px-6 py-2 text-xs font-bold rounded-xl transition-all ${
-                  filterPeriod === p ? 'bg-primary text-white shadow-lg neon-glow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                className={`px-6 py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wide ${
+                  filterPeriod === p 
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md' 
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
-                {p === 'today' ? 'HOJE' : p === 'week' ? 'SEMANAL' : 'MENSAL'}
+                {p === 'today' ? 'Hoje' : p === 'week' ? 'Semana' : 'Mês'}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="xl:w-[500px]">
-           <div className="glass-card bg-primary/10 border-primary/20 rounded-[32px] p-6 text-slate-900 dark:text-white relative overflow-hidden group hover:border-primary/40 transition-colors">
-              <SparklesIcon className="absolute -right-6 -top-6 w-40 h-40 opacity-10 animate-pulse text-primary" />
-              <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary rounded-xl text-white shadow-lg shadow-primary/30">
-                        <BrainCircuitIcon className="w-5 h-5" />
+        {/* AI Insight Card */}
+        <div className="xl:w-[450px]">
+           <div className="glass-card bg-gradient-to-br from-indigo-50 to-white dark:from-slate-900 dark:to-slate-800 border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md transition-all">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <BrainCircuitIcon className="w-32 h-32 text-indigo-600" />
+              </div>
+              
+              <div className="flex items-center justify-between mb-3 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-200 dark:shadow-none">
+                        <SparklesIcon className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-sm uppercase tracking-widest opacity-80">AI Strategy Advisor</h3>
+                    <h3 className="font-bold text-xs text-indigo-900 dark:text-indigo-200 uppercase tracking-widest">FisioFlow Intelligence</h3>
                   </div>
                   <button 
                     onClick={refreshInsight}
                     disabled={loadingInsight}
-                    className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
-                    title="Gerar novo insight"
+                    className="p-1.5 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    title="Atualizar análise"
                   >
-                      <RefreshCwIcon className={`w-4 h-4 ${loadingInsight ? 'animate-spin' : ''}`} />
+                      <RefreshCwIcon className={`w-3.5 h-3.5 ${loadingInsight ? 'animate-spin' : ''}`} />
                   </button>
               </div>
-              <p className="text-sm font-medium leading-relaxed italic opacity-90 min-h-[60px]">
+              
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed italic min-h-[40px] relative z-10">
                 "{insight}"
               </p>
+              
               <button 
                 onClick={() => router.push('reports/executive')}
-                className="mt-6 text-xs font-bold text-primary flex items-center gap-1 hover:underline group-hover:translate-x-1 transition-transform"
+                className="mt-4 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 hover:underline group-hover:translate-x-1 transition-transform relative z-10"
               >
-                  VER RELATÓRIO ANALÍTICO COMPLETO <ChevronRightIcon className="w-3 h-3" />
+                  VER RELATÓRIO COMPLETO <ChevronRightIcon className="w-3 h-3" />
               </button>
            </div>
         </div>
       </div>
 
-      {/* 2. Key Metrics Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 2. Key Metrics Grid (KPIs) */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {initialData.kpis.map((kpi, index) => (
           <KPICard 
             key={index}
@@ -117,55 +130,94 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
             value={String(kpi.value)}
             trend={kpi.trend}
             Icon={kpi.icon}
-            className="glass-card rounded-[28px] p-6"
+            className="glass-card rounded-2xl p-5 border-slate-200 dark:border-slate-800"
           />
         ))}
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main List Section */}
-          <div className="lg:col-span-8 space-y-8">
-            <div className="glass-card rounded-[32px] overflow-hidden">
-                <div className="p-6 border-b border-slate-100 dark:border-white/10 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
-                    <h3 className="font-bold text-lg flex items-center gap-2 text-slate-800 dark:text-white">
-                        <CalendarIcon className="w-5 h-5 text-primary" />
-                        Próximos Atendimentos
-                    </h3>
-                    <button onClick={() => router.push('agenda')} className="text-xs font-bold text-primary hover:underline">VER TODOS</button>
-                </div>
-                <ScheduleTable appointments={initialData.appointments.slice(0, 6)} />
-            </div>
+      {/* 3. Main Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Financial Chart (Large) */}
+          <div className="lg:col-span-2 glass-card rounded-2xl p-6 min-h-[400px] flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                  <div>
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                          <WalletIcon className="w-5 h-5 text-emerald-500" />
+                          Fluxo de Receita
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Comparativo Receita vs Despesa (6 Meses)</p>
+                  </div>
+                  <button onClick={() => router.push('financial')} className="text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors">
+                      DETALHES
+                  </button>
+              </div>
+              <div className="flex-1 w-full">
+                  <FinancialChart data={initialData.financialData} />
+              </div>
           </div>
 
-          {/* Productivity & Goals Sidebar */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="glass-card rounded-[32px] p-6">
-                <h3 className="font-bold text-lg mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
-                    <TrendingUpIcon className="w-5 h-5 text-emerald-500" />
-                    Metas do Mês
-                </h3>
-                <div className="space-y-6">
-                    {[
-                        { label: 'Faturamento', val: 78, color: 'bg-primary' },
-                        { label: 'Retenção', val: 92, color: 'bg-emerald-500' },
-                        { label: 'Novos Pacientes', val: 45, color: 'bg-amber-500' }
-                    ].map(goal => (
-                        <div key={goal.label}>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{goal.label}</span>
-                                <span className="text-xs font-bold text-slate-700 dark:text-white">{goal.val}%</span>
-                            </div>
-                            <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div className={`h-full ${goal.color} rounded-full transition-all duration-1000 ease-out shadow-sm`} style={{ width: `${goal.val}%` }}></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+          {/* Productivity / Goals (Sidebar) */}
+          <div className="space-y-6">
+              {/* Goals Card */}
+              <div className="glass-card rounded-2xl p-6 bg-white dark:bg-slate-900">
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
+                      <TargetIcon className="w-5 h-5 text-primary" />
+                      Metas Mensais
+                  </h3>
+                  <div className="space-y-5">
+                      {[
+                          { label: 'Faturamento', current: 85, target: 100, color: 'bg-emerald-500' },
+                          { label: 'Novos Pacientes', current: 42, target: 60, color: 'bg-blue-500' },
+                          { label: 'Taxa de Retenção', current: 92, target: 95, color: 'bg-purple-500' }
+                      ].map((goal, i) => (
+                          <div key={i}>
+                              <div className="flex justify-between mb-1.5">
+                                  <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{goal.label}</span>
+                                  <span className="text-xs font-bold text-slate-900 dark:text-white">{Math.round((goal.current / goal.target) * 100)}%</span>
+                              </div>
+                              <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full ${goal.color} transition-all duration-1000 ease-out`} 
+                                    style={{ width: `${(goal.current / goal.target) * 100}%` }}
+                                  ></div>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
 
-            <div className="glass-card rounded-[32px] p-6 h-[400px]">
-                <PhysioChart data={initialData.physioData} />
-            </div>
+              {/* Therapist Performance Mini-Chart */}
+              <div className="glass-card rounded-2xl p-6 h-[300px] flex flex-col">
+                   <h3 className="font-bold text-lg mb-2 flex items-center gap-2 text-slate-900 dark:text-white">
+                      <ActivityIcon className="w-5 h-5 text-amber-500" />
+                      Produtividade
+                  </h3>
+                  <div className="flex-1">
+                      <PhysioChart data={initialData.physioData} />
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      {/* 4. Operations / Schedule Snippet */}
+      <div className="glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
+              <div>
+                  <h3 className="font-bold text-lg flex items-center gap-2 text-slate-900 dark:text-white">
+                      <CalendarIcon className="w-5 h-5 text-blue-500" />
+                      Próximos Atendimentos
+                  </h3>
+              </div>
+              <button 
+                onClick={() => router.push('agenda')} 
+                className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                  VER AGENDA COMPLETA
+              </button>
+          </div>
+          <div className="overflow-x-auto">
+              <ScheduleTable appointments={initialData.appointments.slice(0, 5)} />
           </div>
       </div>
     </div>
