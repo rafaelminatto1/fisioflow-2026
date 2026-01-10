@@ -62,7 +62,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     };
 
     return (
-    return (
         <header className="sticky top-0 z-40 h-20 px-8 flex items-center justify-between bg-white/70 backdrop-blur-xl border-b border-slate-200/50 transition-colors duration-300">
             <div className="flex items-center gap-4">
                 <button onClick={onMenuClick} className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">

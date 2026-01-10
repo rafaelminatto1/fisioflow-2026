@@ -26,7 +26,8 @@ import {
   MessageCircleIcon,
   FileTextIcon,
   ShieldIcon,
-  BarChartIcon
+  BarChartIcon,
+  BrainCircuitIcon
 } from './Icons';
 
 interface SidebarProps {
@@ -253,8 +254,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
                       href={item.id}
                       onClick={onClose}
                       className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 group relative overflow-hidden ${isActive
-                          ? 'bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/25 translate-x-1'
-                          : 'text-slate-400 hover:text-white hover:bg-white/5 hover:shadow-inner'
+                        ? 'bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/25 translate-x-1'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5 hover:shadow-inner'
                         }`}
                     >
                       {isActive && <div className="absolute inset-0 bg-white/20 animate-pulse pointer-events-none"></div>}

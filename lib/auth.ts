@@ -25,20 +25,12 @@ export const auth = betterAuth({
     onAPIError: {
         throw: true, // Should we throw? If we throw, it might be caught by the route handler wrapper
         onError: (error, ctx) => {
-            logToFile(`[BETTER-AUTH ERROR] ${ctx.path}: ${error.message || error}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logToFile(`[BETTER-AUTH ERROR] Context: ${JSON.stringify(ctx)} - Error: ${errorMessage}`);
             if (error instanceof Error && error.stack) {
                 logToFile(`[BETTER-AUTH STACK] ${error.stack}`);
             }
         }
     },
-    databaseHooks: {
-        user: {
-            create: {
-                before: async (user) => {
-                    logToFile(`[BETTER-AUTH] Creating user: ${JSON.stringify(user)}`);
-                    return user;
-                }
-            }
-        }
-    }
+    // databaseHooks removed to fix build type errors
 });
