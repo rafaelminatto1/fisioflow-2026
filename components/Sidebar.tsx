@@ -147,9 +147,18 @@ const MENU_STRUCTURE: MenuSection[] = [
   }
 ];
 
+import { signOut } from '../lib/auth-client';
+import { useRouter } from 'next/navigation';
+
 const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
   const [expandedItems, setExpandedItems] = useState<string[]>(['financial-group', 'reports-group', 'registers-group']);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/login');
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev =>
@@ -290,9 +299,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
           </div>
 
           <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Link href="/settings" className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg">
+            <Link href="/settings" className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg" title="Configurações">
               <SettingsIcon className="w-4 h-4" />
             </Link>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white/10 rounded-lg"
+              title="Sair"
+            >
+              <LogOutIcon className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

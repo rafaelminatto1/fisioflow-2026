@@ -2,7 +2,7 @@
 
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { BellIcon, ListIcon, SunIcon, BrainCircuitIcon, CheckCircleIcon, AlertCircleIcon, WalletIcon, CalendarIcon, XIcon, CheckIcon } from './Icons';
+import { BellIcon, ListIcon, SunIcon, BrainCircuitIcon, CheckCircleIcon, AlertCircleIcon, WalletIcon, CalendarIcon, XIcon, CheckIcon, LogOutIcon, SettingsIcon, UsersIcon } from './Icons';
 import { ThemeContext } from './ThemeProvider';
 
 interface HeaderProps {
@@ -11,11 +11,17 @@ interface HeaderProps {
 
 import { Notification, MOCK_NOTIFICATIONS } from '../utils/mock-data';
 
+import { signOut } from '../lib/auth-client';
+import { useRouter } from 'next/navigation';
+
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     const { theme, toggleTheme } = useContext(ThemeContext);
+    const router = useRouter();
     const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const notificationRef = useRef<HTMLDivElement>(null);
+    const profileRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
 
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -25,10 +31,18 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
                 setShowNotifications(false);
             }
+            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+                setShowProfileMenu(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const handleLogout = async () => {
+        await signOut();
+        router.push('/login');
+    };
 
     const markAllAsRead = () => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -160,19 +174,49 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
 
-                <div className="flex items-center gap-3 pl-2">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Dr. Ricardo M.</p>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Admin</p>
+                <div className="relative" ref={profileRef}>
+                    <div
+                        className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    >
+                        <div className="text-right hidden sm:block">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Dr. Ricardo M.</p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Admin</p>
+                        </div>
+                        <div className="relative group">
+                            <img
+                                className="h-10 w-10 rounded-xl object-cover ring-2 ring-white dark:ring-slate-800 shadow-md group-hover:ring-primary transition-all"
+                                src="https://ui-avatars.com/api/?name=Ricardo+M&background=0ea5e9&color=fff"
+                                alt="Avatar"
+                            />
+                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                        </div>
                     </div>
-                    <div className="relative group cursor-pointer">
-                        <img
-                            className="h-10 w-10 rounded-xl object-cover ring-2 ring-white dark:ring-slate-800 shadow-md group-hover:ring-primary transition-all"
-                            src="https://ui-avatars.com/api/?name=Ricardo+M&background=0ea5e9&color=fff"
-                            alt="Avatar"
-                        />
-                        <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
-                    </div>
+
+                    {/* Profile Dropdown */}
+                    {showProfileMenu && (
+                        <div className="absolute right-0 top-full mt-4 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
+                            <div className="p-2 space-y-1">
+                                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                    <UsersIcon className="w-4 h-4" />
+                                    Meu Perfil
+                                </button>
+                                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                    <SettingsIcon className="w-4 h-4" />
+                                    Configurações
+                                </button>
+                            </div>
+                            <div className="p-2 border-t border-slate-100 dark:border-slate-800">
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+                                >
+                                    <LogOutIcon className="w-4 h-4" />
+                                    Sair da Conta
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>
