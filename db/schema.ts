@@ -123,6 +123,19 @@ export const appointments = pgTable('appointments', {
 	status: text('status').default('scheduled').notNull(),
 });
 
+export const patientSessions = pgTable('patient_sessions', {
+	id: text('id').primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'cascade' }).notNull(),
+	date: text('date').notNull(), // Format: DD/MM/YYYY
+	subjective: text('subjective'),
+	objective: text('objective'),
+	assessment: text('assessment'),
+	plan: text('plan'),
+	evaScore: integer('eva_score'), // Pain scale 0-10
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // --- RELATIONS ---
 
 export const prescriptionsRelations = relations(prescriptions, ({ one }) => ({
