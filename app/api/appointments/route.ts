@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { appointments, patients } from '@/db/schema';
-import { eq, gte, lte, and } from 'drizzle-orm';
+import { eq, gte, lte, and, asc } from 'drizzle-orm';
 
 // GET /api/appointments - List appointments with optional date filtering
 export async function GET(request: NextRequest) {
@@ -9,38 +9,49 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('start');
     const endDate = searchParams.get('end');
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const future = searchParams.get('future') === 'true';
+    const sort = searchParams.get('sort');
 
-    let allAppointments;
+    const conditions = [];
 
-    if (startDate && endDate) {
-      allAppointments = await db.select({
-        id: appointments.id,
-        patientId: appointments.patientId,
-        startTime: appointments.startTime,
-        endTime: appointments.endTime,
-        status: appointments.status,
-        patientName: patients.fullName,
-      }).from(appointments)
-        .leftJoin(patients, eq(appointments.patientId, patients.id))
-        .where(
-          and(
-            gte(appointments.startTime, new Date(startDate)),
-            lte(appointments.startTime, new Date(endDate))
-          )
-        );
-    } else {
-      allAppointments = await db.select({
-        id: appointments.id,
-        patientId: appointments.patientId,
-        startTime: appointments.startTime,
-        endTime: appointments.endTime,
-        status: appointments.status,
-        patientName: patients.fullName,
-      }).from(appointments)
-        .leftJoin(patients, eq(appointments.patientId, patients.id));
+    if (startDate) {
+      conditions.push(gte(appointments.startTime, new Date(startDate)));
+    }
+    if (endDate) {
+      conditions.push(lte(appointments.startTime, new Date(endDate)));
+    }
+    if (future) {
+      conditions.push(gte(appointments.startTime, new Date()));
     }
 
-    return NextResponse.json(allAppointments);
+    let query = db.select({
+      id: appointments.id,
+      patientId: appointments.patientId,
+      startTime: appointments.startTime,
+      endTime: appointments.endTime,
+      status: appointments.status,
+      patientName: patients.fullName,
+    }).from(appointments)
+      .leftJoin(patients, eq(appointments.patientId, patients.id))
+      .$dynamic();
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    // Default to ascending order for future appointments (Next Appointments)
+    if (sort === 'asc' || future) {
+      query = query.orderBy(asc(appointments.startTime));
+    }
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const result = await query;
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching appointments:', error);
     return NextResponse.json(

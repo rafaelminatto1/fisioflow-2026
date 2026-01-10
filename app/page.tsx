@@ -15,7 +15,7 @@ async function getDashboardData() {
   const [dashboardMetrics, financialReport, appointments, physioPerformance] = await Promise.all([
     api.reports.dashboard(),
     api.reports.financial(),
-    api.appointments.list(),
+    api.appointments.list(undefined, undefined, 5, true),
     api.performance.therapists()
   ]);
 

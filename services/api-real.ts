@@ -101,10 +101,12 @@ export const api = {
 
   // Appointments
   appointments: {
-    list: async (start?: string, end?: string): Promise<Appointment[]> => {
+    list: async (start?: string, end?: string, limit?: number, future?: boolean): Promise<Appointment[]> => {
       const params = new URLSearchParams();
       if (start) params.append('start', start);
       if (end) params.append('end', end);
+      if (limit) params.append('limit', limit.toString());
+      if (future) params.append('future', 'true');
       const queryString = params.toString();
       const data = await fetchAPI(`/appointments${queryString ? `?${queryString}` : ''}`);
       return data.map((a: any) => ({
