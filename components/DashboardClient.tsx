@@ -58,10 +58,10 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 space-y-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-              Dashboard Executivo <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">Ao Vivo</span>
+            <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white flex items-center gap-3">
+              Dashboard <span className="text-gradient">Executivo</span> <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 self-start mt-2">AO VIVO</span>
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
+            <p className="text-slate-500 dark:text-slate-400 font-medium mt-1 text-lg">
               Visão consolidada de performance clínica e financeira.
             </p>
           </div>
@@ -72,8 +72,8 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
                 key={p}
                 onClick={() => setFilterPeriod(p as any)}
                 className={`px-6 py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wide ${filterPeriod === p
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
               >
                 {p === 'today' ? 'Hoje' : p === 'week' ? 'Semana' : 'Mês'}
@@ -129,7 +129,7 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
             value={String(kpi.value)}
             trend={kpi.trend}
             Icon={kpi.icon}
-            className="glass-card rounded-2xl p-5 border-slate-200 dark:border-slate-800"
+            className="glass-card rounded-2xl p-5 border-slate-200 dark:border-slate-800 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
           />
         ))}
       </section>
@@ -138,7 +138,7 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Financial Chart (Large) */}
-        <div className="lg:col-span-2 glass-card rounded-2xl p-6 min-h-[400px] flex flex-col">
+        <div className="lg:col-span-2 glass-card rounded-2xl p-6 min-h-[400px] flex flex-col hover:shadow-lg transition-shadow duration-300">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
@@ -147,11 +147,11 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">Comparativo Receita vs Despesa (6 Meses)</p>
             </div>
-            <button onClick={() => router.push('financial')} className="text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors">
+            <button onClick={() => router.push('financial')} className="text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors">
               DETALHES
             </button>
           </div>
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full opacity-90 hover:opacity-100 transition-opacity">
             <FinancialChart data={initialData.financialData} />
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
         {/* Productivity / Goals (Sidebar) */}
         <div className="space-y-6">
           {/* Goals Card */}
-          <div className="glass-card rounded-2xl p-6 bg-white dark:bg-slate-900">
+          <div className="glass-card rounded-2xl p-6 bg-white dark:bg-slate-900 hover:scale-[1.01] transition-transform duration-300">
             <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
               <TargetIcon className="w-5 h-5 text-primary" />
               Metas Mensais
@@ -187,7 +187,7 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
           </div>
 
           {/* Therapist Performance Mini-Chart */}
-          <div className="glass-card rounded-2xl p-6 h-[300px] flex flex-col">
+          <div className="glass-card rounded-2xl p-6 h-[300px] flex flex-col hover:scale-[1.01] transition-transform duration-300">
             <h3 className="font-bold text-lg mb-2 flex items-center gap-2 text-slate-900 dark:text-white">
               <ActivityIcon className="w-5 h-5 text-amber-500" />
               Produtividade
@@ -200,7 +200,7 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
       </div>
 
       {/* 4. Operations / Schedule Snippet */}
-      <div className="glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+      <div className="glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all duration-300">
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
           <div>
             <h3 className="font-bold text-lg flex items-center gap-2 text-slate-900 dark:text-white">

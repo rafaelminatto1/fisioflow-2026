@@ -1,12 +1,12 @@
 
 // ... existing imports ...
-import { 
-    ExecutiveReportData, 
-    Patient, 
-    Appointment, 
-    Session, 
-    FinancialReport, 
-    PhysioPerformance, 
+import {
+    ExecutiveReportData,
+    Patient,
+    Appointment,
+    Session,
+    FinancialReport,
+    PhysioPerformance,
     DashboardKPIs,
     WaitlistEntry,
     Exercise,
@@ -31,6 +31,13 @@ let MOCK_PATIENTS: Patient[] = [
 let MOCK_APPOINTMENTS: Appointment[] = [
     { id: '1', patientId: '1', patientName: 'Ana Silva', therapistId: 't1', therapistName: 'Dr. Pedro', startTime: new Date().toISOString().split('T')[0] + 'T14:00:00', endTime: new Date().toISOString().split('T')[0] + 'T15:00:00', duration: 60, status: 'scheduled', type: 'Fisioterapia' },
     { id: '2', patientId: '2', patientName: 'Carlos Oliveira', therapistId: 't2', therapistName: 'Dra. Sofia', startTime: new Date().toISOString().split('T')[0] + 'T10:00:00', endTime: new Date().toISOString().split('T')[0] + 'T11:00:00', duration: 60, status: 'confirmed', type: 'Pilates' },
+];
+
+let MOCK_SESSIONS: Session[] = [
+    { id: 's1', patientId: '1', date: '10/02/2024', subjective: 'Dor lombar', objective: 'ADM reduzida', assessment: 'Contratura', plan: 'TENS + Calor', evaScore: 8 },
+    { id: 's2', patientId: '1', date: '15/02/2024', subjective: 'Melhora leve', objective: 'ADM melhorou', assessment: 'Evoluindo bem', plan: 'Cinesio', evaScore: 6 },
+    { id: 's3', patientId: '1', date: '20/02/2024', subjective: 'Sem dor em repouso', objective: 'Força grau 4', assessment: 'Estável', plan: 'Fortalecimento', evaScore: 4 },
+    { id: 's4', patientId: '1', date: '25/02/2024', subjective: 'Dor zero', objective: 'Força grau 5', assessment: 'Alta próxima', plan: 'Funcional', evaScore: 1 },
 ];
 
 let MOCK_TRANSACTIONS: Transaction[] = [
@@ -80,21 +87,34 @@ export const api = {
             return MOCK_APPOINTMENTS.find(a => a.id === id) as Appointment;
         }
     },
+
+
     sessions: {
         list: async (patientId?: string): Promise<Session[]> => {
-            return [
-                { id: 's1', patientId: patientId || '1', date: '10/02/2024', subjective: 'Dor lombar', objective: 'ADM reduzida', assessment: 'Contratura', plan: 'TENS + Calor', evaScore: 8 },
-                { id: 's2', patientId: patientId || '1', date: '15/02/2024', subjective: 'Melhora leve', objective: 'ADM melhorou', assessment: 'Evoluindo bem', plan: 'Cinesio', evaScore: 6 },
-                { id: 's3', patientId: patientId || '1', date: '20/02/2024', subjective: 'Sem dor em repouso', objective: 'Força grau 4', assessment: 'Estável', plan: 'Fortalecimento', evaScore: 4 },
-                { id: 's4', patientId: patientId || '1', date: '25/02/2024', subjective: 'Dor zero', objective: 'Força grau 5', assessment: 'Alta próxima', plan: 'Funcional', evaScore: 1 },
-            ];
+            if (patientId) {
+                return MOCK_SESSIONS.filter(s => s.patientId === patientId);
+            }
+            return MOCK_SESSIONS;
         },
         get: async (id: string): Promise<Session | null> => {
-            return { id, patientId: '1', date: '25/02/2024', subjective: '', objective: '', assessment: '', plan: '', evaScore: 0 };
+            const session = MOCK_SESSIONS.find(s => s.id === id);
+            return session || null;
         },
-        getLast: async (patientId: string): Promise<Session | null> => null,
-        create: async (data: any): Promise<Session> => ({ ...data, id: Date.now().toString() }),
-        update: async (id: string, data: any): Promise<Session> => ({ ...data, id })
+        getLast: async (patientId: string): Promise<Session | null> => {
+            const patientSessions = MOCK_SESSIONS.filter(s => s.patientId === patientId);
+            if (patientSessions.length === 0) return null;
+            // Sort by ID or Date if available to find truly last
+            return patientSessions[patientSessions.length - 1];
+        },
+        create: async (data: any): Promise<Session> => {
+            const newS = { ...data, id: Date.now().toString() };
+            MOCK_SESSIONS.push(newS);
+            return newS;
+        },
+        update: async (id: string, data: any): Promise<Session> => {
+            MOCK_SESSIONS = MOCK_SESSIONS.map(s => s.id === id ? { ...s, ...data } : s);
+            return MOCK_SESSIONS.find(s => s.id === id) as Session;
+        }
     },
     prescriptions: {
         list: async (patientId?: string): Promise<Prescription[]> => [],
@@ -127,7 +147,7 @@ export const api = {
             const dashboard = await api.reports.dashboard();
             const financial = await api.reports.financial();
             const performance = await api.performance.therapists();
-            
+
             let multiplier = 1;
             if (period === 'week') multiplier = 0.25;
             if (period === 'today') multiplier = 0.05;
@@ -140,10 +160,10 @@ export const api = {
                 kpis: {
                     ...dashboard,
                     monthlyRevenue: totalRev,
-                    activePatients: Math.floor(dashboard.activePatients * (period === 'month' ? 1 : 0.9)), 
-                    appointmentsToday: dashboard.appointmentsToday, 
+                    activePatients: Math.floor(dashboard.activePatients * (period === 'month' ? 1 : 0.9)),
+                    appointmentsToday: dashboard.appointmentsToday,
                     previousPeriodComparison: {
-                        revenue: totalRev * 0.92, 
+                        revenue: totalRev * 0.92,
                         activePatients: Math.floor(dashboard.activePatients * 0.95)
                     }
                 },
@@ -161,8 +181,8 @@ export const api = {
                 clinical: {
                     totalActiveTreatments: 42,
                     dischargesThisMonth: period === 'month' ? 8 : Math.floor(8 * multiplier),
-                    avgPainReduction: 72, 
-                    treatmentSuccessRate: 94, 
+                    avgPainReduction: 72,
+                    treatmentSuccessRate: 94,
                     topDiagnoses: [
                         { name: 'Lombalgia', count: Math.floor(15 * multiplier) || 2 },
                         { name: 'Pós-Op LCA', count: Math.floor(8 * multiplier) || 1 },
@@ -196,11 +216,11 @@ export const api = {
         }
     },
     performance: {
-        therapists: async (): Promise<PhysioPerformance[]> => MOCK_STAFF.map(s => ({ 
-            therapistId: s.id, 
-            name: s.name, 
+        therapists: async (): Promise<PhysioPerformance[]> => MOCK_STAFF.map(s => ({
+            therapistId: s.id,
+            name: s.name,
             appointments: s.performance?.sessionsMonth || 0,
-            total: s.performance?.revenueMonth || 0 
+            total: s.performance?.revenueMonth || 0
         }))
     },
     waitlist: {
@@ -208,7 +228,7 @@ export const api = {
         findMatches: async (date: string, time: string): Promise<WaitlistEntry[]> => [],
         create: async (data: any): Promise<WaitlistEntry> => ({ ...data, id: Date.now().toString(), createdAt: new Date().toISOString() }),
         update: async (id: string, data: any): Promise<WaitlistEntry> => ({ ...data, id }),
-        delete: async (id: string): Promise<void> => {}
+        delete: async (id: string): Promise<void> => { }
     },
     exercises: {
         list: async (): Promise<Exercise[]> => MOCK_EXERCISES,
@@ -229,21 +249,21 @@ export const api = {
         list: async (): Promise<Package[]> => [],
         create: async (data: any): Promise<Package> => ({ ...data, id: Date.now().toString(), isActive: true }),
         update: async (id: string, data: any): Promise<Package> => ({ ...data, id }),
-        delete: async (id: string): Promise<void> => {}
+        delete: async (id: string): Promise<void> => { }
     },
     leads: {
         list: async (): Promise<Lead[]> => [],
         create: async (data: any): Promise<Lead> => ({ ...data, id: Date.now().toString(), status: 'new', createdAt: new Date().toISOString() }),
-        moveStage: async (id: string, status: string): Promise<void> => {}
+        moveStage: async (id: string, status: string): Promise<void> => { }
     },
     user: {
         get: async (): Promise<any> => ({ name: 'Admin', email: 'admin@fisio.com', notifications: { reminders: true } }),
-        update: async (data: any): Promise<void> => {}
+        update: async (data: any): Promise<void> => { }
     },
     stock: {
         list: async (): Promise<Product[]> => [],
         create: async (data: any): Promise<Product> => ({ ...data, id: Date.now().toString() }),
-        delete: async (id: string): Promise<void> => {}
+        delete: async (id: string): Promise<void> => { }
     },
     gamification: {
         ranking: async (): Promise<RankingEntry[]> => []
@@ -285,7 +305,7 @@ export const api = {
         create: async (data: any): Promise<AnnotationVersion> => {
             const versions = MOCK_ANNOTATIONS.filter(a => a.assetId === data.assetId);
             const nextVersion = versions.length > 0 ? Math.max(...versions.map(v => v.versionNumber)) + 1 : 1;
-            
+
             const newVersion: AnnotationVersion = {
                 id: Date.now().toString(),
                 assetId: data.assetId,

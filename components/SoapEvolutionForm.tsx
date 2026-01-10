@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileTextIcon, CopyIcon, XIcon, CheckCircleIcon, DumbbellIcon } from './Icons';
+import { FileTextIcon, CopyIcon, XIcon, CheckCircleIcon, DumbbellIcon, MessageCircleIcon } from './Icons';
 import { api } from '../services/api';
 import InteractivePainMap, { PainPoint } from './InteractivePainMap';
+import ExercisesLibrary from './ExercisesLibrary';
 
 // Zod Schema Definition
 const soapSchema = z.object({
@@ -19,21 +20,20 @@ const soapSchema = z.object({
 
 type SoapFormData = z.infer<typeof soapSchema>;
 
+import { Patient } from '../types';
+import { calculateAge } from '../lib/utils';
+
 interface SoapEvolutionFormProps {
-  patient: {
-    id: string;
-    name: string;
-    age: number;
-    tags: string[];
-    condition: string;
-  };
+  patient: Patient;
   onClose: () => void;
   onSubmit: (data: any) => void;
+  isModal?: boolean;
 }
 
-const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose, onSubmit }) => {
-  const [activeTab, setActiveTab] = useState<'soap' | 'pain-map'>('soap');
+const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose, onSubmit, isModal = true }) => {
+  const [activeTab, setActiveTab] = useState<'soap' | 'pain-map' | 'homecare'>('soap');
   const [painPoints, setPainPoints] = useState<PainPoint[]>([]);
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
 
   const {
     register,
@@ -73,14 +73,28 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
         imageUrl: 'generated-svg',
         bodyPart: 'Full Body',
         points: painPoints
-      }
+      },
+      homeCareExercises: selectedExerciseIds
     };
     onSubmit(fullSessionData);
   };
 
+  const handleSendWhatsApp = () => {
+    if (selectedExerciseIds.length === 0) return alert("Selecione exercícios primeiro.");
+    // Demo link
+    const msg = `Olá ${patient.name.split(' ')[0]}! Aqui estão seus exercícios para fazer em casa: https://fisioflow.app/p/${patient.id}/exercises`;
+    window.open(`https://wa.me/55${patient.phone || ''}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const Container = isModal ? 'div' : React.Fragment;
+  const containerProps = isModal ? { className: "fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" } : {};
+  const cardClass = isModal ? "glass-card w-full max-w-5xl max-h-[90vh] rounded-[32px] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 border border-white/20 dark:border-white/10 shadow-2xl" : "bg-white dark:bg-slate-950 flex flex-col h-full";
+
+  const age = calculateAge(patient.birthDate);
+
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="glass-card w-full max-w-5xl max-h-[90vh] rounded-[32px] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 border border-white/20 dark:border-white/10 shadow-2xl">
+    <Container {...containerProps}>
+      <div className={cardClass}>
 
         {/* Header (Patient Info) - Fixed */}
         <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-b border-white/20 p-6 flex justify-between items-center shrink-0">
@@ -91,10 +105,10 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             <div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 {patient.name}
-                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">({patient.age} anos)</span>
+                {age !== null && <span className="text-sm font-normal text-slate-500 dark:text-slate-400">({age} anos)</span>}
               </h2>
               <div className="flex gap-2 text-xs font-bold uppercase tracking-wider mt-1">
-                <span className="text-primary">{patient.condition}</span>
+                <span className="text-primary">{patient.condition || 'Paciente'}</span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-500">{patient.tags.join(', ')}</span>
               </div>
@@ -116,6 +130,14 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             >
               MAPA 3D
               {painPoints.length > 0 && <span className="bg-primary text-white px-1.5 rounded-full text-[10px]">{painPoints.length}</span>}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('homecare')}
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'homecare' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              HOME CARE
+              {selectedExerciseIds.length > 0 && <span className="bg-primary text-white px-1.5 rounded-full text-[10px]">{selectedExerciseIds.length}</span>}
             </button>
           </div>
 
@@ -233,6 +255,34 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             </div>
           )}
 
+          {/* TAB: HOME CARE */}
+          {activeTab === 'homecare' && (
+            <div className="h-full flex flex-col animate-in fade-in slide-in-from-right-4">
+              <div className="flex justify-between items-center mb-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <DumbbellIcon className="w-4 h-4 text-indigo-500" />
+                    Exercícios Domiciliares
+                  </h3>
+                  <p className="text-xs text-slate-500">Selecione exercícios para enviar ao paciente.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSendWhatsApp}
+                  className="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-600 flex items-center gap-2 transition-colors shadow-sm"
+                >
+                  <MessageCircleIcon className="w-4 h-4" /> Enviar WhatsApp
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden relative">
+                <ExercisesLibrary
+                  selectionMode={true}
+                  onSelectionChange={setSelectedExerciseIds}
+                />
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Footer Actions */}
@@ -259,7 +309,7 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
         </div>
 
       </div>
-    </div>
+    </Container>
   );
 };
 

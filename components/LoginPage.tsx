@@ -101,6 +101,7 @@ const LoginPage: React.FC = () => {
                                         className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
                                         placeholder="Dr. Ricardo Marques"
                                         disabled={loading}
+                                        aria-label="Nome Completo"
                                     />
                                 </div>
                             </div>
@@ -115,6 +116,7 @@ const LoginPage: React.FC = () => {
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
                                     placeholder="exemplo@fisioflow.com"
                                     disabled={loading}
+                                    aria-label="Email Profissional"
                                 />
                             </div>
                         </div>
@@ -128,6 +130,7 @@ const LoginPage: React.FC = () => {
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium text-slate-700"
                                     placeholder="••••••••"
                                     disabled={loading}
+                                    aria-label="Senha"
                                 />
                             </div>
                         </div>

@@ -17,7 +17,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     }
 
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+        <div className="flex min-h-screen bg-slate-50 bg-grid-pattern transition-colors duration-300">
             {/* Mobile Menu Overlay */}
             {isMenuOpen && (
                 <div
@@ -27,7 +27,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             )}
 
             {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 z-50 md:relative transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out`}>
+            <div className={`fixed inset-y-0 left-0 z-50 w-72 md:relative transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0`}>
                 <Sidebar onClose={() => setIsMenuOpen(false)} />
             </div>
 

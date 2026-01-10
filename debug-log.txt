@@ -1,0 +1,280 @@
+[2026-01-10T02:12:31.855Z] [AUTH DEBUG] POST http://localhost:3000/api/auth/sign-up/email
+[2026-01-10T02:12:32.725Z] [AUTH DEBUG] Error response status: 500
+[2026-01-10T02:12:32.725Z] [AUTH DEBUG] Error response body: 
+[2026-01-10T02:13:42.317Z] [AUTH DEBUG] POST http://localhost:3000/api/auth/sign-up/email
+[2026-01-10T02:13:42.964Z] [AUTH DEBUG] Uncaught error in POST handler: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: debug_log_final@example.com 
+Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: debug_log_final@example.com
+    at NeonHttpPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_8346e59a._.js:8779:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async NeonHttpPreparedQuery.execute (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_8346e59a._.js:8938:24)
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:9043:33)
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_@better-auth_core_dist_2b3e86c5._.js:1955:29)
+    at async Object.findUserByEmail (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:2076:28)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7023:18
+    at async internalHandler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_47db02ed._.js:3916:26)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7905:36
+    at async processRequest (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_47db02ed._.js:4415:20)
+    at async handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_47db02ed._.js:4437:25)
+    at async POST (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__067f8580._.js:374:21)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9256:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9319:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9372:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:14:10.062Z] [TEST-DB] Starting DB test...
+[2026-01-10T02:14:10.062Z] [TEST-DB] DATABASE_URL exists: true, len: 147
+[2026-01-10T02:14:10.638Z] [TEST-DB] Error: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+[2026-01-10T02:14:10.639Z] [TEST-DB] Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+    at NeonHttpPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_8346e59a._.js:8779:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async NeonHttpPreparedQuery.execute (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_8346e59a._.js:8938:24)
+    at async GET (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__76fd73cc._.js:322:24)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_51cbb2d1._.js:14843:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_51cbb2d1._.js:14906:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_51cbb2d1._.js:14959:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:14:45.695Z] [TEST-DB] Starting DB test...
+[2026-01-10T02:14:45.695Z] [TEST-DB] DATABASE_URL exists: true, len: 147
+[2026-01-10T02:14:46.516Z] [TEST-DB] Error: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+[2026-01-10T02:14:46.516Z] [TEST-DB] Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+    at NeonPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_15ababe1._.js:8725:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async NeonPreparedQuery.execute (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_15ababe1._.js:8954:24)
+    at async GET (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__0062d3c5._.js:318:24)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_51cbb2d1._.js:14843:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_51cbb2d1._.js:14906:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_51cbb2d1._.js:14959:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:15:37.340Z] [TEST-DB] Starting DB test...
+[2026-01-10T02:15:37.340Z] [TEST-DB] DATABASE_URL exists: true, len: 147
+[2026-01-10T02:15:38.804Z] [TEST-DB] Error: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+[2026-01-10T02:15:38.804Z] [TEST-DB] Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+    at NodePgPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:17763:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:18010:28
+    at async GET (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__76fd73cc._.js:338:24)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:24030:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:24093:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:24146:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:16:06.485Z] [TEST-DB] Starting DB test...
+[2026-01-10T02:16:06.485Z] [TEST-DB] DATABASE_URL exists: true, len: 147
+[2026-01-10T02:16:08.152Z] [TEST-DB] Error: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+[2026-01-10T02:16:08.152Z] [TEST-DB] Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+    at NodePgPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:17763:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:18010:28
+    at async GET (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__76fd73cc._.js:338:24)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:24030:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:24093:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__67cde80a._.js:24146:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:16:21.017Z] [TEST-DB-PG] Starting direct PG test...
+[2026-01-10T02:16:21.017Z] [TEST-DB-PG] Connection String len: 147
+[2026-01-10T02:16:22.448Z] [TEST-DB-PG] Success! Result: [{"res":1}]
+[2026-01-10T02:16:34.128Z] [AUTH DEBUG] POST http://localhost:3000/api/auth/sign-up/email
+[2026-01-10T02:16:35.638Z] [AUTH DEBUG] Uncaught error in POST handler: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: final_fix_test@example.com 
+Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: final_fix_test@example.com
+    at NodePgPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_595d8d4c._.js:8779:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_595d8d4c._.js:9026:28
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:9043:33)
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_@better-auth_core_dist_2b3e86c5._.js:1955:29)
+    at async Object.findUserByEmail (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:2076:28)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7023:18
+    at async internalHandler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__7ce499a4._.js:3916:26)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7905:36
+    at async processRequest (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__7ce499a4._.js:4415:20)
+    at async handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__7ce499a4._.js:4437:25)
+    at async POST (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__067f8580._.js:397:21)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9262:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9325:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9378:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:17:15.268Z] [TEST-DB-PREPARE] Starting prepared stmt test...
+[2026-01-10T02:17:16.708Z] [TEST-DB-PREPARE] Success! Result: [{"res":"Hello Prepared"}]
+[2026-01-10T02:18:28.214Z] [TEST-DB-FINAL] Starting test...
+[2026-01-10T02:18:28.992Z] [TEST-DB-FINAL] Error: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+[2026-01-10T02:18:43.979Z] [TEST-DB-POSTGRES] Starting direct test...
+[2026-01-10T02:18:46.271Z] [TEST-DB-POSTGRES] Success! Result: [{"res":1}]
+[2026-01-10T02:19:22.267Z] [TEST-DB-FINAL-2] Starting test...
+[2026-01-10T02:19:24.799Z] [TEST-DB-FINAL-2] Error: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" limit $1
+params: 1
+[2026-01-10T02:22:37.118Z] [AUTH DEBUG] POST http://localhost:3000/api/auth/sign-up/email
+[2026-01-10T02:22:39.565Z] [AUTH DEBUG] Uncaught error in POST handler: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: verificacao@fisioflow.com 
+Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: verificacao@fisioflow.com
+    at PostgresJsPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_2ba8612c._.js:8779:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_2ba8612c._.js:8939:26
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:9043:33)
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_@better-auth_core_dist_2b3e86c5._.js:1955:29)
+    at async Object.findUserByEmail (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:2076:28)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7023:18
+    at async internalHandler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_26aa87d0._.js:3916:26)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7905:36
+    at async processRequest (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_26aa87d0._.js:4415:20)
+    at async handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_26aa87d0._.js:4437:25)
+    at async POST (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__fa7a2955._.js:407:21)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9256:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9319:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9372:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:26:21.647Z] [AUTH DEBUG] POST http://localhost:3001/api/auth/sign-up/email
+[2026-01-10T02:26:23.975Z] [AUTH DEBUG] Uncaught error in POST handler: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: verificacao_final2@fisioflow.com 
+Stack: Error: Failed query: select "id", "name", "email", "emailVerified", "image", "createdAt", "updatedAt", "role" from "user" where "user"."email" = $1
+params: verificacao_final2@fisioflow.com
+    at PostgresJsPreparedQuery.queryWithCache (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_2ba8612c._.js:8779:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_drizzle-orm_2ba8612c._.js:8939:26
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:9043:33)
+    at async Object.findOne (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_@better-auth_core_dist_2b3e86c5._.js:1955:29)
+    at async Object.findUserByEmail (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:2076:28)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7023:18
+    at async internalHandler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_26aa87d0._.js:3916:26)
+    at async /home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_better-auth_dist_9bbff5f5._.js:7905:36
+    at async processRequest (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_26aa87d0._.js:4415:20)
+    at async handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_26aa87d0._.js:4437:25)
+    at async POST (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/[root-of-the-server]__fa7a2955._.js:407:21)
+    at async AppRouteRouteModule.do (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37866)
+    at async AppRouteRouteModule.handle (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45156)
+    at async responseGenerator (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9256:38)
+    at async AppRouteRouteModule.handleResponse (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187713)
+    at async handleResponse (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9319:32)
+    at async Module.handler (/home/rafael/cursor/2026/fisioflow-2026/.next/dev/server/chunks/node_modules_next_dist_681b28fc._.js:9372:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1422:9)
+    at async DevServer.renderPageComponent (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1474:24)
+    at async DevServer.renderToResponseImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1524:32)
+    at async DevServer.pipeImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:1018:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/next-server.js:395:17)
+    at async DevServer.handleRequestImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/base-server.js:909:17)
+    at async /home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:387:20
+    at async Span.traceAsyncFn (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+    at async invokeRender (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:248:21)
+    at async handleRequest (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:447:24)
+    at async requestHandlerImpl (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/router-server.js:496:13)
+    at async Server.requestListener (/home/rafael/cursor/2026/fisioflow-2026/node_modules/next/dist/server/lib/start-server.js:226:13)
+[2026-01-10T02:27:09.024Z] [TEST-DB-TABLES] Checking tables...
+[2026-01-10T02:27:11.011Z] [TEST-DB-TABLES] Tables: []
+[2026-01-10T02:32:24.403Z] [AUTH DEBUG] POST http://localhost:3002/api/auth/sign-up/email
+[2026-01-10T02:32:27.138Z] [BETTER-AUTH] Creating user: {"createdAt":"2026-01-10T02:32:27.138Z","updatedAt":"2026-01-10T02:32:27.138Z","email":"verificacao_final3@fisioflow.com","name":"Verificacao Final 3","emailVerified":false}
