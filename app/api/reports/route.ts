@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { patients, appointments, transactions, staff, painLogs, patientSessions } from '@/db/schema';
+import { patients, appointments, transactions, staff, painLogs } from '@/db/schema';
 import { eq, gte, lte, and, count, sql, desc } from 'drizzle-orm';
 
 // GET /api/reports - Get various reports with real data
@@ -55,8 +55,10 @@ export async function GET(request: NextRequest) {
         const monthlyRevenue = (revenueResult[0]?.total || 0) / 100; // Convert cents to reais
 
         // Get today's appointments
-        const todayStart = new Date(now.setHours(0, 0, 0, 0));
-        const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
         const todayAppointmentsResult = await db
           .select({ count: count() })
           .from(appointments)
