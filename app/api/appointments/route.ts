@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { appointments, patients } from '@/db/schema';
+import { appointments, patients, staff } from '@/db/schema';
 import { eq, gte, lte, and } from 'drizzle-orm';
 
 // GET /api/appointments - List appointments with optional date filtering
@@ -16,12 +16,18 @@ export async function GET(request: NextRequest) {
       allAppointments = await db.select({
         id: appointments.id,
         patientId: appointments.patientId,
+        therapistId: appointments.therapistId,
+        type: appointments.type,
         startTime: appointments.startTime,
         endTime: appointments.endTime,
         status: appointments.status,
+        notes: appointments.notes,
+        reminderSent: appointments.reminderSent,
         patientName: patients.fullName,
+        therapistName: staff.name,
       }).from(appointments)
         .leftJoin(patients, eq(appointments.patientId, patients.id))
+        .leftJoin(staff, eq(appointments.therapistId, staff.id))
         .where(
           and(
             gte(appointments.startTime, new Date(startDate)),
@@ -32,12 +38,18 @@ export async function GET(request: NextRequest) {
       allAppointments = await db.select({
         id: appointments.id,
         patientId: appointments.patientId,
+        therapistId: appointments.therapistId,
+        type: appointments.type,
         startTime: appointments.startTime,
         endTime: appointments.endTime,
         status: appointments.status,
+        notes: appointments.notes,
+        reminderSent: appointments.reminderSent,
         patientName: patients.fullName,
+        therapistName: staff.name,
       }).from(appointments)
-        .leftJoin(patients, eq(appointments.patientId, patients.id));
+        .leftJoin(patients, eq(appointments.patientId, patients.id))
+        .leftJoin(staff, eq(appointments.therapistId, staff.id));
     }
 
     return NextResponse.json(allAppointments);
@@ -65,12 +77,36 @@ export async function POST(request: NextRequest) {
 
     const newAppointment = await db.insert(appointments).values({
       patientId: body.patientId,
+      therapistId: body.therapistId || null,
+      type: body.type || 'consultation',
       startTime: new Date(body.startTime),
       endTime: new Date(body.endTime),
       status: body.status || 'scheduled',
+      notes: body.notes || null,
+      reminderSent: false,
     }).returning();
 
-    return NextResponse.json(newAppointment[0], { status: 201 });
+    const createdId = newAppointment[0].id;
+
+    // Fetch full details including names
+    const hydratedAppointment = await db.select({
+      id: appointments.id,
+      patientId: appointments.patientId,
+      therapistId: appointments.therapistId,
+      type: appointments.type,
+      startTime: appointments.startTime,
+      endTime: appointments.endTime,
+      status: appointments.status,
+      notes: appointments.notes,
+      reminderSent: appointments.reminderSent,
+      patientName: patients.fullName,
+      therapistName: staff.name,
+    }).from(appointments)
+      .leftJoin(patients, eq(appointments.patientId, patients.id))
+      .leftJoin(staff, eq(appointments.therapistId, staff.id))
+      .where(eq(appointments.id, createdId));
+
+    return NextResponse.json(hydratedAppointment[0], { status: 201 });
   } catch (error) {
     console.error('Error creating appointment:', error);
     return NextResponse.json(

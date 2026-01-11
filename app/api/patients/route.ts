@@ -16,11 +16,24 @@ export async function GET(request: NextRequest) {
     const allPatients = await withCache(
       cacheKey,
       async () => {
-        if (activeOnly) {
-          return await db.select().from(patients).where(eq(patients.isActive, true)).orderBy(desc(patients.createdAt));
-        } else {
-          return await db.select().from(patients).orderBy(desc(patients.createdAt));
-        }
+
+        const result = await db.query.patients.findMany({
+          orderBy: [desc(patients.createdAt)],
+          where: activeOnly ? eq(patients.isActive, true) : undefined,
+          with: {
+            tags: {
+              with: {
+                tag: true
+              }
+            }
+          }
+        });
+
+        // Map tags structure to string array to match API contract
+        return result.map(p => ({
+          ...p,
+          tags: p.tags.map((pt: any) => pt.tag.name)
+        }));
       },
       { ttl: 300 } // 5 minutes cache
     );
@@ -52,11 +65,17 @@ export async function POST(request: NextRequest) {
       fullName: body.fullName,
       email: body.email || null,
       phone: body.phone || null,
+      cpf: body.cpf || null,
+      birthDate: body.birthDate ? new Date(body.birthDate) : null,
+      profession: body.profession || null,
+      condition: body.condition || null,
+      address: body.address || null,
+      emergencyContact: body.emergencyContact || null,
       isActive: body.isActive !== undefined ? body.isActive : true,
       totalPoints: body.totalPoints || 0,
       level: body.level || 1,
       currentStreak: body.currentStreak || 0,
-      lastActiveDate: body.lastActiveDate || null,
+      lastActiveDate: body.lastActiveDate ? new Date(body.lastActiveDate) : null,
     }).returning();
 
     // Invalidate cache

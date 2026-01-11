@@ -6,6 +6,7 @@ import {
   AreaChart,
   Area,
   XAxis,
+  YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer
@@ -64,6 +65,12 @@ const FinancialChart: React.FC<FinancialChartProps> = React.memo(({ data }) => {
               tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 10, fontWeight: 700 }}
               dy={10}
             />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: isDark ? '#64748b' : '#94a3b8', fontSize: 10, fontWeight: 700 }}
+              tickFormatter={(value) => `R$ ${(value / 100 / 1000).toFixed(0)}k`} // Show in k Reals (e.g. 500000 -> 5k)
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)',
@@ -77,7 +84,7 @@ const FinancialChart: React.FC<FinancialChartProps> = React.memo(({ data }) => {
               itemStyle={{ fontSize: '12px', fontWeight: 'bold', padding: '2px 0' }}
               labelStyle={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '8px' }}
               cursor={{ stroke: '#0ea5e9', strokeWidth: 2, strokeDasharray: '4 4' }}
-              formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, '']}
+              formatter={(value: number) => [`R$ ${(value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, '']}
             />
             <Area
               type="monotone"

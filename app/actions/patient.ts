@@ -103,12 +103,9 @@ export async function getUpcomingAppointment(patientId: string) {
         ),
         orderBy: (appointments, { asc }) => [asc(appointments.startTime)],
         with: {
-            physioId: true
+            therapist: true
         }
     });
-
-    // We don't have physio relation setup to return name directly easily unless we join or change schema relation.
-    // For now, let's just return the appointment. treating physioId as string.
 
     return correctAppointment;
 }

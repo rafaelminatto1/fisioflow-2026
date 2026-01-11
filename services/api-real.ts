@@ -33,14 +33,17 @@ export const api = {
       return data.map((p: any) => ({
         id: p.id,
         name: p.fullName,
-        email: p.email,
-        phone: p.phone,
+        email: p.email || '',
+        phone: p.phone || '',
         isActive: p.isActive,
+        cpf: p.cpf || undefined,
         createdAt: p.createdAt,
-        tags: [], // TODO: Implement tags table
-        condition: null,
-        profession: null,
-        birthDate: null,
+        tags: p.tags || [],
+        condition: p.condition || undefined,
+        profession: p.profession || undefined,
+        birthDate: p.birthDate || undefined,
+        address: p.address || undefined,
+        emergencyContact: p.emergencyContact || undefined,
       }));
     },
     get: async (id: string): Promise<Patient | undefined> => {
@@ -48,14 +51,17 @@ export const api = {
       return {
         id: data.id,
         name: data.fullName,
-        email: data.email,
-        phone: data.phone,
+        email: data.email || '',
+        phone: data.phone || '',
         isActive: data.isActive,
+        cpf: data.cpf || undefined,
         createdAt: data.createdAt,
-        tags: [],
-        condition: null,
-        profession: null,
-        birthDate: null,
+        tags: data.tags || [],
+        condition: data.condition || undefined,
+        profession: data.profession || undefined,
+        birthDate: data.birthDate || undefined,
+        address: data.address || undefined,
+        emergencyContact: data.emergencyContact || undefined,
       };
     },
     create: async (data: any): Promise<Patient> => {
@@ -66,14 +72,17 @@ export const api = {
       return {
         id: result.id,
         name: result.fullName,
-        email: result.email,
-        phone: result.phone,
+        email: result.email || '',
+        phone: result.phone || '',
         isActive: result.isActive,
+        cpf: result.cpf || undefined,
         createdAt: result.createdAt,
-        tags: [],
-        condition: null,
-        profession: null,
-        birthDate: null,
+        tags: result.tags || [],
+        condition: result.condition || undefined,
+        profession: result.profession || undefined,
+        birthDate: result.birthDate || undefined,
+        address: result.address || undefined,
+        emergencyContact: result.emergencyContact || undefined,
       };
     },
     update: async (id: string, data: any): Promise<Patient | undefined> => {
@@ -84,19 +93,56 @@ export const api = {
       return {
         id: result.id,
         name: result.fullName,
-        email: result.email,
-        phone: result.phone,
+        email: result.email || '',
+        phone: result.phone || '',
         isActive: result.isActive,
+        cpf: result.cpf || undefined,
         createdAt: result.createdAt,
-        tags: [],
-        condition: null,
-        profession: null,
-        birthDate: null,
+        tags: result.tags || [],
+        condition: result.condition || undefined,
+        profession: result.profession || undefined,
+        birthDate: result.birthDate || undefined,
+        address: result.address || undefined,
+        emergencyContact: result.emergencyContact || undefined,
       };
     },
     delete: async (id: string): Promise<void> => {
       await fetchAPI(`/patients/${id}`, { method: 'DELETE' });
     }
+  },
+
+  // Tags
+  tags: {
+    list: async (patientId?: string): Promise<any[]> => {
+      const params = patientId ? `?patientId=${patientId}` : '';
+      return fetchAPI(`/tags${params}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/tags', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI('/tags', {
+        method: 'PUT',
+        body: JSON.stringify({ ...data, id }),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/tags?id=${id}`, { method: 'DELETE' });
+    },
+    assignToPatient: async (patientId: string, tagId: string): Promise<void> => {
+      await fetchAPI('/patient-tags', {
+        method: 'POST',
+        body: JSON.stringify({ patientId, tagId }),
+      });
+    },
+    removeFromPatient: async (patientId: string, tagId: string): Promise<void> => {
+      await fetchAPI(`/patient-tags?patientId=${patientId}&tagId=${tagId}`, {
+        method: 'DELETE',
+      });
+    },
   },
 
   // Appointments
@@ -111,13 +157,15 @@ export const api = {
         id: a.id,
         patientId: a.patientId,
         patientName: a.patientName || 'Unknown',
-        therapistId: '',
-        therapistName: '',
+        therapistId: a.therapistId || '',
+        therapistName: a.therapistName || '',
         startTime: a.startTime,
         endTime: a.endTime,
         duration: Math.round((new Date(a.endTime).getTime() - new Date(a.startTime).getTime()) / 60000),
         status: a.status,
-        type: 'Fisioterapia',
+        type: a.type || 'consultation',
+        notes: a.notes,
+        reminderSent: a.reminderSent,
       }));
     },
     create: async (data: any): Promise<Appointment> => {
@@ -128,14 +176,16 @@ export const api = {
       return {
         id: result.id,
         patientId: result.patientId,
-        patientName: '',
-        therapistId: '',
-        therapistName: '',
+        patientName: result.patientName || '',
+        therapistId: result.therapistId || '',
+        therapistName: result.therapistName || '',
         startTime: result.startTime,
         endTime: result.endTime,
-        duration: 60,
+        duration: Math.round((new Date(result.endTime).getTime() - new Date(result.startTime).getTime()) / 60000),
         status: result.status,
-        type: 'Fisioterapia',
+        type: result.type || 'consultation',
+        notes: result.notes,
+        reminderSent: result.reminderSent || false,
       };
     },
     update: async (id: string, data: any): Promise<Appointment> => {
@@ -146,14 +196,16 @@ export const api = {
       return {
         id: result.id,
         patientId: result.patientId,
-        patientName: '',
-        therapistId: '',
-        therapistName: '',
+        patientName: result.patientName || '',
+        therapistId: result.therapistId || '',
+        therapistName: result.therapistName || '',
         startTime: result.startTime,
         endTime: result.endTime,
-        duration: 60,
+        duration: Math.round((new Date(result.endTime).getTime() - new Date(result.startTime).getTime()) / 60000),
         status: result.status,
-        type: 'Fisioterapia',
+        type: result.type || 'consultation',
+        notes: result.notes,
+        reminderSent: result.reminderSent || false,
       };
     },
     delete: async (id: string): Promise<void> => {
@@ -491,22 +543,111 @@ export const api = {
 
   // Stock
   stock: {
-    list: async (): Promise<any[]> => [],
-    create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
-    delete: async (id: string): Promise<void> => {},
+    list: async (category?: string, lowStock?: boolean): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (category) params.append('category', category);
+      if (lowStock) params.append('lowStock', 'true');
+      const queryString = params.toString();
+      return fetchAPI(`/stock${queryString ? `?${queryString}` : ''}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/stock', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/stock/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/stock/${id}`, { method: 'DELETE' });
+    },
+    adjust: async (id: string, adjustment: number): Promise<any> => {
+      return fetchAPI(`/stock/${id}/adjust`, {
+        method: 'PATCH',
+        body: JSON.stringify({ adjustment }),
+      });
+    },
   },
 
   // Gamification
   gamification: {
-    ranking: async (): Promise<RankingEntry[]> => [],
+    ranking: async (): Promise<RankingEntry[]> => {
+      const data = await fetchAPI('/patients?active=true&sort=points');
+      return data
+        .filter((p: any) => p.isActive)
+        .sort((a: any, b: any) => (b.totalPoints || 0) - (a.totalPoints || 0))
+        .slice(0, 20)
+        .map((p: any) => ({
+          patientId: p.id,
+          patientName: p.fullName,
+          points: p.totalPoints || 0,
+          level: p.level || 1,
+          streak: p.currentStreak || 0,
+          badges: [],
+        }));
+    },
   },
 
   // Staff
   staff: {
-    list: async (): Promise<any[]> => [],
-    create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
-    update: async (id: string, data: any): Promise<any> => ({ ...data, id }),
-    delete: async (id: string): Promise<void> => {},
+    list: async (isActive?: boolean, role?: string): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (isActive !== undefined) params.append('active', isActive.toString());
+      if (role) params.append('role', role);
+      const queryString = params.toString();
+      return fetchAPI(`/staff${queryString ? `?${queryString}` : ''}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/staff', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/staff/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/staff/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // Tasks
+  tasks: {
+    list: async (filters?: { assignedTo?: string; status?: string; priority?: string }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.assignedTo) params.append('assignedTo', filters.assignedTo);
+      if (filters?.status) params.append('status', filters.status);
+      if (filters?.priority) params.append('priority', filters.priority);
+      const queryString = params.toString();
+      return fetchAPI(`/tasks${queryString ? `?${queryString}` : ''}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/tasks', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/tasks/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/tasks/${id}`, { method: 'DELETE' });
+    },
+    complete: async (id: string): Promise<any> => {
+      return fetchAPI(`/tasks/${id}/complete`, {
+        method: 'PATCH',
+      });
+    },
   },
 
   // Transactions
@@ -538,47 +679,20 @@ export const api = {
     },
   },
   reports: {
-    dashboard: async (): Promise<any> => ({
-      activePatients: 0,
-      monthlyRevenue: 0,
-      occupancyRate: 0,
-      noShowRate: 0,
-      confirmationRate: 0,
-      appointmentsToday: 0,
-    }),
-    financial: async (): Promise<any> => ({
-      totalRevenue: 0,
-      totalExpenses: 0,
-      netIncome: 0,
-      chartData: [],
-    }),
-    executive: async (period?: string): Promise<any> => ({
-      kpis: {
-        activePatients: 0,
-        monthlyRevenue: 0,
-        appointmentsToday: 0,
-      },
-      financial: {
-        totalRevenue: 0,
-        totalExpenses: 0,
-        netIncome: 0,
-        chartData: [],
-      },
-      clinical: {
-        totalActiveTreatments: 0,
-        dischargesThisMonth: 0,
-        avgPainReduction: 0,
-        treatmentSuccessRate: 0,
-        topDiagnoses: [],
-      },
-      healthScore: {
-        score: 0,
-        dimensions: {},
-      },
-    }),
+    dashboard: async (period = 'month'): Promise<any> => {
+      return fetchAPI(`/reports?type=dashboard&period=${period}`);
+    },
+    financial: async (period = 'month'): Promise<any> => {
+      return fetchAPI(`/reports?type=financial&period=${period}`);
+    },
+    executive: async (period = 'month'): Promise<any> => {
+      return fetchAPI(`/reports?type=executive&period=${period}`);
+    },
   },
   performance: {
-    therapists: async (): Promise<any[]> => [],
+    therapists: async (period = 'month'): Promise<any[]> => {
+      return fetchAPI(`/reports?type=therapists&period=${period}`);
+    },
   },
   annotations: {
     list: async (assetId: string): Promise<any[]> => [],

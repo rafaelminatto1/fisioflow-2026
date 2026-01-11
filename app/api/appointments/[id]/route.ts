@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { appointments } from '@/db/schema';
+import { appointments, patients, staff } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // PUT /api/appointments/[id] - Update an appointment
@@ -15,9 +15,13 @@ export async function PUT(
     const updated = await db.update(appointments)
       .set({
         patientId: body.patientId,
+        therapistId: body.therapistId,
+        type: body.type,
         startTime: body.startTime ? new Date(body.startTime) : undefined,
         endTime: body.endTime ? new Date(body.endTime) : undefined,
         status: body.status,
+        notes: body.notes,
+        reminderSent: body.reminderSent,
       })
       .where(eq(appointments.id, id))
       .returning();
@@ -29,7 +33,25 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(updated[0]);
+    // Fetch with patient and therapist names
+    const result = await db.select({
+      id: appointments.id,
+      patientId: appointments.patientId,
+      therapistId: appointments.therapistId,
+      type: appointments.type,
+      startTime: appointments.startTime,
+      endTime: appointments.endTime,
+      status: appointments.status,
+      notes: appointments.notes,
+      reminderSent: appointments.reminderSent,
+      patientName: patients.fullName,
+      therapistName: staff.name,
+    }).from(appointments)
+      .leftJoin(patients, eq(appointments.patientId, patients.id))
+      .leftJoin(staff, eq(appointments.therapistId, staff.id))
+      .where(eq(appointments.id, id));
+
+    return NextResponse.json(result[0]);
   } catch (error) {
     console.error('Error updating appointment:', error);
     return NextResponse.json(

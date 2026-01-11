@@ -58,11 +58,48 @@ export const patients = pgTable('patients', {
 	fullName: varchar('full_name', { length: 255 }).notNull(),
 	email: varchar('email', { length: 255 }),
 	phone: varchar('phone', { length: 20 }),
+	cpf: varchar('cpf', { length: 14 }),
+	birthDate: timestamp('birth_date'),
+	profession: varchar('profession', { length: 255 }),
+	condition: text('condition'),
+	address: jsonb('address').$type<{
+		zipCode?: string;
+		street?: string;
+		number?: string;
+		neighborhood?: string;
+		city?: string;
+		state?: string;
+	}>(),
+	emergencyContact: jsonb('emergency_contact').$type<{
+		name?: string;
+		phone?: string;
+		relationship?: string;
+	}>(),
 	isActive: boolean('is_active').default(true).notNull(),
 	totalPoints: integer('total_points').default(0).notNull(),
 	level: integer('level').default(1).notNull(),
 	currentStreak: integer('current_streak').default(0).notNull(),
 	lastActiveDate: timestamp('last_active_date'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- PATIENT TAGS ---
+
+export const tags = pgTable('tags', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 50 }).notNull().unique(),
+	color: varchar('color', { length: 7 }).default('#3B82F6').notNull(), // Hex color
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const patientTags = pgTable('patient_tags', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	tagId: uuid('tag_id')
+		.references(() => tags.id, { onDelete: 'cascade' })
+		.notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -118,8 +155,12 @@ export const dailyTasks = pgTable('daily_tasks', {
 export const appointments = pgTable('appointments', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'cascade' }),
+	therapistId: uuid('therapist_id').references(() => staff.id, { onDelete: 'set null' }),
+	type: text('type').default('consultation'), // 'consultation', 'evaluation', 'therapy', 'follow_up'
 	startTime: timestamp('start_time').notNull(),
 	endTime: timestamp('end_time').notNull(),
+	notes: text('notes'),
+	reminderSent: boolean('reminder_sent').default(false).notNull(),
 	status: text('status').default('scheduled').notNull(),
 });
 
@@ -138,6 +179,42 @@ export const patientSessions = pgTable('patient_sessions', {
 
 // --- RELATIONS ---
 
+export const patientsRelations = relations(patients, ({ many }) => ({
+	tags: many(patientTags),
+	sessions: many(patientSessions),
+	painLogs: many(painLogs),
+	prescriptions: many(prescriptions),
+	dailyTasks: many(dailyTasks),
+	appointments: many(appointments),
+	goals: many(goals),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+	patients: many(patientTags),
+}));
+
+export const patientTagsRelations = relations(patientTags, ({ one }) => ({
+	patient: one(patients, {
+		fields: [patientTags.patientId],
+		references: [patients.id],
+	}),
+	tag: one(tags, {
+		fields: [patientTags.tagId],
+		references: [tags.id],
+	}),
+}));
+
+export const appointmentsRelations = relations(appointments, ({ one }) => ({
+	patient: one(patients, {
+		fields: [appointments.patientId],
+		references: [patients.id],
+	}),
+	therapist: one(staff, {
+		fields: [appointments.therapistId],
+		references: [staff.id],
+	}),
+}));
+
 export const prescriptionsRelations = relations(prescriptions, ({ one }) => ({
 	patient: one(patients, {
 		fields: [prescriptions.patientId],
@@ -152,6 +229,13 @@ export const prescriptionsRelations = relations(prescriptions, ({ one }) => ({
 export const dailyTasksRelations = relations(dailyTasks, ({ one }) => ({
 	patient: one(patients, {
 		fields: [dailyTasks.patientId],
+		references: [patients.id],
+	}),
+}));
+
+export const patientSessionsRelations = relations(patientSessions, ({ one }) => ({
+	patient: one(patients, {
+		fields: [patientSessions.patientId],
 		references: [patients.id],
 	}),
 }));
@@ -286,6 +370,13 @@ export const goals = pgTable('goals', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export const goalsRelations = relations(goals, ({ one }) => ({
+	patient: one(patients, {
+		fields: [goals.patientId],
+		references: [patients.id],
+	}),
+}));
 
 // --- EVENTS ---
 
