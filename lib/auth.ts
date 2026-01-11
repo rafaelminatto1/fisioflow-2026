@@ -20,6 +20,10 @@ export const auth = betterAuth({
     },
     // Configurações para produção na Vercel
     baseURL: process.env.BETTER_AUTH_URL,
-    trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
+    trustedOrigins: [
+        process.env.BETTER_AUTH_URL || "http://localhost:3000",
+        ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+        "https://fisioflow-2026.vercel.app"
+    ],
     // databaseHooks removed to fix build type errors
 });
