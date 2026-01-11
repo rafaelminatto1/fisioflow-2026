@@ -4,13 +4,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { KPI } from '../../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
 
 /**
  * Gera texto simples via Gemini (Server Side)
  */
 export async function generateText(prompt: string, model: string = 'gemini-3-flash-preview') {
-  if (!process.env.API_KEY) {
+  if (!process.env.GOOGLE_AI_API_KEY) {
     return { error: 'Chave de API não configurada no servidor.' };
   }
 
@@ -30,7 +30,7 @@ export async function generateText(prompt: string, model: string = 'gemini-3-fla
  * Gera JSON estruturado via Gemini (Server Side)
  */
 export async function generateJSON(prompt: string, model: string = 'gemini-3-flash-preview') {
-  if (!process.env.API_KEY) {
+  if (!process.env.GOOGLE_AI_API_KEY) {
     return { error: 'Chave de API não configurada no servidor.' };
   }
 

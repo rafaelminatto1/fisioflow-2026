@@ -2,20 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { patients } from '@/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
+import { withCache, invalidatePattern, CacheKeys } from '@/lib/vercel-kv';
 
-// GET /api/patients - List all patients
+// GET /api/patients - List all patients (cached)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') === 'true';
 
-    let allPatients;
+    // Cache for 5 minutes (300 seconds)
+    const cacheKey = activeOnly ? 'patients:active' : CacheKeys.PATIENTS;
 
-    if (activeOnly) {
-      allPatients = await db.select().from(patients).where(eq(patients.isActive, true)).orderBy(desc(patients.createdAt));
-    } else {
-      allPatients = await db.select().from(patients).orderBy(desc(patients.createdAt));
-    }
+    const allPatients = await withCache(
+      cacheKey,
+      async () => {
+        if (activeOnly) {
+          return await db.select().from(patients).where(eq(patients.isActive, true)).orderBy(desc(patients.createdAt));
+        } else {
+          return await db.select().from(patients).orderBy(desc(patients.createdAt));
+        }
+      },
+      { ttl: 300 } // 5 minutes cache
+    );
 
     return NextResponse.json(allPatients);
   } catch (error) {
@@ -27,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/patients - Create a new patient
+// POST /api/patients - Create a new patient (invalidates cache)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -50,6 +58,9 @@ export async function POST(request: NextRequest) {
       currentStreak: body.currentStreak || 0,
       lastActiveDate: body.lastActiveDate || null,
     }).returning();
+
+    // Invalidate cache
+    await invalidatePattern('patients:*');
 
     return NextResponse.json(newPatient[0], { status: 201 });
   } catch (error) {

@@ -269,7 +269,7 @@ export default function BiomechanicsPage() {
 
       setIsAnalyzing(true);
       try {
-          const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+          const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
           
           let imageData = '';
           let mimeType = '';

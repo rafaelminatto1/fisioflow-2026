@@ -162,3 +162,179 @@ export const painLogsRelations = relations(painLogs, ({ one }) => ({
 		references: [patients.id],
 	}),
 }));
+
+// --- WAITLIST ---
+
+export const waitlist = pgTable('waitlist', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'cascade' }),
+	patientName: varchar('patient_name', { length: 255 }).notNull(),
+	phone: varchar('phone', { length: 20 }),
+	preferredDate: timestamp('preferred_date'),
+	preferredTime: text('preferred_time'),
+	notes: text('notes'),
+	status: text('status').default('active').notNull(), // 'active', 'scheduled', 'cancelled'
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- PACKAGES ---
+
+export const packages = pgTable('packages', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'cascade' }),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	totalSessions: integer('total_sessions').notNull(),
+	usedSessions: integer('used_sessions').default(0).notNull(),
+	price: integer('price').notNull(), // in cents
+	status: text('status').default('active').notNull(), // 'active', 'completed', 'expired'
+	expiryDate: timestamp('expiry_date'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- CRM LEADS ---
+
+export const leads = pgTable('leads', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	email: varchar('email', { length: 255 }),
+	phone: varchar('phone', { length: 20 }).notNull(),
+	source: text('source'), // 'whatsapp', 'instagram', 'referral', 'website'
+	status: text('status').default('new').notNull(), // 'new', 'contacted', 'qualified', 'converted', 'lost'
+	notes: text('notes'),
+	budget: integer('budget'), // in cents
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- FINANCIAL TRANSACTIONS ---
+
+export const transactions = pgTable('transactions', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'set null' }),
+	type: text('type').notNull(), // 'income', 'expense'
+	category: text('category').notNull(), // 'consultation', 'package', 'salary', 'rent', etc.
+	amount: integer('amount').notNull(), // in cents
+	description: text('description'),
+	paymentMethod: text('payment_method'), // 'credit_card', 'cash', 'pix', 'transfer'
+	date: timestamp('date').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- STAFF ---
+
+export const staff = pgTable('staff', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
+	name: varchar('name', { length: 255 }).notNull(),
+	email: varchar('email', { length: 255 }).notNull().unique(),
+	phone: varchar('phone', { length: 20 }),
+	role: text('role').notNull(), // 'physiotherapist', 'receptionist', 'admin'
+	specialty: text('specialty'),
+	licenseNumber: text('license_number'),
+	hireDate: timestamp('hire_date'),
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- STOCK/INVENTORY ---
+
+export const stock = pgTable('stock', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	category: text('category'),
+	quantity: integer('quantity').default(0).notNull(),
+	minQuantity: integer('min_quantity').default(5).notNull(),
+	unit: text('unit').default('unit').notNull(), // 'unit', 'box', 'package'
+	costPerUnit: integer('cost_per_unit'), // in cents
+	supplier: text('supplier'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- TASKS ---
+
+export const tasks = pgTable('tasks', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	title: varchar('title', { length: 255 }).notNull(),
+	description: text('description'),
+	assignedTo: uuid('assigned_to').references(() => staff.id, { onDelete: 'set null' }),
+	status: text('status').default('pending').notNull(), // 'pending', 'in_progress', 'completed'
+	priority: text('priority').default('medium').notNull(), // 'low', 'medium', 'high'
+	dueDate: timestamp('due_date'),
+	completedAt: timestamp('completed_at'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- PATIENT GOALS ---
+
+export const goals = pgTable('goals', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	title: varchar('title', { length: 255 }).notNull(),
+	description: text('description'),
+	targetDate: timestamp('target_date'),
+	status: text('status').default('active').notNull(), // 'active', 'achieved', 'cancelled'
+	achievedAt: timestamp('achieved_at'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- EVENTS ---
+
+export const events = pgTable('events', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	title: varchar('title', { length: 255 }).notNull(),
+	description: text('description'),
+	startTime: timestamp('start_time').notNull(),
+	endTime: timestamp('end_time').notNull(),
+	type: text('type').notNull(), // 'meeting', 'training', 'holiday', 'maintenance'
+	attendees: jsonb('attendees').$type<string[]>(), // array of staff IDs
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- DOCUMENTS ---
+
+export const documents = pgTable('documents', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'cascade' }),
+	title: varchar('title', { length: 255 }).notNull(),
+	type: text('type').notNull(), // 'exam', 'prescription', 'report', 'image'
+	fileUrl: text('file_url').notNull(),
+	fileSize: integer('file_size'), // in bytes
+	mimeType: text('mime_type'),
+	uploadedBy: uuid('uploaded_by').references(() => staff.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- FORMS/TEMPLATES ---
+
+export const forms = pgTable('forms', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	category: text('category'), // 'initial_evaluation', 'progress_note', 'discharge'
+	fields: jsonb('fields').$type<Array<{name: string, type: string, label: string, required: boolean}>>().notNull(),
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- HOLIDAYS ---
+
+export const holidays = pgTable('holidays', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	date: timestamp('date').notNull(),
+	isRecurring: boolean('is_recurring').default(false).notNull(),
+	notes: text('notes'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});

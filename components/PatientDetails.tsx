@@ -160,7 +160,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ patientId, onBack }) =>
         if (!patient) return;
         setIsGeneratingSummary(true);
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
             const historyText = sessions.map(s =>
                 `Data: ${s.date}, EVA: ${s.evaScore}, Subjetivo: ${s.subjective}, Objetivo: ${s.objective}, Plano: ${s.plan}`
             ).join('\n---\n');

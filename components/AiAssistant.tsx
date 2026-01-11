@@ -37,7 +37,7 @@ const AiAssistant = () => {
 
     try {
       // Initialize Gemini Client
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
       
       // Convert history to Gemini format
       // Note: We intentionally exclude the very last user message we just added locally 

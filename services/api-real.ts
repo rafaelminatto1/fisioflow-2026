@@ -399,48 +399,143 @@ export const api = {
     },
   },
 
-  // Placeholder for other features (TODO: Implement)
+  // Waitlist
   waitlist: {
-    list: async (): Promise<any[]> => [],
-    findMatches: async (date: string, time: string): Promise<any[]> => [],
-    create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
-    update: async (id: string, data: any): Promise<any> => ({ ...data, id }),
-    delete: async (id: string): Promise<void> => {},
+    list: async (status?: string): Promise<any[]> => {
+      const params = status ? `?status=${status}` : '';
+      return fetchAPI(`/waitlist${params}`);
+    },
+    findMatches: async (date: string, time: string): Promise<any[]> => {
+      return fetchAPI(`/waitlist/find-matches?date=${date}&time=${time}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/waitlist', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/waitlist/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/waitlist/${id}`, { method: 'DELETE' });
+    },
   },
+
+  // Packages
   packages: {
-    list: async (): Promise<any[]> => [],
-    create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
-    update: async (id: string, data: any): Promise<any> => ({ ...data, id }),
-    delete: async (id: string): Promise<void> => {},
+    list: async (patientId?: string, status?: string): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (patientId) params.append('patientId', patientId);
+      if (status) params.append('status', status);
+      const queryString = params.toString();
+      return fetchAPI(`/packages${queryString ? `?${queryString}` : ''}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/packages', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/packages/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/packages/${id}`, { method: 'DELETE' });
+    },
   },
+
+  // CRM Leads
   leads: {
-    list: async (): Promise<any[]> => [],
-    create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
-    moveStage: async (id: string, status: string): Promise<void> => {},
+    list: async (status?: string, source?: string): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (status) params.append('status', status);
+      if (source) params.append('source', source);
+      const queryString = params.toString();
+      return fetchAPI(`/leads${queryString ? `?${queryString}` : ''}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/leads', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/leads/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/leads/${id}`, { method: 'DELETE' });
+    },
+    moveStage: async (id: string, status: string): Promise<void> => {
+      await fetchAPI(`/leads/${id}/stage`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+    },
   },
+
+  // User (placeholder - uses Better Auth)
   user: {
     get: async (): Promise<any> => ({ name: 'Admin', email: 'admin@fisio.com' }),
     update: async (data: any): Promise<void> => {},
   },
+
+  // Stock
   stock: {
     list: async (): Promise<any[]> => [],
     create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
     delete: async (id: string): Promise<void> => {},
   },
+
+  // Gamification
   gamification: {
     ranking: async (): Promise<RankingEntry[]> => [],
   },
+
+  // Staff
   staff: {
     list: async (): Promise<any[]> => [],
     create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
     update: async (id: string, data: any): Promise<any> => ({ ...data, id }),
     delete: async (id: string): Promise<void> => {},
   },
+
+  // Transactions
   transactions: {
-    list: async (): Promise<any[]> => [],
-    create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
-    update: async (id: string, data: any): Promise<any> => ({ ...data, id }),
-    delete: async (id: string): Promise<void> => {},
+    list: async (filters?: { patientId?: string; type?: string; category?: string; startDate?: string; endDate?: string }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.patientId) params.append('patientId', filters.patientId);
+      if (filters?.type) params.append('type', filters.type);
+      if (filters?.category) params.append('category', filters.category);
+      if (filters?.startDate) params.append('startDate', filters.startDate);
+      if (filters?.endDate) params.append('endDate', filters.endDate);
+      const queryString = params.toString();
+      return fetchAPI(`/transactions${queryString ? `?${queryString}` : ''}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/transactions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/transactions/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/transactions/${id}`, { method: 'DELETE' });
+    },
   },
   reports: {
     dashboard: async (): Promise<any> => ({
