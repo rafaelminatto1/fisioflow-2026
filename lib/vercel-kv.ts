@@ -114,4 +114,10 @@ export const CacheKeys = {
   EXERCISES: 'exercises:all',
   SESSIONS_PATIENT: (patientId: string) => `sessions:patient:${patientId}`,
   DASHBOARD_KPI: 'dashboard:kpi',
+  TAGS: 'tags:all',
+  STAFF: 'staff:all',
+  STOCK: 'stock:all',
+  TASKS: 'tasks:all',
+  TRANSACTIONS: 'transactions:all',
+  LEADS: 'leads:all',
 } as const;
