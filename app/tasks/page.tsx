@@ -1,13 +1,12 @@
-
 'use client';
 
 import React from 'react';
-import TasksManager from '../../components/TasksManager';
+import TasksManagerPro from '../../components/TasksManagerPro';
 
 export default function TasksPage() {
   return (
     <div className="h-full">
-      <TasksManager />
+      <TasksManagerPro />
     </div>
   );
 }

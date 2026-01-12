@@ -79,6 +79,7 @@ const MENU_STRUCTURE: MenuSection[] = [
           { id: '/financial/accounts', label: 'Contas Bancárias' },
           { id: '/financial/billing', label: 'Faturamento TISS' },
           { id: '/financial/simulator', label: 'Simulador Preços' },
+          { id: '/financial/reports', label: 'Relatórios (DRE/BP)' },
         ]
       },
       {
@@ -98,7 +99,15 @@ const MENU_STRUCTURE: MenuSection[] = [
     title: 'ENGAJAMENTO',
     items: [
       { id: '/communications', label: 'Marketing', icon: MessageCircleIcon },
-      { id: '/gamification', label: 'Gamification', icon: TrophyIcon },
+      {
+        id: 'gamification-group',
+        label: 'Gamification',
+        icon: TrophyIcon,
+        subItems: [
+          { id: '/gamification', label: 'Ranking' },
+          { id: '/gamification/manage', label: 'Gerenciar Conquistas' },
+        ]
+      },
       { id: '/events', label: 'Eventos & Aulas', icon: CalendarIcon },
     ]
   },
@@ -127,6 +136,22 @@ const MENU_STRUCTURE: MenuSection[] = [
     ]
   },
   {
+    title: 'ADMINISTRAÇÃO',
+    items: [
+      {
+        id: 'admin-group',
+        label: 'Configurações',
+        icon: SettingsIcon,
+        subItems: [
+          { id: '/settings', label: 'Clínica' },
+          { id: '/settings/users', label: 'Usuários e Permissões' },
+          { id: '/settings/notifications', label: 'Notificações' },
+        ]
+      },
+      { id: '/tasks', label: 'Tarefas Internas', icon: ClipboardListIcon },
+    ]
+  },
+  {
     title: 'INTELIGÊNCIA',
     items: [
       {
@@ -151,7 +176,7 @@ import { signOut } from '../lib/auth-client';
 import { useRouter } from 'next/navigation';
 
 const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
-  const [expandedItems, setExpandedItems] = useState<string[]>(['financial-group', 'reports-group', 'registers-group']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['financial-group', 'reports-group', 'registers-group', 'gamification-group', 'admin-group']);
   const pathname = usePathname();
   const router = useRouter();
 

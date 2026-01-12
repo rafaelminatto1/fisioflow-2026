@@ -2,12 +2,12 @@
 'use client';
 
 import React from 'react';
-import CRMDashboard from '../../../components/CRMDashboard';
+import CRMDashboardPro from '../../../components/CRMDashboardPro';
 
 export default function CRMDashboardPage() {
   return (
     <div className="h-full">
-      <CRMDashboard />
+      <CRMDashboardPro />
     </div>
   );
 }

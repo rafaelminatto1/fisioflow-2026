@@ -153,19 +153,25 @@ export const api = {
       if (end) params.append('end', end);
       const queryString = params.toString();
       const data = await fetchAPI(`/appointments${queryString ? `?${queryString}` : ''}`);
+      if (!Array.isArray(data)) {
+        console.error('API returned non-array for appointments:', data);
+        return [];
+      }
       return data.map((a: any) => ({
         id: a.id,
         patientId: a.patientId,
-        patientName: a.patientName || 'Unknown',
+        patientName: a.patientName || 'Paciente sem nome',
         therapistId: a.therapistId || '',
-        therapistName: a.therapistName || '',
-        startTime: a.startTime,
-        endTime: a.endTime,
-        duration: Math.round((new Date(a.endTime).getTime() - new Date(a.startTime).getTime()) / 60000),
-        status: a.status,
+        therapistName: a.therapistName || 'Profissional',
+        startTime: a.startTime ? new Date(a.startTime).toISOString() : new Date().toISOString(),
+        endTime: a.endTime ? new Date(a.endTime).toISOString() : new Date().toISOString(),
+        duration: (a.startTime && a.endTime)
+          ? Math.round((new Date(a.endTime).getTime() - new Date(a.startTime).getTime()) / 60000)
+          : 60,
+        status: a.status || 'scheduled',
         type: a.type || 'consultation',
-        notes: a.notes,
-        reminderSent: a.reminderSent,
+        notes: a.notes || '',
+        reminderSent: a.reminderSent || false,
       }));
     },
     create: async (data: any): Promise<Appointment> => {
@@ -533,12 +539,30 @@ export const api = {
         body: JSON.stringify({ status }),
       });
     },
+    leadScores: async (): Promise<any[]> => {
+      return fetchAPI('/crm/lead-scores');
+    },
+    funnel: async (period: string): Promise<any[]> => {
+      return fetchAPI(`/crm/funnel?period=${period}`);
+    },
+    campaigns: async (period: string): Promise<any[]> => {
+      return fetchAPI(`/crm/campaigns?period=${period}`);
+    },
+    nurturing: async (): Promise<any[]> => {
+      return fetchAPI('/crm/nurturing-sequences');
+    },
+    createNurturing: async (data: any): Promise<any> => {
+      return fetchAPI('/crm/nurturing-sequences', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
   },
 
-  // User (placeholder - uses Better Auth)
+  // CRM Analytics
   user: {
     get: async (): Promise<any> => ({ name: 'Admin', email: 'admin@fisio.com' }),
-    update: async (data: any): Promise<void> => {},
+    update: async (data: any): Promise<void> => { },
   },
 
   // Stock
@@ -589,6 +613,54 @@ export const api = {
           streak: p.currentStreak || 0,
           badges: [],
         }));
+    },
+    badges: async (): Promise<any[]> => {
+      return fetchAPI('/gamification/badges');
+    },
+    createBadge: async (data: any): Promise<any> => {
+      return fetchAPI('/gamification/badges', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateBadge: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/gamification/badges/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteBadge: async (id: string): Promise<void> => {
+      await fetchAPI(`/gamification/badges/${id}`, { method: 'DELETE' });
+    },
+    achievements: async (): Promise<any[]> => {
+      return fetchAPI('/gamification/achievements');
+    },
+    awardPoints: async (patientId: string, points: number, reason: string): Promise<any> => {
+      return fetchAPI('/gamification/award-points', {
+        method: 'POST',
+        body: JSON.stringify({ patientId, points, reason }),
+      });
+    },
+    pointsRules: async (): Promise<any[]> => {
+      return fetchAPI('/gamification/points-rules');
+    },
+    createPointsRule: async (data: any): Promise<any> => {
+      return fetchAPI('/gamification/points-rules', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updatePointsRule: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/gamification/points-rules/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    deletePointsRule: async (id: string): Promise<void> => {
+      await fetchAPI(`/gamification/points-rules/${id}`, { method: 'DELETE' });
+    },
+    patientProfile: async (patientId: string): Promise<any> => {
+      return fetchAPI(`/gamification/patient/${patientId}`);
     },
   },
 
@@ -648,6 +720,15 @@ export const api = {
         method: 'PATCH',
       });
     },
+    templates: async (): Promise<any[]> => {
+      return fetchAPI('/tasks/templates');
+    },
+    createTemplate: async (data: any): Promise<any> => {
+      return fetchAPI('/tasks/templates', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
   },
 
   // Transactions
@@ -688,6 +769,15 @@ export const api = {
     executive: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports?type=executive&period=${period}`);
     },
+    dre: async (period = 'month'): Promise<any[]> => {
+      return fetchAPI(`/reports/dre?period=${period}`);
+    },
+    balanceSheet: async (period = 'month'): Promise<any[]> => {
+      return fetchAPI(`/reports/balance-sheet?period=${period}`);
+    },
+    cashFlow: async (period = 'month'): Promise<any[]> => {
+      return fetchAPI(`/reports/cash-flow?period=${period}`);
+    },
   },
   performance: {
     therapists: async (period = 'month'): Promise<any[]> => {
@@ -701,5 +791,260 @@ export const api = {
   postural: {
     list: async (patientId: string): Promise<any[]> => [],
     create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString() }),
+  },
+
+  // Assessments
+  assessments: {
+    listTemplates: async (): Promise<any[]> => {
+      return fetchAPI('/assessments/templates');
+    },
+    getTemplate: async (id: string): Promise<any> => {
+      return fetchAPI(`/assessments/templates/${id}`);
+    },
+    createTemplate: async (data: any): Promise<any> => {
+      return fetchAPI('/assessments/templates', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateTemplate: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/assessments/templates/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteTemplate: async (id: string): Promise<void> => {
+      await fetchAPI(`/assessments/templates/${id}`, { method: 'DELETE' });
+    },
+    createAssessment: async (data: any): Promise<any> => {
+      return fetchAPI('/assessments', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    list: async (patientId?: string): Promise<any[]> => {
+      const params = patientId ? `?patientId=${patientId}` : '';
+      return fetchAPI(`/assessments${params}`);
+    },
+    compare: async (assessmentIds: string[]): Promise<any> => {
+      return fetchAPI('/assessments/compare', {
+        method: 'POST',
+        body: JSON.stringify({ assessmentIds }),
+      });
+    },
+  },
+
+  // Telemedicine
+  telemedicine: {
+    list: async (date?: string): Promise<any[]> => {
+      const params = date ? `?date=${date}` : '';
+      return fetchAPI(`/telemedicine${params}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/telemedicine', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/telemedicine/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/telemedicine/${id}`, { method: 'DELETE' });
+    },
+    startCall: async (id: string): Promise<any> => {
+      return fetchAPI(`/telemedicine/${id}/start`, { method: 'POST' });
+    },
+    endCall: async (id: string, data: { duration: number; recording?: string }): Promise<any> => {
+      return fetchAPI(`/telemedicine/${id}/end`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+  },
+
+  // Users (RBAC)
+  users: {
+    list: async (): Promise<any[]> => {
+      return fetchAPI('/users');
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/users/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/users/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/users/${id}`, { method: 'DELETE' });
+    },
+    listRoles: async (): Promise<any[]> => {
+      return fetchAPI('/users/roles');
+    },
+    createRole: async (data: any): Promise<any> => {
+      return fetchAPI('/users/roles', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateRole: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/users/roles/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteRole: async (id: string): Promise<void> => {
+      await fetchAPI(`/users/roles/${id}`, { method: 'DELETE' });
+    },
+    getPermissions: async (): Promise<any[]> => {
+      return fetchAPI('/users/permissions');
+    },
+  },
+
+  // Notifications
+  notifications: {
+    list: async (): Promise<any[]> => {
+      return fetchAPI('/notifications');
+    },
+    getUnreadCount: async (): Promise<number> => {
+      const data = await fetchAPI('/notifications/unread/count');
+      return data.count || 0;
+    },
+    markAsRead: async (id: string): Promise<void> => {
+      await fetchAPI(`/notifications/${id}/read`, { method: 'PUT' });
+    },
+    markAllAsRead: async (): Promise<void> => {
+      await fetchAPI('/notifications/read-all', { method: 'PUT' });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/notifications/${id}`, { method: 'DELETE' });
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/notifications', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    getRules: async (): Promise<any[]> => {
+      return fetchAPI('/notifications/rules');
+    },
+    updateRule: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/notifications/rules/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    getPreferences: async (): Promise<any> => {
+      return fetchAPI('/notifications/preferences');
+    },
+    updatePreferences: async (data: any): Promise<any> => {
+      return fetchAPI('/notifications/preferences', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+  },
+
+  // Search
+  search: {
+    global: async (query: string, filters?: { types?: string[]; dateFrom?: string; dateTo?: string; }): Promise<any> => {
+      const params = new URLSearchParams({ query });
+      if (filters?.types) params.append('types', filters.types.join(','));
+      if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
+      if (filters?.dateTo) params.append('dateTo', filters.dateTo);
+      return fetchAPI(`/search?${params.toString()}`);
+    },
+    suggestions: async (query: string): Promise<string[]> => {
+      return fetchAPI(`/search/suggestions?q=${encodeURIComponent(query)}`);
+    },
+    recent: async (): Promise<any[]> => {
+      return fetchAPI('/search/recent');
+    },
+  },
+
+  // Reports
+  reports: {
+    financial: async (period: string): Promise<any> => {
+      return fetchAPI(`/reports/financial?period=${period}`);
+    },
+    dre: async (period: string): Promise<any[]> => {
+      return fetchAPI(`/reports/dre?period=${period}`);
+    },
+    balanceSheet: async (period: string): Promise<any[]> => {
+      return fetchAPI(`/reports/balance-sheet?period=${period}`);
+    },
+    cashFlow: async (period: string): Promise<any> => {
+      return fetchAPI(`/reports/cash-flow?period=${period}`);
+    },
+    executive: async (period: string): Promise<any> => {
+      return fetchAPI(`/reports/executive?period=${period}`);
+    },
+    managerial: async (period: string): Promise<any> => {
+      return fetchAPI(`/reports/managerial?period=${period}`);
+    },
+    clinical: async (period: string): Promise<any> => {
+      return fetchAPI(`/reports/clinical?period=${period}`);
+    },
+    performance: async (period: string): Promise<any> => {
+      return fetchAPI(`/reports/performance?period=${period}`);
+    },
+    export: async (reportType: string, format: 'pdf' | 'excel' | 'csv', params?: any): Promise<Blob> => {
+      const queryString = new URLSearchParams({ format, ...params }).toString();
+      const response = await fetch(`${API_BASE}/api/reports/${reportType}/export?${queryString}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return response.blob();
+    },
+  },
+
+  // Clinic Settings
+  settings: {
+    getClinic: async (): Promise<any> => {
+      return fetchAPI('/settings/clinic');
+    },
+    updateClinic: async (data: any): Promise<any> => {
+      return fetchAPI('/settings/clinic', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    getSchedule: async (): Promise<any> => {
+      return fetchAPI('/settings/schedule');
+    },
+    updateSchedule: async (data: any): Promise<any> => {
+      return fetchAPI('/settings/schedule', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    getPaymentMethods: async (): Promise<any[]> => {
+      return fetchAPI('/settings/payment-methods');
+    },
+    updatePaymentMethods: async (methods: any[]): Promise<void> => {
+      await fetchAPI('/settings/payment-methods', {
+        method: 'PUT',
+        body: JSON.stringify({ methods }),
+      });
+    },
+    getIntegrations: async (): Promise<any> => {
+      return fetchAPI('/settings/integrations');
+    },
+    updateIntegration: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/settings/integrations/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
   },
 };
