@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { signIn, signUp } from '../lib/auth-client';
 import { BrainCircuitIcon, LockIcon, MailIcon, ChevronRightIcon, UsersIcon, CheckCircleIcon, AlertCircleIcon } from './Icons';
 
@@ -13,6 +14,8 @@ const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    const router = useRouter();
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,7 +30,7 @@ const LoginPage: React.FC = () => {
                     password
                 });
                 if (signInError) throw signInError;
-                // O redirecionamento é automático pelo useSession no App.tsx
+                router.push('/');
             } else {
                 const { error: signUpError } = await signUp.email({
                     email,
@@ -35,7 +38,22 @@ const LoginPage: React.FC = () => {
                     name
                 });
                 if (signUpError) throw signUpError;
+
+                // Auto login após cadastro
+                const { error: signInError } = await signIn.email({
+                    email,
+                    password
+                });
+
+                if (signInError) {
+                    setSuccess('Conta criada! Faça login para continuar.');
+                    setIsLogin(true);
+                    setLoading(false);
+                    return;
+                }
+
                 setSuccess('Conta criada com sucesso! Realizando login...');
+                router.push('/');
             }
         } catch (err: unknown) {
             console.error("Auth error:", err);
