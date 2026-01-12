@@ -759,31 +759,15 @@ export const api = {
       await fetchAPI(`/transactions/${id}`, { method: 'DELETE' });
     },
   },
-  reports: {
-    dashboard: async (period = 'month'): Promise<any> => {
-      return fetchAPI(`/reports?type=dashboard&period=${period}`);
-    },
-    financial: async (period = 'month'): Promise<any> => {
-      return fetchAPI(`/reports?type=financial&period=${period}`);
-    },
-    executive: async (period = 'month'): Promise<any> => {
-      return fetchAPI(`/reports?type=executive&period=${period}`);
-    },
-    dre: async (period = 'month'): Promise<any[]> => {
-      return fetchAPI(`/reports/dre?period=${period}`);
-    },
-    balanceSheet: async (period = 'month'): Promise<any[]> => {
-      return fetchAPI(`/reports/balance-sheet?period=${period}`);
-    },
-    cashFlow: async (period = 'month'): Promise<any[]> => {
-      return fetchAPI(`/reports/cash-flow?period=${period}`);
-    },
-  },
+
+  // Performance (Therapists)
   performance: {
     therapists: async (period = 'month'): Promise<any[]> => {
       return fetchAPI(`/reports?type=therapists&period=${period}`);
     },
   },
+
+  // Annotations
   annotations: {
     list: async (assetId: string): Promise<any[]> => [],
     create: async (data: any): Promise<any> => ({ ...data, id: Date.now().toString(), createdAt: new Date().toISOString() }),
@@ -975,28 +959,31 @@ export const api = {
 
   // Reports
   reports: {
-    financial: async (period: string): Promise<any> => {
+    dashboard: async (period = 'month'): Promise<any> => {
+      return fetchAPI(`/reports?type=dashboard&period=${period}`);
+    },
+    financial: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports/financial?period=${period}`);
     },
-    dre: async (period: string): Promise<any[]> => {
+    dre: async (period = 'month'): Promise<any[]> => {
       return fetchAPI(`/reports/dre?period=${period}`);
     },
-    balanceSheet: async (period: string): Promise<any[]> => {
+    balanceSheet: async (period = 'month'): Promise<any[]> => {
       return fetchAPI(`/reports/balance-sheet?period=${period}`);
     },
-    cashFlow: async (period: string): Promise<any> => {
+    cashFlow: async (period = 'month'): Promise<any[]> => {
       return fetchAPI(`/reports/cash-flow?period=${period}`);
     },
-    executive: async (period: string): Promise<any> => {
+    executive: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports/executive?period=${period}`);
     },
-    managerial: async (period: string): Promise<any> => {
+    managerial: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports/managerial?period=${period}`);
     },
-    clinical: async (period: string): Promise<any> => {
+    clinical: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports/clinical?period=${period}`);
     },
-    performance: async (period: string): Promise<any> => {
+    performance: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports/performance?period=${period}`);
     },
     export: async (reportType: string, format: 'pdf' | 'excel' | 'csv', params?: any): Promise<Blob> => {

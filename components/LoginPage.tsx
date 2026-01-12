@@ -55,9 +55,16 @@ const LoginPage: React.FC = () => {
                 setSuccess('Conta criada com sucesso! Realizando login...');
                 router.push('/');
             }
-        } catch (err: unknown) {
+        } catch (err: any) {
             console.error("Auth error:", err);
-            const errorMessage = err instanceof Error ? err.message : 'Falha na autenticação. Verifique suas credenciais.';
+            let errorMessage = 'Falha na autenticação. Verifique suas credenciais.';
+
+            if (err?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' || err?.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
+                errorMessage = 'Este e-mail já está cadastrado. Tente fazer login.';
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
+
             setError(errorMessage);
             setLoading(false);
         }

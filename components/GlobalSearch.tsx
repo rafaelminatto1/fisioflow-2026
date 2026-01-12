@@ -122,7 +122,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
         try {
           // Get suggestions
           const suggestionsData = await api.search.suggestions(query);
-          setSuggestions(suggestionsData);
+          setSuggestions(suggestionsData.map((text: string) => ({ text, type: 'suggestion' })));
 
           // Get search results
           const filters = selectedCategory !== 'all' ? { types: [selectedCategory] } : undefined;

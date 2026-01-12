@@ -20,7 +20,7 @@ export default function FinancialPage() {
         setLoading(true);
         try {
             const [reportData, txData] = await Promise.all([
-                api.reports.financial(),
+                api.reports.financial('month'),
                 api.transactions.list()
             ]);
             setChartData(reportData.chartData);

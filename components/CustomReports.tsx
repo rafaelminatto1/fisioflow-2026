@@ -187,7 +187,8 @@ const CustomReports: React.FC = () => {
   const loadReports = async () => {
     setLoading(true);
     try {
-      const data = await api.reports?.custom?.list() || DEFAULT_REPORTS;
+      // Use mock data for now since custom reports API doesn't exist yet
+      const data = DEFAULT_REPORTS;
       setSavedReports(data);
     } catch (error) {
       console.error('Error loading reports:', error);
@@ -204,7 +205,8 @@ const CustomReports: React.FC = () => {
     setSelectedReport(report);
     setLoading(true);
     try {
-      const data = await api.reports?.custom?.run(report) || [];
+      // Mock data for now
+      const data = [];
       setReportData(data);
     } catch (error) {
       console.error('Error running report:', error);

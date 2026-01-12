@@ -8,5 +8,9 @@ if (!process.env.DATABASE_URL) {
 }
 
 // prepare: false is required for transaction pooling (port 6543) compatibility
-const client = postgres(process.env.DATABASE_URL, { prepare: false });
+// We also force search_path=public to avoid confusion with neon_auth schema
+const connectionString = new URL(process.env.DATABASE_URL);
+connectionString.searchParams.set('search_path', 'public');
+
+const client = postgres(connectionString.toString(), { prepare: false });
 export const db = drizzle(client, { schema });

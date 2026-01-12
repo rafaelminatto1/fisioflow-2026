@@ -57,9 +57,9 @@ const CRMDashboardPro: React.FC = () => {
     setLoading(true);
     try {
       const [scoresData, funnelData, campaignsData] = await Promise.all([
-        api.crm.leadScores(),
-        api.crm.funnel(period),
-        api.crm.campaigns(period)
+        api.leads.leadScores(),
+        api.leads.funnel(period),
+        api.leads.campaigns(period)
       ]);
       setLeadScores(scoresData);
       setFunnelData(funnelData);

@@ -22,7 +22,7 @@ interface Task {
   assignee: string;
   dueDate: string;
   priority: 'low' | 'medium' | 'high';
-  status: 'todo' | 'in_progress' | 'done';
+  status: 'todo' | 'in_progress' | 'review' | 'done';
   category: string;
   recurring?: {
     frequency: 'daily' | 'weekly' | 'monthly';
