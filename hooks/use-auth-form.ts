@@ -69,19 +69,9 @@ export const useAuthForm = () => {
 
             // We can also try explicit sign in if needed, but let's trust autoSignIn first 
             // or duplicate the logic from the original file to be safe.
-            const { error: signInError } = await signIn.email({
-                email: data.email,
-                password: data.password
-            });
-
-            if (signInError) {
-                setGlobalSuccess('Conta criada! Faça login para continuar.');
-                setIsLogin(true);
-                return;
-            }
-
-            setGlobalSuccess('Conta criada com sucesso! Entrando...');
-            router.push('/');
+            setGlobalSuccess('Conta criada com sucesso! Faça login para continuar.');
+            setIsLogin(true);
+            registerForm.reset();
         } catch (err: any) {
             console.error("Register error:", err);
             if (err?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' || err?.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
