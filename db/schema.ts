@@ -418,7 +418,7 @@ export const forms = pgTable('forms', {
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 	category: text('category'), // 'initial_evaluation', 'progress_note', 'discharge'
-	fields: jsonb('fields').$type<Array<{name: string, type: string, label: string, required: boolean}>>().notNull(),
+	fields: jsonb('fields').$type<Array<{ name: string, type: string, label: string, required: boolean }>>().notNull(),
 	isActive: boolean('is_active').default(true).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -572,7 +572,7 @@ export const telemedicineSettings = pgTable('telemedicine_settings', {
 
 export const clinicSettings = pgTable('clinic_settings', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	key: varchar('key', { length: 100 }).primaryKey(),
+	key: varchar('key', { length: 100 }).unique().notNull(),
 	value: jsonb('value').notNull(),
 	description: text('description'),
 	category: text('category'), // 'general', 'notification', 'integrations', 'telemedicine'
