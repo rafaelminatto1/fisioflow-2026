@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { achievements, badges, patients } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { withCache, invalidatePattern } from '@/lib/vercel-kv';
 
 // GET /api/gamification/achievements - List achievements
@@ -88,11 +88,11 @@ export async function POST(request: NextRequest) {
 
     // Update patient points if badge has points
     if (badge && badge.points > 0) {
-      await db.update(patients)
-        .set({
-          totalPoints: db.raw(`total_points + ${badge.points}`),
-        })
-        .where(eq(patients.id, body.patientId));
+      await db.execute(sql`
+        UPDATE patients
+        SET total_points = total_points + ${badge.points}
+        WHERE id = ${body.patientId}
+      `);
     }
 
     // Invalidate cache

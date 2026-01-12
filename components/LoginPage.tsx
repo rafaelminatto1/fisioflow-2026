@@ -1,74 +1,26 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn, signUp } from '../lib/auth-client';
+import React from 'react';
 import { BrainCircuitIcon, LockIcon, MailIcon, ChevronRightIcon, UsersIcon, CheckCircleIcon, AlertCircleIcon } from './Icons';
+import { useAuthForm } from '@/hooks/use-auth-form';
 
 const LoginPage: React.FC = () => {
-    const [isLogin, setIsLogin] = useState(true);
-    const [email, setInputEmail] = useState('');
-    const [password, setInputPassword] = useState('');
-    const [name, setInputName] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const {
+        isLogin,
+        toggleMode,
+        globalError,
+        globalSuccess,
+        loginForm,
+        registerForm,
+        handleLogin,
+        handleRegister,
+        isSubmitting
+    } = useAuthForm();
 
-    const router = useRouter();
-
-    const handleAuth = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess('');
-
-        try {
-            if (isLogin) {
-                const { error: signInError } = await signIn.email({
-                    email,
-                    password
-                });
-                if (signInError) throw signInError;
-                router.push('/');
-            } else {
-                const { error: signUpError } = await signUp.email({
-                    email,
-                    password,
-                    name
-                });
-                if (signUpError) throw signUpError;
-
-                // Auto login após cadastro
-                const { error: signInError } = await signIn.email({
-                    email,
-                    password
-                });
-
-                if (signInError) {
-                    setSuccess('Conta criada! Faça login para continuar.');
-                    setIsLogin(true);
-                    setLoading(false);
-                    return;
-                }
-
-                setSuccess('Conta criada com sucesso! Realizando login...');
-                router.push('/');
-            }
-        } catch (err: any) {
-            console.error("Auth error:", err);
-            let errorMessage = 'Falha na autenticação. Verifique suas credenciais.';
-
-            if (err?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL' || err?.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') {
-                errorMessage = 'Este e-mail já está cadastrado. Tente fazer login.';
-            } else if (err instanceof Error) {
-                errorMessage = err.message;
-            }
-
-            setError(errorMessage);
-            setLoading(false);
-        }
-    };
+    const onSubmit = isLogin ? handleLogin : handleRegister;
+    const currentForm = isLogin ? loginForm : registerForm;
+    const errors = currentForm.formState.errors;
 
     return (
         <div className="min-h-screen w-full flex bg-slate-50 relative overflow-hidden font-sans selection:bg-primary/30">
@@ -132,7 +84,7 @@ const LoginPage: React.FC = () => {
                         </p>
                     </div>
 
-                    <form onSubmit={handleAuth} className="space-y-6">
+                    <form onSubmit={onSubmit} className="space-y-6">
                         {!isLogin && (
                             <div className="space-y-2 group">
                                 <label className="text-xs font-bold uppercase text-slate-400 tracking-widest ml-1 group-focus-within:text-primary transition-colors">Nome Completo</label>
@@ -141,14 +93,15 @@ const LoginPage: React.FC = () => {
                                         <UsersIcon className="w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                                     </div>
                                     <input
-                                        type="text" required value={name}
-                                        onChange={(e) => setInputName(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300"
+                                        type="text"
+                                        {...registerForm.register('name')}
+                                        className={`w-full pl-12 pr-4 py-4 bg-slate-50/50 border ${('name' in errors) && errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-xl focus:ring-4 outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300`}
                                         placeholder="Dr. Ricardo Marques"
-                                        disabled={loading}
+                                        disabled={isSubmitting}
                                         aria-label="Nome Completo"
                                     />
                                 </div>
+                                {'name' in errors && errors.name && <p className="text-xs text-red-500 font-medium ml-1">{errors.name.message as string}</p>}
                             </div>
                         )}
                         <div className="space-y-2 group">
@@ -158,14 +111,15 @@ const LoginPage: React.FC = () => {
                                     <MailIcon className="w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                                 </div>
                                 <input
-                                    type="email" required value={email}
-                                    onChange={(e) => setInputEmail(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300"
+                                    type="email"
+                                    {...((isLogin ? loginForm : registerForm) as any).register('email')}
+                                    className={`w-full pl-12 pr-4 py-4 bg-slate-50/50 border ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-xl focus:ring-4 outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300`}
                                     placeholder="exemplo@fisioflow.com"
-                                    disabled={loading}
+                                    disabled={isSubmitting}
                                     aria-label="Email Profissional"
                                 />
                             </div>
+                            {errors.email && <p className="text-xs text-red-500 font-medium ml-1">{errors.email.message as string}</p>}
                         </div>
                         <div className="space-y-2 group">
                             <label className="text-xs font-bold uppercase text-slate-400 tracking-widest ml-1 group-focus-within:text-primary transition-colors">Senha</label>
@@ -174,35 +128,36 @@ const LoginPage: React.FC = () => {
                                     <LockIcon className="w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                                 </div>
                                 <input
-                                    type="password" required value={password}
-                                    onChange={(e) => setInputPassword(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300"
+                                    type="password"
+                                    {...((isLogin ? loginForm : registerForm) as any).register('password')}
+                                    className={`w-full pl-12 pr-4 py-4 bg-slate-50/50 border ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-xl focus:ring-4 outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300`}
                                     placeholder="••••••••"
-                                    disabled={loading}
+                                    disabled={isSubmitting}
                                     aria-label="Senha"
                                 />
                             </div>
+                            {errors.password && <p className="text-xs text-red-500 font-medium ml-1">{errors.password.message as string}</p>}
                         </div>
 
-                        {error && (
+                        {globalError && (
                             <div className="p-4 bg-red-50/50 border border-red-100 text-red-600 text-sm font-medium rounded-xl animate-shake flex items-center gap-3">
                                 <AlertCircleIcon className="w-5 h-5 flex-shrink-0" />
-                                <span>{error}</span>
+                                <span>{globalError}</span>
                             </div>
                         )}
 
-                        {success && (
+                        {globalSuccess && (
                             <div className="p-4 bg-emerald-50/50 border border-emerald-100 text-emerald-600 text-sm font-medium rounded-xl animate-pulse flex items-center gap-3">
                                 <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />
-                                <span>{success}</span>
+                                <span>{globalSuccess}</span>
                             </div>
                         )}
 
                         <button
-                            disabled={loading}
+                            disabled={isSubmitting}
                             className="w-full py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl font-bold text-lg tracking-wide hover:from-primary hover:to-blue-600 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl shadow-slate-900/10 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-2"
                         >
-                            {loading ? (
+                            {isSubmitting ? (
                                 <>
                                     <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
                                     <span>Processando...</span>
@@ -218,9 +173,9 @@ const LoginPage: React.FC = () => {
 
                     <div className="text-center mt-8">
                         <button
-                            onClick={() => { setError(''); setSuccess(''); setIsLogin(!isLogin); }}
+                            onClick={toggleMode}
                             className="group relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 disabled:opacity-50 transition-all duration-300"
-                            disabled={loading}
+                            disabled={isSubmitting}
                         >
                             <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 font-bold">
                                 {isLogin ? 'Novo por aqui? Crie sua conta' : 'Já possui conta? Faça o login'}
