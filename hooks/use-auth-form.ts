@@ -70,6 +70,7 @@ export const useAuthForm = () => {
             // We can also try explicit sign in if needed, but let's trust autoSignIn first 
             // or duplicate the logic from the original file to be safe.
             setGlobalSuccess('Conta criada com sucesso! Faça login para continuar.');
+            loginForm.setValue('email', data.email);
             setIsLogin(true);
             registerForm.reset();
         } catch (err: any) {
