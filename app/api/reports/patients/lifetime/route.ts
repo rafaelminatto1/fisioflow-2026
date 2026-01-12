@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
         `);
 
         // Calculate LTV metrics
-        const totalRevenue = patientLTV.reduce((sum: number, p: any) => sum + Number(p.totalRevenue), 0);
-        const avgRevenue = totalRevenue / patientLTV.length;
+        const totalRevenue = patientLTV.rows.reduce((sum: number, p: any) => sum + Number(p.totalRevenue), 0);
+        const avgRevenue = totalRevenue / patientLTV.rows.length;
 
         return {
-          topPatients: patientLTV.map((p: any) => ({
+          topPatients: patientLTV.rows.map((p: any) => ({
             ...p,
             totalRevenueFormatted: (Number(p.totalRevenue) / 100).toLocaleString('pt-BR', {
               style: 'currency',
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
               : 0,
           })),
           summary: {
-            totalPatients: patientLTV.length,
+            totalPatients: patientLTV.rows.length,
             totalRevenue: totalRevenue / 100,
             avgRevenuePerPatient: avgRevenue / 100,
           },

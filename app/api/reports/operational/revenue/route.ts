@@ -59,21 +59,21 @@ export async function GET(request: NextRequest) {
 
         return {
           period: { days: parseInt(period), startDate, endDate: now },
-          byCategory: byCategory.map((r: any) => ({
+          byCategory: byCategory.rows.map((r: any) => ({
             ...r,
             totalFormatted: (Number(r.total) / 100).toLocaleString('pt-BR', {
               style: 'currency',
               currency: 'BRL',
             }),
           })),
-          byPaymentMethod: byPaymentMethod.map((r: any) => ({
+          byPaymentMethod: byPaymentMethod.rows.map((r: any) => ({
             ...r,
             totalFormatted: (Number(r.total) / 100).toLocaleString('pt-BR', {
               style: 'currency',
               currency: 'BRL',
             }),
           })),
-          dailyRevenue: dailyRevenue.map((r: any) => ({
+          dailyRevenue: dailyRevenue.rows.map((r: any) => ({
             ...r,
             incomeFormatted: (Number(r.income) / 100).toLocaleString('pt-BR', {
               style: 'currency',

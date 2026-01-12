@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
           ORDER BY month DESC
         `);
 
-        const kpi = kpis[0] || {};
+        const kpi = kpis.rows[0] || {};
 
         return {
           kpis: {
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
           recent: {
             patients: recentPatients,
             leads: recentLeads,
-            transactions: recentTransactions.map((t: any) => ({
+            transactions: recentTransactions.rows.map((t: any) => ({
               ...t,
               amountFormatted: (Number(t.amount) / 100).toLocaleString('pt-BR', {
                 style: 'currency',
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
               }),
             })),
           },
-          revenueTrend: revenueTrend.map((r: any) => ({
+          revenueTrend: revenueTrend.rows.map((r: any) => ({
             ...r,
             incomeFormatted: (Number(r.income) / 100).toLocaleString('pt-BR', {
               style: 'currency',

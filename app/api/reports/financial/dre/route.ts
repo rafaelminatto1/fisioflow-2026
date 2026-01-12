@@ -54,15 +54,15 @@ export async function GET(request: NextRequest) {
         `);
 
         // Calculate totals
-        const totalRevenue = revenue.reduce((sum: number, r: any) => sum + Number(r.total), 0);
-        const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e.total), 0);
+        const totalRevenue = revenue.rows.reduce((sum: number, r: any) => sum + Number(r.total), 0);
+        const totalExpenses = expenses.rows.reduce((sum: number, e: any) => sum + Number(e.total), 0);
         const profit = totalRevenue - totalExpenses;
         const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
         return {
           period: { startDate, endDate },
           revenue: {
-            byCategory: revenue.map((r: any) => ({
+            byCategory: revenue.rows.map((r: any) => ({
               category: r.category,
               total: Number(r.total),
               totalFormatted: (Number(r.total) / 100).toLocaleString('pt-BR', {
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
             }),
           },
           expenses: {
-            byCategory: expenses.map((e: any) => ({
+            byCategory: expenses.rows.map((e: any) => ({
               category: e.category,
               total: Number(e.total),
               totalFormatted: (Number(e.total) / 100).toLocaleString('pt-BR', {

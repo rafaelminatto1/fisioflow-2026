@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         ORDER BY a.start_time DESC
         LIMIT ${limit}
       `);
-      results.appointments = appointmentResults.map((a: any) => ({
+      results.appointments = appointmentResults.rows.map((a: any) => ({
         ...a,
         type: 'appointment',
       }));

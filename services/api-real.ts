@@ -9,20 +9,29 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Helper function for API calls
 async function fetchAPI(endpoint: string, options?: RequestInit) {
-  const response = await fetch(`${API_BASE}/api${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
+  console.log(`[API] Fetching ${endpoint}...`);
+  try {
+    const response = await fetch(`${API_BASE}/api${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || 'API request failed');
+    console.log(`[API] ${endpoint} status:`, response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error(`[API] Error invoking ${endpoint}:`, error);
+      throw new Error(error.error || 'API request failed');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(`[API] Network/System error for ${endpoint}:`, error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export const api = {

@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         `);
 
         // Calculate stage-by-stage drop-off
-        const stages = result;
+        const stages = result.rows;
         let previousCount = Number(stages[0]?.count || 0);
 
         const funnelWithDropOff = stages.map((stage: any) => {

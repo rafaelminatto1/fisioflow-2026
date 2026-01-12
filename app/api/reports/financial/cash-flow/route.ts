@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
         // Calculate running balance
         let runningBalance = 0;
-        const withBalance = result.map((row: any) => {
+        const withBalance = result.rows.map((row: any) => {
           runningBalance += Number(row.net);
           return {
             period: row.period,

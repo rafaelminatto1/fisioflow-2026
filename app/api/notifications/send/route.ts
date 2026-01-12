@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         JOIN roles r ON ur.role_id = r.id
         WHERE r.name = ${body.role}
       `);
-      recipients = usersWithRole.map((r: any) => r.id);
+      recipients = usersWithRole.rows.map((r: any) => r.id);
     } else if (body.userIds && Array.isArray(body.userIds)) {
       recipients = body.userIds;
     } else {
