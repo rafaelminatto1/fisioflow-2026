@@ -33,17 +33,31 @@ export const useAuthForm = () => {
         setGlobalError('');
         setGlobalSuccess('');
         try {
-            const { error } = await signIn.email({
+            console.log('[AUTH] Attempting login for:', data.email);
+            const result = await signIn.email({
                 email: data.email,
                 password: data.password,
+                callbackURL: '/',
             });
 
-            if (error) throw error;
+            console.log('[AUTH] Login result:', result);
 
+            if (result.error) {
+                console.error('[AUTH] Login error:', result.error);
+                throw result.error;
+            }
+
+            console.log('[AUTH] Login successful, redirecting...');
             router.push('/');
         } catch (err: any) {
-            console.error("Login error:", err);
-            if (err?.code === 'INVALID_EMAIL_OR_PASSWORD' || err?.code === 'INVALID_PASSWORD') {
+            console.error('[AUTH] Login exception:', err);
+            console.error('[AUTH] Error code:', err?.code);
+            console.error('[AUTH] Error message:', err?.message);
+            console.error('[AUTH] Full error:', JSON.stringify(err, null, 2));
+
+            if (err?.status === 429) {
+                setGlobalError('Muitas tentativas. Aguarde alguns segundos e tente novamente.');
+            } else if (err?.code === 'INVALID_EMAIL_OR_PASSWORD' || err?.code === 'INVALID_PASSWORD') {
                 setGlobalError('Email ou senha incorretos.');
             } else {
                 setGlobalError(err?.message || 'Falha ao entrar. Tente novamente.');

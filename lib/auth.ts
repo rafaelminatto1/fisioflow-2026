@@ -25,5 +25,11 @@ export const auth = betterAuth({
         ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
         "https://fisioflow-2026.vercel.app"
     ],
-    // databaseHooks removed to fix build type errors
+    // Ajuste de rate limiting para evitar bloqueios durante testes
+    rateLimit: {
+        enabled: true,
+        window: 30, // 30 segundos
+        max: 10, // 10 tentativas por janela
+        storage: "memory"
+    }
 });
