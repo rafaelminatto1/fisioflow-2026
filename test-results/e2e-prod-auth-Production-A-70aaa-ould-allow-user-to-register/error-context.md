@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic [ref=e1]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - heading "FisioFlow Pro" [level=1] [ref=e12]
+      - paragraph [ref=e13]: Gestão clínica inteligente potencializada por Neon DB e Better Auth. Performance e segurança em tempo real.
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - img [ref=e16]
+          - text: Alta Disponibilidade
+        - generic [ref=e19]:
+          - img [ref=e20]
+          - text: Criptografia Ponta-a-Ponta
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - heading "Crie sua conta" [level=2] [ref=e26]
+          - paragraph [ref=e27]: Comece a gerenciar com inteligência hoje.
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - text: Nome Completo
+            - generic [ref=e30]:
+              - img [ref=e31]
+              - textbox "Nome Completo" [ref=e36]:
+                - /placeholder: Dr. Ricardo Marques
+                - text: Test User
+          - generic [ref=e37]:
+            - text: Email Profissional
+            - generic [ref=e38]:
+              - img [ref=e39]
+              - textbox "Email Profissional" [ref=e42]:
+                - /placeholder: exemplo@fisioflow.com
+                - text: test.user.1768234756253@example.com
+          - generic [ref=e43]:
+            - text: Senha
+            - generic [ref=e44]:
+              - img [ref=e45]
+              - textbox "Senha" [active] [ref=e48]:
+                - /placeholder: ••••••••
+                - text: Password123!
+          - button "Finalizar Cadastro" [ref=e49]:
+            - text: Finalizar Cadastro
+            - img [ref=e50]
+        - button "Já possui conta? Faça o login" [ref=e53]
+      - generic [ref=e54]: Powered by Neon & Better Auth
+  - button [ref=e55]:
+    - img [ref=e56]
+    - img [ref=e58]
+  - alert [ref=e62]
+```
