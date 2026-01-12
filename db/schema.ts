@@ -162,6 +162,7 @@ export const appointments = pgTable('appointments', {
 	notes: text('notes'),
 	reminderSent: boolean('reminder_sent').default(false).notNull(),
 	status: text('status').default('scheduled').notNull(),
+	sessionType: text('session_type').default('presencial'), // 'presencial', 'telemedicine', 'home_visit'
 });
 
 export const patientSessions = pgTable('patient_sessions', {
