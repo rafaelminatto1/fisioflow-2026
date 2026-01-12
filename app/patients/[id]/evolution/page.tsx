@@ -1,15 +1,17 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from '../../../../hooks/useRouter';
 import { api } from '../../../../services/api';
 import SoapEvolutionForm from '../../../../components/SoapEvolutionForm';
 
-export default function EvolutionPage({ params, searchParams }: { params?: { id: string }, searchParams?: { sessionId?: string } }) {
+export default function EvolutionPage({ params, searchParams }: { params?: Promise<{ id: string }>, searchParams?: Promise<{ sessionId?: string }> }) {
     const router = useRouter();
-    const sessionId = searchParams?.sessionId;
-    const patientId = params?.id || '1';
+    const resolvedParams = use(params || Promise.resolve({ id: '1' }));
+    const resolvedSearchParams = use(searchParams || Promise.resolve({ sessionId: undefined }));
+    const sessionId = resolvedSearchParams.sessionId;
+    const patientId = resolvedParams.id || '1';
 
     const [loading, setLoading] = useState(true);
     const [patient, setPatient] = useState<any>(null);

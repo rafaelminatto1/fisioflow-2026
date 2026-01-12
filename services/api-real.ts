@@ -972,16 +972,16 @@ export const api = {
       return fetchAPI(`/reports?type=dashboard&period=${period}`);
     },
     financial: async (period = 'month'): Promise<any> => {
-      return fetchAPI(`/reports/financial?period=${period}`);
+      return fetchAPI(`/reports?type=financial&period=${period}`);
     },
     dre: async (period = 'month'): Promise<any[]> => {
-      return fetchAPI(`/reports/dre?period=${period}`);
+      return fetchAPI(`/reports/financial/dre?period=${period}`);
     },
     balanceSheet: async (period = 'month'): Promise<any[]> => {
-      return fetchAPI(`/reports/balance-sheet?period=${period}`);
+      return fetchAPI(`/reports/financial/balance?period=${period}`);
     },
     cashFlow: async (period = 'month'): Promise<any[]> => {
-      return fetchAPI(`/reports/cash-flow?period=${period}`);
+      return fetchAPI(`/reports/financial/cash-flow?period=${period}`);
     },
     executive: async (period = 'month'): Promise<any> => {
       return fetchAPI(`/reports/executive?period=${period}`);
