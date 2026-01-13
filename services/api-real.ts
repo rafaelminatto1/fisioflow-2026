@@ -35,6 +35,32 @@ async function fetchAPI(endpoint: string, options?: RequestInit) {
 }
 
 export const api = {
+  // Generic API methods for any endpoint
+  get: async <T = any>(endpoint: string): Promise<T> => {
+    return fetchAPI(endpoint);
+  },
+  post: async <T = any>(endpoint: string, data?: any): Promise<T> => {
+    return fetchAPI(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  put: async <T = any>(endpoint: string, data?: any): Promise<T> => {
+    return fetchAPI(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  patch: async <T = any>(endpoint: string, data?: any): Promise<T> => {
+    return fetchAPI(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+  delete: async <T = any>(endpoint: string): Promise<T> => {
+    return fetchAPI(endpoint, { method: 'DELETE' });
+  },
+
   // Patients
   patients: {
     list: async (): Promise<Patient[]> => {

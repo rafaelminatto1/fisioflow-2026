@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileTextIcon, CopyIcon, XIcon, CheckCircleIcon, DumbbellIcon, MessageCircleIcon } from './Icons';
+import { FileTextIcon, CopyIcon, XIcon, CheckCircleIcon, DumbbellIcon, MessageCircleIcon, PaperclipIcon, LockIcon, SparklesIcon } from './Icons';
 import { api } from '../services/api';
 import InteractivePainMap, { PainPoint } from './InteractivePainMap';
 import ExercisesLibrary from './ExercisesLibrary';
+import SoapTemplateSelector from './SoapTemplateSelector';
+import { SoapTemplate } from '../types';
 
 // Zod Schema Definition
 const soapSchema = z.object({
@@ -28,12 +30,25 @@ interface SoapEvolutionFormProps {
   onClose: () => void;
   onSubmit: (data: any) => void;
   isModal?: boolean;
+  initialData?: {
+    subjective?: string;
+    objective?: string;
+    assessment?: string;
+    plan?: string;
+    eva?: number;
+    painMap?: any;
+    homeCareExercises?: string[];
+    therapistNotes?: string;
+  };
 }
 
-const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose, onSubmit, isModal = true }) => {
-  const [activeTab, setActiveTab] = useState<'soap' | 'pain-map' | 'homecare'>('soap');
-  const [painPoints, setPainPoints] = useState<PainPoint[]>([]);
-  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
+const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose, onSubmit, isModal = true, initialData }) => {
+  const [activeTab, setActiveTab] = useState<'soap' | 'pain-map' | 'homecare' | 'notes'>('soap');
+  const [painPoints, setPainPoints] = useState<PainPoint[]>(initialData?.painMap?.points || []);
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>(initialData?.homeCareExercises || []);
+  const [therapistNotes, setTherapistNotes] = useState(initialData?.therapistNotes || '');
+  const [attachments, setAttachments] = useState<Array<{ id: string; name: string; url: string; type: string; size: number }>>([]);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   const {
     register,
@@ -44,7 +59,11 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
   } = useForm<SoapFormData>({
     resolver: zodResolver(soapSchema),
     defaultValues: {
-      eva: 0,
+      eva: initialData?.eva || 0,
+      subjective: initialData?.subjective || '',
+      objective: initialData?.objective || '',
+      assessment: initialData?.assessment || '',
+      plan: initialData?.plan || '',
     },
   });
 
@@ -58,7 +77,6 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
       } else {
         const fallbackPlan = "Manutenção da conduta: Cinesioterapia (3x12) para quadríceps + TENS (20min, 100Hz) + Alongamento de isquiotibiais.";
         setValue('plan', fallbackPlan);
-        // if(!lastSession) alert("Nenhuma sessão anterior encontrada. Usando template padrão.");
       }
     } catch (e) {
       console.error(e);
@@ -66,24 +84,58 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
     }
   };
 
+  const handleSelectTemplate = (template: SoapTemplate) => {
+    setValue('subjective', template.subjective);
+    setValue('objective', template.objective);
+    setValue('assessment', template.assessment);
+    setValue('plan', template.plan);
+    setShowTemplateSelector(false);
+  };
+
   const onFormSubmit = (data: SoapFormData) => {
     const fullSessionData = {
       ...data,
-      painMap: {
+      evaScore: data.eva,
+      painMap: painPoints.length > 0 ? {
         imageUrl: 'generated-svg',
         bodyPart: 'Full Body',
         points: painPoints
-      },
-      homeCareExercises: selectedExerciseIds
+      } : null,
+      homeCareExercises: selectedExerciseIds.length > 0 ? selectedExerciseIds : null,
+      therapistNotes: therapistNotes || null,
+      attachments: attachments.length > 0 ? attachments : null,
     };
     onSubmit(fullSessionData);
   };
 
   const handleSendWhatsApp = () => {
     if (selectedExerciseIds.length === 0) return alert("Selecione exercícios primeiro.");
-    // Demo link
     const msg = `Olá ${patient.name.split(' ')[0]}! Aqui estão seus exercícios para fazer em casa: https://fisioflow.app/p/${patient.id}/exercises`;
     window.open(`https://wa.me/55${patient.phone || ''}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const newAttachment = {
+          id: Date.now().toString() + Math.random(),
+          name: file.name,
+          url: event.target?.result as string,
+          type: file.type,
+          size: file.size
+        };
+        setAttachments(prev => [...prev, newAttachment]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments(prev => prev.filter(a => a.id !== id));
   };
 
   const Container = isModal ? 'div' : React.Fragment;
@@ -119,14 +171,14 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             <button
               type="button"
               onClick={() => setActiveTab('soap')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'soap' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'soap' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
-              REGISTRO SOAP
+              SOAP
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('pain-map')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'pain-map' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'pain-map' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               MAPA 3D
               {painPoints.length > 0 && <span className="bg-primary text-white px-1.5 rounded-full text-[10px]">{painPoints.length}</span>}
@@ -134,10 +186,19 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             <button
               type="button"
               onClick={() => setActiveTab('homecare')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'homecare' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'homecare' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               HOME CARE
               {selectedExerciseIds.length > 0 && <span className="bg-primary text-white px-1.5 rounded-full text-[10px]">{selectedExerciseIds.length}</span>}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('notes')}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'notes' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              <LockIcon className="w-3 h-3" />
+              NOTAS
+              {therapistNotes && <span className="bg-amber-500 text-white px-1.5 rounded-full text-[10px]">1</span>}
             </button>
           </div>
 
@@ -152,6 +213,24 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
           {/* TAB: SOAP FORM */}
           {activeTab === 'soap' && (
             <div className="max-w-3xl mx-auto">
+              {/* Template Actions */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <SparklesIcon className="w-5 h-5 text-primary" />
+                  <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Ações Rápidas
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTemplateSelector(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20"
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                  Usar Template
+                </button>
+              </div>
+
               <form id="soap-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
 
                 {/* S - Subjetivo */}
@@ -237,20 +316,24 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
           {/* TAB: PAIN MAP */}
           {activeTab === 'pain-map' && (
             <div className="h-full flex flex-col animate-in fade-in slide-in-from-right-4">
-              <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden relative">
+              <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden relative min-h-[500px]">
                 <InteractivePainMap
                   initialPoints={painPoints}
                   onChange={setPainPoints}
                   readOnly={false}
                 />
-                <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-slate-800/90 p-3 rounded-xl shadow-lg text-xs border border-white/20 backdrop-blur-md">
-                  <p className="font-bold mb-1">Instruções:</p>
-                  <ul className="list-disc list-inside space-y-0.5 text-slate-600 dark:text-slate-400">
-                    <li>Clique para adicionar ponto de dor</li>
-                    <li>Arraste para ajustar posição</li>
-                    <li>Clique no ponto para editar/remover</li>
-                  </ul>
-                </div>
+              </div>
+              <div className="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-400 flex items-center gap-2">
+                  <LockIcon className="w-4 h-4" />
+                  Como usar o mapa de dor
+                </p>
+                <ul className="mt-2 text-xs text-amber-700 dark:text-amber-500 space-y-1">
+                  <li>• <strong>Clique</strong> em qualquer região do corpo para adicionar um ponto de dor</li>
+                  <li>• <strong>Clique no ponto</strong> para editar intensidade, tipo, agravantes e aliviantes</li>
+                  <li>• <strong>Arraste</strong> para reposicionar o ponto com precisão</li>
+                  <li>• Use os detalhes para documentar completamente a dor do paciente</li>
+                </ul>
               </div>
             </div>
           )}
@@ -274,11 +357,95 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
                   <MessageCircleIcon className="w-4 h-4" /> Enviar WhatsApp
                 </button>
               </div>
-              <div className="flex-1 overflow-hidden relative">
+              <div className="flex-1 overflow-hidden relative min-h-[400px]">
                 <ExercisesLibrary
                   selectionMode={true}
                   onSelectionChange={setSelectedExerciseIds}
                 />
+              </div>
+            </div>
+          )}
+
+          {/* TAB: NOTES & ATTACHMENTS */}
+          {activeTab === 'notes' && (
+            <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-right-4">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-400 flex items-center gap-2">
+                  <LockIcon className="w-4 h-4" />
+                  Notas do Terapeuta (Privadas)
+                </p>
+                <p className="mt-1 text-xs text-amber-700 dark:text-amber-500">
+                  Estas notas são visíveis apenas para você e outros profissionais da clínica. O paciente não terá acesso a este conteúdo.
+                </p>
+              </div>
+
+              {/* Therapist Notes */}
+              <div className="relative group p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm mb-6">
+                <div className="absolute -left-3 top-4 w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shadow-sm">
+                  <LockIcon className="w-4 h-4" />
+                </div>
+                <div className="pl-8">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    Notas Particulares do Terapeuta
+                  </label>
+                  <textarea
+                    value={therapistNotes}
+                    onChange={(e) => setTherapistNotes(e.target.value)}
+                    className="w-full h-40 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500/20 outline-none resize-none transition-all"
+                    placeholder="Use este espaço para anotações privadas como: hipóteses diagnósticas não confirmadas, observações sobre o comportamento do paciente, notas para sessões futuras, ou qualquer informação que não deve ser compartilhada com o paciente..."
+                  ></textarea>
+                </div>
+              </div>
+
+              {/* Attachments */}
+              <div className="relative group p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div className="absolute -left-3 top-4 w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shadow-sm">
+                  <PaperclipIcon className="w-4 h-4" />
+                </div>
+                <div className="pl-8">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    Anexos (Imagens, Documentos)
+                  </label>
+
+                  {/* Upload Area */}
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <PaperclipIcon className="w-8 h-8 mb-2 text-slate-400" />
+                      <p className="text-sm text-slate-500"><span className="font-semibold">Clique para上传</span> ou arraste arquivos</p>
+                      <p className="text-xs text-slate-400">PNG, JPG, PDF até 10MB</p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      multiple
+                      accept="image/*,.pdf"
+                      onChange={handleFileUpload}
+                    />
+                  </label>
+
+                  {/* Attachments List */}
+                  {attachments.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {attachments.map((attachment) => (
+                        <div key={attachment.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <div className="flex items-center gap-3">
+                            <FileTextIcon className="w-5 h-5 text-indigo-500" />
+                            <div>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{attachment.name}</p>
+                              <p className="text-xs text-slate-500">{(attachment.size / 1024).toFixed(1)} KB</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => removeAttachment(attachment.id)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <XIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -288,7 +455,7 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
         {/* Footer Actions */}
         <div className="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-bold text-slate-700 dark:text-slate-300">Dica:</span> Use o botão "Repetir Anterior" para agilizar.
+            <span className="font-bold text-slate-700 dark:text-slate-300">Dica:</span> Complete todas as abas para um registro completo.
           </div>
           <div className="flex gap-3">
             <button
@@ -307,6 +474,14 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             </button>
           </div>
         </div>
+
+        {/* Template Selector Modal */}
+        {showTemplateSelector && (
+          <SoapTemplateSelector
+            onSelect={handleSelectTemplate}
+            onClose={() => setShowTemplateSelector(false)}
+          />
+        )}
 
       </div>
     </Container>

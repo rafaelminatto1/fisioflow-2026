@@ -46,6 +46,12 @@ export async function PUT(
         assessment: body.assessment,
         plan: body.plan,
         evaScore: body.evaScore,
+        painMap: body.painMap,
+        homeCareExercises: body.homeCareExercises,
+        sessionType: body.sessionType,
+        duration: body.duration,
+        attachments: body.attachments,
+        therapistNotes: body.therapistNotes,
         updatedAt: new Date(),
       })
       .where(eq(patientSessions.id, id))

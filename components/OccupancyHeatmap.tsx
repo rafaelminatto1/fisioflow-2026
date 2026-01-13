@@ -22,7 +22,13 @@ const generateHeatmapData = () => {
 };
 
 const OccupancyHeatmap = () => {
-    const heatData = useMemo(() => generateHeatmapData(), []);
+    const [heatData, setHeatData] = React.useState<ReturnType<typeof generateHeatmapData> | null>(null);
+
+    React.useEffect(() => {
+        setHeatData(generateHeatmapData());
+    }, []);
+
+    if (!heatData) return <div className="animate-pulse h-96 bg-slate-50 rounded-xl"></div>; // Loading state
 
     const getColor = (value: number) => {
         if (value === 0) return 'bg-slate-50';
@@ -93,8 +99,8 @@ const OccupancyHeatmap = () => {
                                 {DAYS.map(day => {
                                     const value = heatData[day][hour];
                                     return (
-                                        <div 
-                                            key={`${day}-${hour}`} 
+                                        <div
+                                            key={`${day}-${hour}`}
                                             className={`h-10 rounded-md transition-all hover:scale-105 cursor-help relative group ${getColor(value)}`}
                                             title={`Ocupação: ${(value * 100).toFixed(0)}%`}
                                         >

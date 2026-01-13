@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-    UsersIcon, 
-    ClockIcon, 
-    CheckCircleIcon, 
-    LogOutIcon, 
+import {
+    UsersIcon,
+    ClockIcon,
+    CheckCircleIcon,
+    LogOutIcon,
     PlusIcon,
     AlertCircleIcon,
     CalendarIcon,
@@ -14,11 +14,11 @@ import {
 
 // --- Local Icon Stubs if needed ---
 const DoorIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 20v-6.5a2.5 2.5 0 0 0-5 0V20"/><path d="M20 8v12"/><path d="M4 20v-6.5a2.5 2.5 0 0 1 5 0V20"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M13 4h3a2 2 0 0 1 2 2v14" /><path d="M2 20h3" /><path d="M13 20h9" /><path d="M10 20v-6.5a2.5 2.5 0 0 0-5 0V20" /><path d="M20 8v12" /><path d="M4 20v-6.5a2.5 2.5 0 0 1 5 0V20" /></svg>
 );
 
 const UserCheckIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><polyline points="17 11 19 13 23 9" /></svg>
 );
 
 // --- Types ---
@@ -60,14 +60,16 @@ const MOCK_ROOMS: Room[] = [
 const ReceptionDesk = () => {
     const [waitingList, setWaitingList] = useState<WaitingPatient[]>(MOCK_WAITING);
     const [rooms, setRooms] = useState<Room[]>(MOCK_ROOMS);
-    const [currentTime, setCurrentTime] = useState(new Date());
+    const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
     useEffect(() => {
+        setCurrentTime(new Date());
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
         return () => clearInterval(timer);
     }, []);
 
     const calculateWaitTime = (arrivalTime: string) => {
+        if (!currentTime) return 0;
         const [h, m] = arrivalTime.split(':').map(Number);
         const arrival = new Date();
         arrival.setHours(h, m, 0, 0);
@@ -78,9 +80,9 @@ const ReceptionDesk = () => {
     const handleRoomStatusChange = (roomId: string, newStatus: Room['status']) => {
         setRooms(prev => prev.map(r => {
             if (r.id === roomId) {
-                return { 
-                    ...r, 
-                    status: newStatus, 
+                return {
+                    ...r,
+                    status: newStatus,
                     currentPatient: newStatus === 'free' ? undefined : r.currentPatient,
                     timeRemaining: newStatus === 'free' ? undefined : r.timeRemaining
                 };
@@ -93,8 +95,8 @@ const ReceptionDesk = () => {
         const name = prompt("Nome do Paciente:");
         if (!name) return;
         const now = new Date();
-        const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         const newPatient: WaitingPatient = {
             id: Date.now().toString(),
             name,
@@ -126,14 +128,14 @@ const ReceptionDesk = () => {
                 <div className="flex items-center gap-3">
                     <div className="text-right hidden sm:block">
                         <p className="text-2xl font-bold text-slate-800 leading-none">
-                            {currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            {currentTime ? currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                         </p>
                         <p className="text-xs text-slate-500">
-                            {currentTime.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            {currentTime ? currentTime.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }) : '...'}
                         </p>
                     </div>
                     <div className="h-10 w-px bg-slate-200 mx-2 hidden sm:block"></div>
-                    <button 
+                    <button
                         onClick={handleCheckIn}
                         className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
                     >
@@ -144,7 +146,7 @@ const ReceptionDesk = () => {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 flex-1 min-h-0">
-                
+
                 {/* Left Column: Waiting List */}
                 <div className="xl:col-span-1 flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
@@ -156,7 +158,7 @@ const ReceptionDesk = () => {
                             {waitingList.length}
                         </span>
                     </div>
-                    
+
                     <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                         {waitingList.length === 0 && (
                             <div className="text-center py-10 text-slate-400">
@@ -195,7 +197,7 @@ const ReceptionDesk = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => handleSendToRoom(patient.id)}
                                         className="w-full mt-3 bg-blue-50 text-blue-600 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors opacity-0 group-hover:opacity-100"
                                     >
@@ -224,21 +226,19 @@ const ReceptionDesk = () => {
                     <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {rooms.map(room => (
-                                <div 
-                                    key={room.id} 
-                                    className={`relative p-4 rounded-xl border-2 transition-all flex flex-col justify-between h-40 group ${
-                                        room.status === 'free' ? 'border-emerald-100 bg-emerald-50/30' : 
-                                        room.status === 'cleaning' ? 'border-amber-100 bg-amber-50/30' : 
-                                        'border-red-100 bg-red-50/30'
-                                    }`}
+                                <div
+                                    key={room.id}
+                                    className={`relative p-4 rounded-xl border-2 transition-all flex flex-col justify-between h-40 group ${room.status === 'free' ? 'border-emerald-100 bg-emerald-50/30' :
+                                        room.status === 'cleaning' ? 'border-amber-100 bg-amber-50/30' :
+                                            'border-red-100 bg-red-50/30'
+                                        }`}
                                 >
                                     <div className="flex justify-between items-start">
                                         <h4 className="font-bold text-slate-800">{room.name}</h4>
-                                        <span className={`w-3 h-3 rounded-full ${
-                                            room.status === 'free' ? 'bg-emerald-500' : 
-                                            room.status === 'cleaning' ? 'bg-amber-500 animate-pulse' : 
-                                            'bg-red-500'
-                                        }`}></span>
+                                        <span className={`w-3 h-3 rounded-full ${room.status === 'free' ? 'bg-emerald-500' :
+                                            room.status === 'cleaning' ? 'bg-amber-500 animate-pulse' :
+                                                'bg-red-500'
+                                            }`}></span>
                                     </div>
 
                                     <div className="flex-1 flex flex-col justify-center">
@@ -262,21 +262,21 @@ const ReceptionDesk = () => {
                                     {/* Action Overlay */}
                                     <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg z-10">
                                         {room.status === 'occupied' ? (
-                                            <button 
+                                            <button
                                                 onClick={() => handleRoomStatusChange(room.id, 'cleaning')}
                                                 className="px-4 py-2 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600"
                                             >
                                                 Liberar para Limpeza
                                             </button>
                                         ) : room.status === 'cleaning' ? (
-                                            <button 
+                                            <button
                                                 onClick={() => handleRoomStatusChange(room.id, 'free')}
                                                 className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600"
                                             >
                                                 Marcar como Limpo
                                             </button>
                                         ) : (
-                                            <button 
+                                            <button
                                                 onClick={() => handleRoomStatusChange(room.id, 'occupied')} // Mock action
                                                 className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800"
                                             >

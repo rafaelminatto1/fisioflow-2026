@@ -116,18 +116,30 @@ export interface Session {
   patientId: string;
   appointmentId?: string;
   date: string;
-  subjective: string;
-  objective: string;
-  assessment: string;
-  plan: string;
-  evaScore: number;
+  subjective?: string;
+  objective?: string;
+  assessment?: string;
+  plan?: string;
+  evaScore?: number;
   painMap?: {
     imageUrl?: string;
     bodyPart?: string;
     points?: PainPoint[];
   };
   customData?: any;
-  homeCareExercises?: Exercise[];
+  homeCareExercises?: Exercise[] | string[];
+  sessionType?: 'presencial' | 'telemedicine' | 'home_visit';
+  duration?: number;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+  }>;
+  therapistNotes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Prescription {
@@ -182,9 +194,11 @@ export interface Lead {
   id: string;
   name: string;
   phone: string;
+  email?: string;
   source: string;
   interest?: string;
   status: LeadStatus;
+  budget?: number;
   createdAt: string;
 }
 
@@ -400,5 +414,365 @@ export interface Asset {
   status: 'uploading' | 'processing' | 'ready' | 'error';
   hash?: string;
   metadata?: any;
+  createdAt: string;
+}
+
+// --- SOAP TEMPLATES ---
+
+export interface SoapTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  category: 'initial_evaluation' | 'follow_up' | 'discharge' | 'specific_condition';
+  condition?: string;
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  variables?: Array<{
+    name: string;
+    label: string;
+    type: 'text' | 'number' | 'select';
+    options?: string[];
+    defaultValue?: string;
+  }>;
+  isActive: boolean;
+  isSystem: boolean;
+  usageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- REFERRALS ---
+
+export interface Referral {
+  id: string;
+  patientId: string;
+  patientName?: string;
+  providerName: string;
+  specialty: string;
+  reason: string;
+  urgency: 'routine' | 'urgent' | 'emergency';
+  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  referredTo?: {
+    name?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+  };
+  appointmentDate?: string;
+  reportReceived: boolean;
+  reportUrl?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- PATIENT DISCHARGE ---
+
+export interface PatientDischarge {
+  id: string;
+  patientId: string;
+  patientName?: string;
+  dischargeDate: string;
+  reason: 'treatment_completed' | 'patient_request' | 'medical_decision' | 'insurance_exhausted' | 'non_compliance' | 'referral';
+  primaryDiagnosis?: string;
+  secondaryDiagnoses?: string[];
+  treatmentSummary: string;
+  initialAssessment?: string;
+  finalAssessment?: string;
+  outcomes?: Array<{
+    category: string;
+    initial: number | string;
+    final: number | string;
+    improvement: string;
+  }>;
+  painLevelInitial?: number;
+  painLevelFinal?: number;
+  functionalGain?: string;
+  sessionCount?: number;
+  recommendations?: string;
+  followUpDate?: string;
+  homeCareInstructions?: string;
+  attachments?: Array<{ id: string; name: string; url: string; type: string }>;
+  createdAt: string;
+}
+
+// --- SESSION WORKFLOW ---
+
+export interface SessionWorkflow {
+  id: string;
+  sessionId: string;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'missed';
+  startedAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
+  cancellationReason?: string;
+  notes?: string;
+  updatedAt: string;
+}
+
+// --- ACCOUNTS RECEIVABLE / PAYABLE ---
+
+export interface AccountReceivable {
+  id: string;
+  patientId?: string;
+  patientName?: string;
+  description: string;
+  amount: number;
+  dueDate: string;
+  paidAmount: number;
+  paidAt?: string;
+  status: 'pending' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+  paymentMethod?: string;
+  installmentNumber?: number;
+  totalInstallments?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccountPayable {
+  id: string;
+  supplier: string;
+  description: string;
+  amount: number;
+  dueDate: string;
+  paidAmount: number;
+  paidAt?: string;
+  status: 'pending' | 'partial' | 'paid' | 'overdue' | 'cancelled';
+  paymentMethod?: string;
+  category: 'rent' | 'supplies' | 'services' | 'equipment' | 'utilities' | 'other';
+  documentNumber?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- INSURANCE ---
+
+export interface InsurancePlan {
+  id: string;
+  name: string;
+  ansCode?: string;
+  cnpj?: string;
+  phone?: string;
+  email?: string;
+  address?: {
+    street?: string;
+    number?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  };
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PatientInsurance {
+  id: string;
+  patientId: string;
+  planId?: string;
+  planName?: string;
+  cardNumber?: string;
+  holderName?: string;
+  holderCpf?: string;
+  validityStart?: string;
+  validityEnd?: string;
+  authorizationCode?: string;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TissGuide {
+  id: string;
+  patientId: string;
+  patientName?: string;
+  insurancePlanId?: string;
+  planName?: string;
+  guideNumber?: string;
+  guideType: 'sp_sadt' | 'guia_consulta' | 'honorario_individual';
+  authorizationNumber?: string;
+  sessionId?: string;
+  procedures: Array<{
+    tussCode: string;
+    description: string;
+    quantity: number;
+    unitValue: number;
+    totalValue: number;
+  }>;
+  totalAmount: number;
+  status: 'pending' | 'submitted' | 'approved' | 'rejected' | 'paid';
+  submissionDate?: string;
+  responseDate?: string;
+  glosaReason?: string;
+  glosaAmount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- CRM NURTURING ---
+
+export interface NurturingSequence {
+  id: string;
+  name: string;
+  description?: string;
+  triggerType: 'lead_created' | 'no_show' | 'inactive_patient' | 'post_discharge' | 'birthday';
+  triggerDelay: number;
+  isActive: boolean;
+  steps?: NurturingStep[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NurturingStep {
+  id: string;
+  sequenceId: string;
+  stepOrder: number;
+  channel: 'email' | 'whatsapp' | 'sms';
+  subject?: string;
+  message: string;
+  delayHours: number;
+  createdAt: string;
+}
+
+// --- LEAD SCORING ---
+
+export interface LeadScoringRule {
+  id: string;
+  name: string;
+  description?: string;
+  ruleType: 'source' | 'response_time' | 'budget' | 'location' | 'custom';
+  condition: {
+    field: string;
+    operator: 'equals' | 'contains' | 'greater_than' | 'less_than' | 'in';
+    value: any;
+  };
+  points: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface LeadScore {
+  id: string;
+  leadId: string;
+  score: number;
+  lastCalculated: string;
+  updatedAt: string;
+}
+
+// --- CAMPAIGNS ---
+
+export interface Campaign {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'whatsapp' | 'email' | 'sms';
+  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';
+  message: string;
+  recipients: Array<{
+    id: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+  }>;
+  scheduledFor?: string;
+  sentAt?: string;
+  deliveredCount: number;
+  failedCount: number;
+  openedCount: number;
+  clickedCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- NPS ---
+
+export interface NpsSurvey {
+  id: string;
+  patientId: string;
+  patientName?: string;
+  sessionId?: string;
+  score: number;
+  feedback?: string;
+  isPromoter: boolean;
+  isPassive: boolean;
+  isDetractor: boolean;
+  sentAt?: string;
+  answeredAt?: string;
+  createdAt: string;
+}
+
+// --- PAYMENT ---
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  type: 'credit_card' | 'debit_card' | 'pix' | 'boleto' | 'cash' | 'transfer';
+  isActive: boolean;
+  config?: {
+    stripeProductId?: string;
+    stripePriceId?: string;
+    installmentsEnabled?: boolean;
+    maxInstallments?: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Subscription {
+  id: string;
+  patientId: string;
+  patientName?: string;
+  packageId?: string;
+  stripeSubscriptionId?: string;
+  stripeCustomerId?: string;
+  status: 'active' | 'past_due' | 'canceled' | 'unpaid' | 'trialing';
+  currentPeriodStart?: string;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd: boolean;
+  canceledAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- AI TREATMENT PLANS ---
+
+export interface AiTreatmentPlan {
+  id: string;
+  patientId: string;
+  sessionId?: string;
+  diagnosis: string;
+  objectives: Array<{
+    title: string;
+    description: string;
+    targetDate?: string;
+  }>;
+  techniques: Array<{
+    name: string;
+    description: string;
+    duration: number;
+    frequency: string;
+  }>;
+  exercises: Array<{
+    exerciseId?: string;
+    name: string;
+    sets: number;
+    reps: string;
+    frequency: string;
+    notes?: string;
+  }>;
+  expectedOutcomes: Array<{
+    outcome: string;
+    timeframe: string;
+  }>;
+  precautions?: string[];
+  aiModel?: string;
+  isAccepted: boolean;
+  modifications?: string;
   createdAt: string;
 }

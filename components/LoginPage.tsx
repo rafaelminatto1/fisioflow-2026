@@ -22,6 +22,8 @@ const LoginPage: React.FC = () => {
     const currentForm = isLogin ? loginForm : registerForm;
     const errors = currentForm.formState.errors;
 
+
+
     return (
         <div className="min-h-screen w-full flex bg-slate-50 relative overflow-hidden font-sans selection:bg-primary/30">
             {/* Background Pattern for whole page mobile / right side */}

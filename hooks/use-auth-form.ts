@@ -18,6 +18,7 @@ export const useAuthForm = () => {
             email: '',
             password: '',
         },
+        mode: 'onChange',
     });
 
     const registerForm = useForm<RegisterFormValues>({
@@ -27,6 +28,7 @@ export const useAuthForm = () => {
             email: '',
             password: '',
         },
+        mode: 'onChange',
     });
 
     const handleLogin = async (data: LoginFormValues) => {

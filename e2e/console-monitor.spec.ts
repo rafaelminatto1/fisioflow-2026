@@ -54,6 +54,7 @@ test.describe('Console Error Monitor', () => {
 
 
         // 1. Register/Login
+        page.on('console', msg => console.log(`[BROWSER]: ${msg.text()}`));
         console.log(`Navigating to ${BASE_URL}/login...`);
         await page.goto(`${BASE_URL}/login`);
 
@@ -71,7 +72,7 @@ test.describe('Console Error Monitor', () => {
         await page.getByPlaceholder('••••••••').fill(password);
 
         // Wait for button to be enabled and click Register
-        const submitBtn = page.locator('button[type="submit"]');
+        const submitBtn = page.getByRole('button', { name: 'Criar Conta Gratuita' });
         await expect(submitBtn).toBeEnabled({ timeout: 10000 });
         await submitBtn.click();
 
@@ -84,11 +85,13 @@ test.describe('Console Error Monitor', () => {
         await page.getByPlaceholder('••••••••').fill(password);
 
         // Click Login
-        await expect(submitBtn).toBeEnabled();
-        await submitBtn.click();
+        const loginBtn = page.getByRole('button', { name: 'Acessar Plataforma' });
+        await expect(loginBtn).toBeEnabled();
+        await loginBtn.click();
 
         // Wait for redirect to dashboard/home
-        await expect(page.locator('text=Home').or(page.locator('text=Dashboard'))).toBeVisible({ timeout: 30000 });
+        await expect(page).toHaveURL(`${BASE_URL}/`);
+        await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible({ timeout: 30000 });
         console.log('Login successful.');
     });
 

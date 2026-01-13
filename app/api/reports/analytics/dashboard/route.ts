@@ -1,137 +1,167 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { patients, leads, transactions, appointments } from '@/db/schema';
-import { sql } from 'drizzle-orm';
-import { withCache } from '@/lib/vercel-kv';
+import { appointments, patients, sessions } from '@/db/schema';
+import { eq, and, gte, lte, count, sql } from 'drizzle-orm';
+import { startOfDay, endOfDay } from 'date-fns';
 
-// GET /api/reports/analytics/dashboard - Get dashboard analytics
+// GET /api/reports/analytics/dashboard - Get real-time analytics data
 export async function GET(request: NextRequest) {
   try {
-    const cacheKey = `reports:analytics:dashboard`;
+    const now = new Date();
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
 
-    const dashboard = await withCache(
-      cacheKey,
-      async () => {
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    // Active sessions (appointments in progress)
+    const [activeSessionsResult] = await db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          lte(appointments.startTime, now.toISOString()),
+          gte(appointments.endTime || now, now.toISOString()),
+          eq(appointments.status, 'in_progress')
+        )
+      );
 
-        // KPIs
-        const kpis = await db.execute(sql`
-          WITH patient_stats AS (
-            SELECT
-              COUNT(*) FILTER (WHERE is_active = true) as "activePatients",
-              COUNT(*) FILTER (WHERE created_at >= ${thisMonth}) as "newPatientsThisMonth"
-            FROM patients
-          ),
-          lead_stats AS (
-            SELECT
-              COUNT(*) as "totalLeads",
-              COUNT(*) FILTER (WHERE status = 'new') as "newLeads",
-              COUNT(*) FILTER (WHERE created_at >= ${thisMonth}) as "leadsThisMonth"
-            FROM leads
-          ),
-          revenue_stats AS (
-            SELECT
-              COALESCE(SUM(CASE WHEN type = 'income' AND date >= ${thisMonth} THEN amount ELSE 0 END), 0) as "revenueThisMonth",
-              COALESCE(SUM(CASE WHEN type = 'income' AND date >= ${lastMonth} AND date < ${thisMonth} THEN amount ELSE 0 END), 0) as "revenueLastMonth"
-            FROM transactions
-          ),
-          appointment_stats AS (
-            SELECT
-              COUNT(*) as "totalToday",
-              COUNT(*) FILTER (WHERE status = 'completed') as "completedToday",
-              COUNT(*) FILTER (WHERE start_time >= ${today} AND start_time < ${today} + INTERVAL '1 day') as "scheduledToday"
-            FROM appointments
-          )
-          SELECT * FROM patient_stats, lead_stats, revenue_stats, appointment_stats
-        `);
+    // Get unique therapists from active sessions
+    const activeTherapists = await db
+      .selectDistinct({ therapistId: appointments.therapistId })
+      .from(appointments)
+      .where(
+        and(
+          lte(appointments.startTime, now.toISOString()),
+          gte(appointments.endTime || now, now.toISOString()),
+          eq(appointments.status, 'in_progress')
+        )
+      );
 
-        // Recent activity
-        const recentPatients = await db.execute(sql`
-          SELECT id, full_name as "fullName", created_at as "createdAt"
-          FROM patients
-          ORDER BY created_at DESC
-          LIMIT 5
-        `);
+    // Get unique patients from active appointments
+    const activePatients = await db
+      .selectDistinct({ patientId: appointments.patientId })
+      .from(appointments)
+      .where(
+        and(
+          lte(appointments.startTime, now.toISOString()),
+          gte(appointments.endTime || now, now.toISOString()),
+          sql`${appointments.status} IN ('in_progress', 'confirmed', 'checked_in')`
+        )
+      );
 
-        const recentLeads = await db.execute(sql`
-          SELECT id, name, status, created_at as "createdAt"
-          FROM leads
-          ORDER BY created_at DESC
-          LIMIT 5
-        `);
+    // Today's completed sessions
+    const [completedTodayResult] = await db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.startTime, todayStart.toISOString()),
+          lte(appointments.startTime, todayEnd.toISOString()),
+          eq(appointments.status, 'completed')
+        )
+      );
 
-        const recentTransactions = await db.execute(sql`
-          SELECT id, type, category, amount, date
-          FROM transactions
-          ORDER BY date DESC
-          LIMIT 10
-        `);
+    // Today's scheduled sessions
+    const [scheduledTodayResult] = await db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.startTime, todayStart.toISOString()),
+          lte(appointments.startTime, todayEnd.toISOString())
+        )
+      );
 
-        // Revenue trend (last 6 months)
-        const revenueTrend = await db.execute(sql`
-          SELECT
-            TO_CHAR(date, 'YYYY-MM') as month,
-            SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-            SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
-          FROM transactions
-          WHERE date >= NOW() - INTERVAL '6 months'
-          GROUP BY TO_CHAR(date, 'YYYY-MM')
-          ORDER BY month DESC
-        `);
+    // New patients today
+    const [newPatientsTodayResult] = await db
+      .select({ count: count() })
+      .from(patients)
+      .where(
+        and(
+          gte(patients.createdAt, todayStart.toISOString()),
+          lte(patients.createdAt, todayEnd.toISOString())
+        )
+      );
 
-        const kpi = kpis.rows[0] || {};
+    // Revenue today (from completed sessions - would need transactions table)
+    const revenueToday = 0; // Placeholder
 
-        return {
-          kpis: {
-            activePatients: Number(kpi.activePatients || 0),
-            newPatientsThisMonth: Number(kpi.newPatientsThisMonth || 0),
-            totalLeads: Number(kpi.totalLeads || 0),
-            newLeads: Number(kpi.newLeads || 0),
-            leadsThisMonth: Number(kpi.leadsThisMonth || 0),
-            revenueThisMonth: Number(kpi.revenueThisMonth || 0),
-            revenueLastMonth: Number(kpi.revenueLastMonth || 0),
-            revenueGrowth: kpi.revenueLastMonth
-              ? (((Number(kpi.revenueThisMonth) - Number(kpi.revenueLastMonth)) / Number(kpi.revenueLastMonth)) * 100).toFixed(1)
-              : 0,
-            appointmentsToday: Number(kpi.totalToday || 0),
-            appointmentsCompletedToday: Number(kpi.completedToday || 0),
-          },
-          recent: {
-            patients: recentPatients,
-            leads: recentLeads,
-            transactions: recentTransactions.rows.map((t: any) => ({
-              ...t,
-              amountFormatted: (Number(t.amount) / 100).toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              }),
-            })),
-          },
-          revenueTrend: revenueTrend.rows.map((r: any) => ({
-            ...r,
-            incomeFormatted: (Number(r.income) / 100).toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }),
-            expenseFormatted: (Number(r.expense) / 100).toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }),
-          })),
-          generatedAt: now.toISOString(),
-        };
+    // Upcoming appointments (next 5)
+    const upcomingAppointments = await db
+      .select()
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.startTime, now.toISOString()),
+          sql`${appointments.status} IN ('scheduled', 'confirmed')`
+        )
+      )
+      .orderBy(appointments.startTime)
+      .limit(5);
+
+    // Generate alerts
+    const alerts = [];
+    const noShowCount = await db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.startTime, todayStart.toISOString()),
+          lte(appointments.startTime, todayEnd.toISOString()),
+          eq(appointments.status, 'no_show')
+        )
+      );
+
+    if (noShowCount.count > 2) {
+      alerts.push({
+        id: '1',
+        type: 'warning' as const,
+        message: `${noShowCount.count} pacientes não compareceram hoje`,
+        time: 'Agora',
+      });
+    }
+
+    if (activeSessionsResult.count > 0) {
+      alerts.push({
+        id: '2',
+        type: 'info' as const,
+        message: `${activeSessionsResult.count} sessões em andamento`,
+        time: 'Agora',
+      });
+    }
+
+    if (completedTodayResult.count >= scheduledTodayResult.count * 0.8 && scheduledTodayResult.count > 0) {
+      alerts.push({
+        id: '3',
+        type: 'success' as const,
+        message: 'Ótimo progresso! 80% das sessões concluídas',
+        time: 'Agora',
+      });
+    }
+
+    return NextResponse.json({
+      activeNow: {
+        patients: activePatients.length,
+        therapists: activeTherapists.length,
+        sessionsInProgress: activeSessionsResult.count || 0,
       },
-      { ttl: 60 } // 1 minute cache for dashboard
-    );
-
-    return NextResponse.json(dashboard);
+      todayMetrics: {
+        completedSessions: completedTodayResult.count || 0,
+        scheduledSessions: scheduledTodayResult.count || 0,
+        revenue: revenueToday,
+        newPatients: newPatientsTodayResult.count || 0,
+      },
+      upcomingAppointments: upcomingAppointments.map((apt) => ({
+        id: apt.id,
+        patientName: apt.patientName || 'Paciente',
+        therapist: apt.therapistName || 'Fisioterapeuta',
+        time: new Date(apt.startTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        type: apt.type || 'Consulta',
+      })),
+      alerts,
+    });
   } catch (error) {
-    console.error('Error generating dashboard analytics:', error);
+    console.error('Error fetching real-time analytics:', error);
     return NextResponse.json(
-      { error: 'Failed to generate dashboard analytics' },
+      { error: 'Failed to fetch real-time analytics' },
       { status: 500 }
     );
   }

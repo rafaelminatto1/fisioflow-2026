@@ -1,5 +1,5 @@
 
-import { pgTable, text, timestamp, boolean, uuid, varchar, integer, pgEnum, jsonb, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, uuid, varchar, integer, pgEnum, jsonb, uniqueIndex, numeric as pgNumeric } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // --- BETTER AUTH TABLES (Neon compatible) ---
@@ -174,6 +174,33 @@ export const patientSessions = pgTable('patient_sessions', {
 	assessment: text('assessment'),
 	plan: text('plan'),
 	evaScore: integer('eva_score'), // Pain scale 0-10
+	painMap: jsonb('pain_map').$type<{
+		imageUrl?: string;
+		bodyPart?: string;
+		points: Array<{
+			id: string;
+			x: number;
+			y: number;
+			angle: number;
+			intensity: number;
+			type: string;
+			muscleGroup?: string;
+			notes?: string;
+			agravantes?: string[];
+			aliviantes?: string[];
+		}>;
+	}>(),
+	homeCareExercises: jsonb('home_care_exercises').$type<string[]>(), // Array of exercise IDs
+	sessionType: text('session_type').default('presencial'), // 'presencial', 'telemedicine', 'home_visit'
+	duration: integer('duration'), // Session duration in minutes
+	attachments: jsonb('attachments').$type<Array<{
+		id: string;
+		name: string;
+		url: string;
+		type: string;
+		size: number;
+	}>>(),
+	therapistNotes: text('therapist_notes'), // Private notes for therapist
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -603,6 +630,32 @@ export const notificationPreferences = pgTable('notification_preferences', {
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// --- REMINDERS ---
+
+export const reminderRules = pgTable('reminder_rules', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	type: text('type').notNull(), // 'appointment', 'payment', 'follow_up', 'birthday'
+	trigger: varchar('trigger', { length: 50 }).notNull(), // '24h', '48h', '1d', '1w', etc.
+	channel: text('channel').notNull(), // 'whatsapp', 'email', 'sms'
+	template: text('template').notNull(), // message template with {{variables}}
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- NPS SURVEYS ---
+
+export const npsResponses = pgTable('nps_responses', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'set null' }),
+	score: integer('score').notNull(), // 0-10
+	feedback: text('feedback'),
+	source: text('source').default('manual'), // 'manual', 'email', 'whatsapp', 'sms'
+	respondedAt: timestamp('responded_at').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // --- PERMISSIONS/RBAC ---
 
 export const roles = pgTable('roles', {
@@ -668,6 +721,562 @@ export const reports = pgTable('reports', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// --- SOAP TEMPLATES ---
+
+export const soapTemplates = pgTable('soap_templates', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	category: text('category').notNull(), // 'initial_evaluation', 'follow_up', 'discharge', 'specific_condition'
+	condition: text('condition'), // 'lombalgia', 'cervicalgia', 'oclusal', etc.
+	subjective: text('subjective').notNull(),
+	objective: text('objective').notNull(),
+	assessment: text('assessment').notNull(),
+	plan: text('plan').notNull(),
+	variables: jsonb('variables').$type<Array<{ name: string; label: string; type: 'text' | 'number' | 'select'; options?: string[]; defaultValue?: string }>>(),
+	isActive: boolean('is_active').default(true).notNull(),
+	isSystem: boolean('is_system').default(false).notNull(), // system templates cannot be deleted
+	createdBy: uuid('created_by').references(() => staff.id, { onDelete: 'set null' }),
+	organizationId: uuid('organization_id'), // for multi-tenant support
+	usageCount: integer('usage_count').default(0).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- REFERRALS / ENCAMINHAMENTOS ---
+
+export const referrals = pgTable('referrals', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	providerName: varchar('provider_name', { length: 255 }).notNull(),
+	specialty: text('specialty').notNull(), // 'ortopedia', 'neurologia', 'cardiologia', etc.
+	reason: text('reason').notNull(),
+	urgency: text('urgency').default('routine').notNull(), // 'routine', 'urgent', 'emergency'
+	status: text('status').default('pending').notNull(), // 'pending', 'scheduled', 'completed', 'cancelled'
+	referredTo: jsonb('referred_to').$type<{
+		name?: string;
+		address?: string;
+		phone?: string;
+		email?: string;
+	}>(),
+	appointmentDate: timestamp('appointment_date'),
+	reportReceived: boolean('report_received').default(false),
+	reportUrl: text('report_url'),
+	notes: text('notes'),
+	referredBy: uuid('referred_by').references(() => staff.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- PATIENT DISCHARGE ---
+
+export const patientDischarges = pgTable('patient_discharges', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	dischargeDate: timestamp('discharge_date').notNull(),
+	reason: text('reason').notNull(), // 'treatment_completed', 'patient_request', 'medical_decision', 'insurance_exhausted', 'non_compliance', 'referral'
+	primaryDiagnosis: text('primary_diagnosis'),
+	secondaryDiagnoses: jsonb('secondary_diagnoses').$type<string[]>(),
+	treatmentSummary: text('treatment_summary').notNull(),
+	initialAssessment: text('initial_assessment'),
+	finalAssessment: text('final_assessment'),
+	outcomes: jsonb('outcomes').$type<Array<{
+		category: string;
+		initial: number | string;
+		final: number | string;
+		improvement: string;
+	}>>(),
+	painLevelInitial: integer('pain_level_initial'),
+	painLevelFinal: integer('pain_level_final'),
+	functionalGain: text('functional_gain'),
+	sessionCount: integer('session_count'),
+	recommendations: text('recommendations'),
+	followUpDate: timestamp('follow_up_date'),
+	homeCareInstructions: text('home_care_instructions'),
+	attachments: jsonb('attachments').$type<Array<{ id: string; name: string; url: string; type: string }>>(),
+	dischargedBy: uuid('discharged_by').references(() => staff.id, { onDelete: 'set null' }),
+	approvedBy: uuid('approved_by').references(() => staff.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- SESSION WORKFLOW ---
+
+export const sessionWorkflow = pgTable('session_workflow', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	sessionId: text('session_id').notNull(),
+	status: text('status').default('scheduled').notNull(), // 'scheduled', 'in_progress', 'completed', 'cancelled', 'missed'
+	startedAt: timestamp('started_at'),
+	completedAt: timestamp('completed_at'),
+	cancelledAt: timestamp('cancelled_at'),
+	cancelledBy: uuid('cancelled_by').references(() => staff.id, { onDelete: 'set null' }),
+	cancellationReason: text('cancellation_reason'),
+	notes: text('notes'),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- ACCOUNTS RECEIVABLE / PAYABLE ---
+
+export const accountsReceivable = pgTable('accounts_receivable', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'set null' }),
+	description: text('description').notNull(),
+	amount: integer('amount').notNull(), // in cents
+	dueDate: timestamp('due_date').notNull(),
+	paidAmount: integer('paid_amount').default(0).notNull(),
+	paidAt: timestamp('paid_at'),
+	status: text('status').default('pending').notNull(), // 'pending', 'partial', 'paid', 'overdue', 'cancelled'
+	paymentMethod: text('payment_method'),
+	transactionId: uuid('transaction_id').references(() => transactions.id, { onDelete: 'set null' }),
+	stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
+	installmentNumber: integer('installment_number'),
+	totalInstallments: integer('total_installments'),
+	notes: text('notes'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const accountsPayable = pgTable('accounts_payable', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	supplier: varchar('supplier', { length: 255 }).notNull(),
+	description: text('description').notNull(),
+	amount: integer('amount').notNull(), // in cents
+	dueDate: timestamp('due_date').notNull(),
+	paidAmount: integer('paid_amount').default(0).notNull(),
+	paidAt: timestamp('paid_at'),
+	status: text('status').default('pending').notNull(), // 'pending', 'partial', 'paid', 'overdue', 'cancelled'),
+	paymentMethod: text('payment_method'),
+	category: text('category'), // 'rent', 'supplies', 'services', 'equipment', 'utilities'
+	documentNumber: varchar('document_number', { length: 100 }),
+	notes: text('notes'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- INSURANCE / CONVENIOS ---
+
+export const insurancePlans = pgTable('insurance_plans', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull().unique(),
+	ansCode: varchar('ans_code', { length: 20 }), // Registro ANS
+	cnpj: varchar('cnpj', { length: 18 }),
+	phone: varchar('phone', { length: 20 }),
+	email: varchar('email', { length: 255 }),
+	address: jsonb('address').$type<{
+		street?: string;
+		number?: string;
+		neighborhood?: string;
+		city?: string;
+		state?: string;
+		zipCode?: string;
+	}>(),
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const patientInsurance = pgTable('patient_insurance', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	planId: uuid('plan_id').references(() => insurancePlans.id, { onDelete: 'set null' }),
+	cardNumber: varchar('card_number', { length: 50 }),
+	holderName: varchar('holder_name', { length: 255 }),
+	holderCpf: varchar('holder_cpf', { length: 14 }),
+	validityStart: timestamp('validity_start'),
+	validityEnd: timestamp('validity_end'),
+	authorizationCode: varchar('authorization_code', { length: 50 }),
+	isPrimary: boolean('is_primary').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const tissGuides = pgTable('tiss_guides', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	insurancePlanId: uuid('insurance_plan_id').references(() => insurancePlans.id, { onDelete: 'set null' }),
+	guideNumber: varchar('guide_number', { length: 20 }).unique(),
+	guideType: text('guide_type').notNull(), // 'sp_sadt', 'guia_consulta', 'honorario_individual'
+	authorizationNumber: varchar('authorization_number', { length: 20 }),
+	sessionId: text('session_id'),
+	procedures: jsonb('procedures').$type<Array<{
+		tussCode: string;
+		description: string;
+		quantity: number;
+		unitValue: number;
+		totalValue: number;
+	}>>().notNull(),
+	totalAmount: integer('total_amount').notNull(), // in cents
+	status: text('status').default('pending').notNull(), // 'pending', 'submitted', 'approved', 'rejected', 'paid'
+	submissionDate: timestamp('submission_date'),
+	responseDate: timestamp('response_date'),
+	glosaReason: text('glosa_reason'),
+	glosaAmount: integer('glosa_amount'),
+	createdBy: uuid('created_by').references(() => staff.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- CRM NURTURING SEQUENCES ---
+
+export const nurturingSequences = pgTable('nurturing_sequences', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	triggerType: text('trigger_type').notNull(), // 'lead_created', 'no_show', 'inactive_patient', 'post_discharge', 'birthday'
+	triggerDelay: integer('trigger_delay').default(0), // hours after trigger
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const nurturingSteps = pgTable('nurturing_steps', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	sequenceId: uuid('sequence_id')
+		.references(() => nurturingSequences.id, { onDelete: 'cascade' })
+		.notNull(),
+	stepOrder: integer('step_order').notNull(),
+	channel: text('channel').notNull(), // 'email', 'whatsapp', 'sms'
+	subject: varchar('subject', { length: 255 }),
+	message: text('message').notNull(),
+	delayHours: integer('delay_hours').default(24), // hours after previous step
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const nurturingLogs = pgTable('nurturing_logs', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	sequenceId: uuid('sequence_id').references(() => nurturingSequences.id, { onDelete: 'set null' }),
+	leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'set null' }),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'set null' }),
+	stepId: uuid('step_id').references(() => nurturingSteps.id, { onDelete: 'set null' }),
+	status: text('status').default('pending').notNull(), // 'pending', 'sent', 'delivered', 'failed'
+	sentAt: timestamp('sent_at'),
+	deliveredAt: timestamp('delivered_at'),
+	failedReason: text('failed_reason'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- LEAD SCORING ---
+
+export const leadScoringRules = pgTable('lead_scoring_rules', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	ruleType: text('rule_type').notNull(), // 'source', 'response_time', 'budget', 'location', 'custom'
+	condition: jsonb('condition').notNull(), // { field: 'source', operator: 'equals', value: 'instagram' }
+	points: integer('points').notNull(),
+	isActive: boolean('is_active').default(true).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const leadScores = pgTable('lead_scores', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	leadId: uuid('lead_id')
+		.references(() => leads.id, { onDelete: 'cascade' })
+		.notNull(),
+	score: integer('score').default(0).notNull(),
+	lastCalculated: timestamp('last_calculated').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- CAMPAIGNS ---
+
+export const campaigns = pgTable('campaigns', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+	type: text('type').notNull(), // 'whatsapp', 'email', 'sms'
+	status: text('status').default('draft').notNull(), // 'draft', 'scheduled', 'sending', 'sent', 'cancelled'
+	message: text('message').notNull(),
+	recipients: jsonb('recipients').$type<Array<{ id: string; name?: string; phone?: string; email?: string }>>(),
+	scheduledFor: timestamp('scheduled_for'),
+	sentAt: timestamp('sent_at'),
+	deliveredCount: integer('delivered_count').default(0),
+	failedCount: integer('failed_count').default(0),
+	openedCount: integer('opened_count').default(0),
+	clickedCount: integer('clicked_count').default(0),
+	createdBy: uuid('created_by').references(() => staff.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- NPS / SATISFACTION ---
+
+export const npsSurveys = pgTable('nps_surveys', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	sessionId: text('session_id'),
+	score: integer('score').notNull(), // 0-10
+	feedback: text('feedback'),
+	isPromoter: boolean('is_promoter'), // score 9-10
+	isPassive: boolean('is_passive'), // score 7-8
+	isDetractor: boolean('is_detractor'), // score 0-6
+	sentAt: timestamp('sent_at'),
+	answeredAt: timestamp('answered_at'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- PAYMENT INTEGRATION ---
+
+export const paymentMethods = pgTable('payment_methods', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 100 }).notNull(),
+	type: text('type').notNull(), // 'credit_card', 'debit_card', 'pix', 'boleto', 'cash', 'transfer'
+	isActive: boolean('is_active').default(true).notNull(),
+	config: jsonb('config').$type<{
+		stripeProductId?: string;
+		stripePriceId?: string;
+		installmentsEnabled?: boolean;
+		maxInstallments?: number;
+	}>(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const payments = pgTable('payments', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id').references(() => patients.id, { onDelete: 'set null' }),
+	amount: pgNumeric('amount', { precision: 10, scale: 2 }).notNull(),
+	currency: varchar('currency', { length: 3 }).default('BRL').notNull(),
+	status: text('status').default('pending').notNull(), // 'pending', 'completed', 'failed', 'refunded'
+	paymentMethod: text('payment_method'), // 'stripe', 'boleto', 'pix', 'cash', 'card', 'transfer', 'subscription'
+	stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
+	stripeInvoiceId: varchar('stripe_invoice_id', { length: 255 }),
+	dueDate: timestamp('due_date'),
+	paidAt: timestamp('paid_at'),
+	metadata: jsonb('metadata').$type<Record<string, any>>(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const subscriptions = pgTable('subscriptions', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	packageId: uuid('package_id').references(() => packages.id, { onDelete: 'set null' }),
+	stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
+	stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
+	stripePriceId: varchar('stripe_price_id', { length: 255 }),
+	stripeItemId: varchar('stripe_item_id', { length: 255 }),
+	status: text('status').default('active').notNull(), // 'active', 'past_due', 'canceled', 'unpaid', 'trialing'
+	currentPeriodStart: timestamp('current_period_start'),
+	currentPeriodEnd: timestamp('current_period_end'),
+	cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
+	canceledAt: timestamp('canceled_at'),
+	endedAt: timestamp('ended_at'),
+	lastPaymentDate: timestamp('last_payment_date'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// --- AI TREATMENT PLANS ---
+
+export const aiTreatmentPlans = pgTable('ai_treatment_plans', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	patientId: uuid('patient_id')
+		.references(() => patients.id, { onDelete: 'cascade' })
+		.notNull(),
+	sessionId: text('session_id'),
+	diagnosis: text('diagnosis').notNull(),
+	objectives: jsonb('objectives').$type<Array<{ title: string; description: string; targetDate?: string }>>(),
+	techniques: jsonb('techniques').$type<Array<{
+		name: string;
+		description: string;
+		duration: number;
+		frequency: string;
+	}>>().notNull(),
+	exercises: jsonb('exercises').$type<Array<{
+		exerciseId?: string;
+		name: string;
+		sets: number;
+		reps: string;
+		frequency: string;
+		notes?: string;
+	}>>(),
+	expectedOutcomes: jsonb('expected_outcomes').$type<Array<{ outcome: string; timeframe: string }>>(),
+	precautions: jsonb('precautions').$type<string[]>(),
+	aiModel: text('ai_model'), // 'gemini', 'gpt-4', etc.
+	aiResponse: jsonb('ai_response'), // raw AI response for debugging
+	isAccepted: boolean('is_accepted').default(false),
+	modifications: text('modifications'),
+	createdBy: uuid('created_by').references(() => staff.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// --- RELATIONS FOR NEW TABLES ---
+
+export const soapTemplatesRelations = relations(soapTemplates, ({ one }) => ({
+	createdByStaff: one(staff, {
+		fields: [soapTemplates.createdBy],
+		references: [staff.id],
+	}),
+}));
+
+export const referralsRelations = relations(referrals, ({ one }) => ({
+	patient: one(patients, {
+		fields: [referrals.patientId],
+		references: [patients.id],
+	}),
+	referredByStaff: one(staff, {
+		fields: [referrals.referredBy],
+		references: [staff.id],
+	}),
+}));
+
+export const patientDischargesRelations = relations(patientDischarges, ({ one }) => ({
+	patient: one(patients, {
+		fields: [patientDischarges.patientId],
+		references: [patients.id],
+	}),
+	dischargedByStaff: one(staff, {
+		fields: [patientDischarges.dischargedBy],
+		references: [staff.id],
+	}),
+	approvedByStaff: one(staff, {
+		fields: [patientDischarges.approvedBy],
+		references: [staff.id],
+	}),
+}));
+
+export const accountsReceivableRelations = relations(accountsReceivable, ({ one }) => ({
+	patient: one(patients, {
+		fields: [accountsReceivable.patientId],
+		references: [patients.id],
+	}),
+	transaction: one(transactions, {
+		fields: [accountsReceivable.transactionId],
+		references: [transactions.id],
+	}),
+}));
+
+export const accountsPayableRelations = relations(accountsPayable, ({ one, many }) => ({
+	// No direct relations needed
+}));
+
+export const insurancePlansRelations = relations(insurancePlans, ({ many }) => ({
+	patientInsurances: many(patientInsurance),
+	tissGuides: many(tissGuides),
+}));
+
+export const patientInsuranceRelations = relations(patientInsurance, ({ one }) => ({
+	patient: one(patients, {
+		fields: [patientInsurance.patientId],
+		references: [patients.id],
+	}),
+	plan: one(insurancePlans, {
+		fields: [patientInsurance.planId],
+		references: [insurancePlans.id],
+	}),
+}));
+
+export const tissGuidesRelations = relations(tissGuides, ({ one }) => ({
+	patient: one(patients, {
+		fields: [tissGuides.patientId],
+		references: [patients.id],
+	}),
+	insurancePlan: one(insurancePlans, {
+		fields: [tissGuides.insurancePlanId],
+		references: [insurancePlans.id],
+	}),
+	createdByStaff: one(staff, {
+		fields: [tissGuides.createdBy],
+		references: [staff.id],
+	}),
+}));
+
+export const nurturingSequencesRelations = relations(nurturingSequences, ({ many, one }) => ({
+	steps: many(nurturingSteps),
+	logs: many(nurturingLogs),
+}));
+
+export const nurturingStepsRelations = relations(nurturingSteps, ({ one, many }) => ({
+	sequence: one(nurturingSequences, {
+		fields: [nurturingSteps.sequenceId],
+		references: [nurturingSequences.id],
+	}),
+	logs: many(nurturingLogs),
+}));
+
+export const nurturingLogsRelations = relations(nurturingLogs, ({ one }) => ({
+	sequence: one(nurturingSequences, {
+		fields: [nurturingLogs.sequenceId],
+		references: [nurturingSequences.id],
+	}),
+	lead: one(leads, {
+		fields: [nurturingLogs.leadId],
+		references: [leads.id],
+	}),
+	patient: one(patients, {
+		fields: [nurturingLogs.patientId],
+		references: [patients.id],
+	}),
+	step: one(nurturingSteps, {
+		fields: [nurturingLogs.stepId],
+		references: [nurturingSteps.id],
+	}),
+}));
+
+export const leadScoringRulesRelations = relations(leadScoringRules, ({ many }) => ({
+	// No direct relations needed
+}));
+
+export const leadScoresRelations = relations(leadScores, ({ one }) => ({
+	lead: one(leads, {
+		fields: [leadScores.leadId],
+		references: [leads.id],
+	}),
+}));
+
+export const campaignsRelations = relations(campaigns, ({ one }) => ({
+	createdByStaff: one(staff, {
+		fields: [campaigns.createdBy],
+		references: [staff.id],
+	}),
+}));
+
+export const npsSurveysRelations = relations(npsSurveys, ({ one }) => ({
+	patient: one(patients, {
+		fields: [npsSurveys.patientId],
+		references: [patients.id],
+	}),
+}));
+
+export const paymentMethodsRelations = relations(paymentMethods, ({ many }) => ({
+	// No direct relations needed
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+	patient: one(patients, {
+		fields: [subscriptions.patientId],
+		references: [patients.id],
+	}),
+	package: one(packages, {
+		fields: [subscriptions.packageId],
+		references: [packages.id],
+	}),
+}));
+
+export const aiTreatmentPlansRelations = relations(aiTreatmentPlans, ({ one }) => ({
+	patient: one(patients, {
+		fields: [aiTreatmentPlans.patientId],
+		references: [patients.id],
+	}),
+	createdByStaff: one(staff, {
+		fields: [aiTreatmentPlans.createdBy],
+		references: [staff.id],
+	}),
+}));
 
 // --- RELATIONS FOR NEW TABLES ---
 
