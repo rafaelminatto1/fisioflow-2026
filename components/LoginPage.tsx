@@ -1,8 +1,8 @@
 
 'use client';
 
-import React from 'react';
-import { BrainCircuitIcon, LockIcon, MailIcon, ChevronRightIcon, UsersIcon, CheckCircleIcon, AlertCircleIcon } from './Icons';
+import React, { useState } from 'react';
+import { BrainCircuitIcon, LockIcon, MailIcon, ChevronRightIcon, UsersIcon, CheckCircleIcon, AlertCircleIcon, EyeIcon, EyeOffIcon } from './Icons';
 import { useAuthForm } from '@/hooks/use-auth-form';
 
 const LoginPage: React.FC = () => {
@@ -17,6 +17,8 @@ const LoginPage: React.FC = () => {
         handleRegister,
         isSubmitting
     } = useAuthForm();
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const onSubmit = isLogin ? handleLogin : handleRegister;
     const currentForm = isLogin ? loginForm : registerForm;
@@ -128,13 +130,22 @@ const LoginPage: React.FC = () => {
                                     <LockIcon className="w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                                 </div>
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     {...((isLogin ? loginForm : registerForm) as any).register('password')}
-                                    className={`w-full pl-12 pr-4 py-4 bg-slate-50/50 border ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-xl focus:ring-4 outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300`}
+                                    className={`w-full pl-12 pr-12 py-4 bg-slate-50/50 border ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-xl focus:ring-4 outline-none transition-all duration-300 font-medium text-slate-700 placeholder:text-slate-300 hover:border-slate-300`}
                                     placeholder="••••••••"
                                     disabled={isSubmitting}
                                     aria-label="Senha"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 hover:text-slate-600 focus:text-primary focus:outline-none"
+                                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                                    disabled={isSubmitting}
+                                >
+                                    {showPassword ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                                </button>
                             </div>
                             {errors.password && <p className="text-xs text-red-500 font-medium ml-1">{errors.password.message as string}</p>}
                         </div>
