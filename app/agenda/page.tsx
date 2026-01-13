@@ -49,11 +49,18 @@ export default function AgendaPage() {
     // View State
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
-    // Filter States - Default to today
-    const todayStr = new Date().toISOString().split('T')[0];
-    const [filterDate, setFilterDate] = useState(todayStr);
+    // Filter States - Default to empty to match server, then update to today
+    const [filterDate, setFilterDate] = useState('');
     const [filterPhysio, setFilterPhysio] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+        // Set initial date only on client side to avoid hydration mismatch
+        const todayStr = new Date().toLocaleDateString('sv'); // YYYY-MM-DD
+        setFilterDate(todayStr);
+    }, []);
 
     const fetchAppointments = async () => {
         setLoading(true);
@@ -69,22 +76,50 @@ export default function AgendaPage() {
         fetchAppointments();
     }, []);
 
+    // Helper to check if appointment is on selected date (handling timezones)
+    const isSameDate = (dateStr: string, filterDateStr: string) => {
+        if (!dateStr || !filterDateStr) return false;
+        try {
+            const d = new Date(dateStr);
+            const localDate = d.toLocaleDateString('sv'); // YYYY-MM-DD
+            return localDate === filterDateStr;
+        } catch (e) {
+            return false;
+        }
+    };
+
     // Filter Logic
     const filteredAppointments = useMemo(() => {
-        if (!Array.isArray(appointments)) return [];
+        if (!Array.isArray(appointments) || !filterDate) return [];
 
         return appointments.filter(apt => {
             if (!apt) return false;
+
+            // Fix: Compare local dates instead of raw string startsWith
+            const matchesDate = isSameDate(apt.startTime, filterDate);
             const matchesPhysio = filterPhysio === 'all' || apt.therapistId === filterPhysio;
             const matchesStatus = filterStatus === 'all' || apt.status === filterStatus;
+
+            // For calendar view, we might want all dates, but for list/metrics usually selected date matters
+            // Current flow seems to be: 
+            // - Calendar View: Shows week/month usually? The current implementation passes ALL filtered appointments to WeeklyCalendar
+            // - List View: Shows only selected date
+
+            // Let's refine: The 'filteredAppointments' should probably respect Physio/Status 
+            // and the DATE filtering should happen at the specific view/metric level OR here if the intent is date-specific filtering globally.
+            // Looking at original code: 'dailyAppointments' filtered again by startsWith.
+            // Let's keep general filtering here (Physio/Status) and let views handle date if they show ranges, 
+            // BUT the original code didn't filter by date here? 
+            // Wait, original: `matchesPhysio && matchesStatus` (NO DATE check in main filter)
+
             return matchesPhysio && matchesStatus;
         });
-    }, [appointments, filterPhysio, filterStatus]);
+    }, [appointments, filterPhysio, filterStatus, filterDate]);
 
     // Derived Metrics for KPI Bar
     const agendaMetrics = useMemo(() => {
         // Filter for the specific view period (Simplify to "Selected Date" for KPIs to be precise)
-        const dailyAppointments = filteredAppointments.filter(a => a.startTime.startsWith(filterDate));
+        const dailyAppointments = filteredAppointments.filter(a => isSameDate(a.startTime, filterDate));
 
         const total = dailyAppointments.length;
         const confirmed = dailyAppointments.filter(a => a.status === 'confirmed' || a.status === 'completed').length;
@@ -356,9 +391,9 @@ export default function AgendaPage() {
                 ) : (
                     <div className="h-full overflow-auto custom-scrollbar p-4">
                         <ScheduleTable
-                            appointments={filteredAppointments.filter(a => a.startTime.startsWith(filterDate))}
+                            appointments={filteredAppointments.filter(a => isSameDate(a.startTime, filterDate))}
                         />
-                        {filteredAppointments.filter(a => a.startTime.startsWith(filterDate)).length === 0 && (
+                        {filteredAppointments.filter(a => isSameDate(a.startTime, filterDate)).length === 0 && (
                             <div className="text-center py-20 text-slate-400 flex flex-col items-center">
                                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                                     <CalendarIcon className="w-8 h-8 opacity-30" />

@@ -112,6 +112,14 @@ body {
   animation: slideUp 0.7s ease-out forwards;
 }
 
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-1rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-down {
+  animation: slideDown 0.5s ease-out forwards;
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   15% { transform: translateX(-5px); }

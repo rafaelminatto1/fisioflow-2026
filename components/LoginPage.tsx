@@ -147,9 +147,16 @@ const LoginPage: React.FC = () => {
                         )}
 
                         {globalSuccess && (
-                            <div className="p-4 bg-emerald-50/50 border border-emerald-100 text-emerald-600 text-sm font-medium rounded-xl animate-pulse flex items-center gap-3">
-                                <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />
-                                <span>{globalSuccess}</span>
+                            <div className="p-5 bg-emerald-50/90 backdrop-blur-xl border border-emerald-200/60 text-emerald-800 rounded-2xl animate-slide-down flex items-start gap-4 shadow-[0_8px_30px_rgb(16,185,129,0.12)] ring-1 ring-emerald-500/20 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-transparent rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
+
+                                <div className="p-2.5 bg-emerald-100/80 rounded-xl shrink-0 border border-emerald-200/50 shadow-sm">
+                                    <CheckCircleIcon className="w-6 h-6 text-emerald-600 drop-shadow-sm" />
+                                </div>
+                                <div className="flex flex-col gap-1 z-10 py-0.5">
+                                    <span className="font-bold text-lg text-emerald-950 tracking-tight">Tudo pronto!</span>
+                                    <span className="text-emerald-700/90 font-medium leading-relaxed text-[15px]">{globalSuccess}</span>
+                                </div>
                             </div>
                         )}
 
@@ -173,6 +180,7 @@ const LoginPage: React.FC = () => {
 
                     <div className="text-center mt-8">
                         <button
+                            type="button"
                             onClick={toggleMode}
                             className="group relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 disabled:opacity-50 transition-all duration-300"
                             disabled={isSubmitting}
