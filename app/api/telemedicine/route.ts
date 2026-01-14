@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { telemedicineSessions, patients } from '@/db/schema';
-import { eq, desc, gte, and } from 'drizzle-orm';
+import { eq, desc, gte, lte, and } from 'drizzle-orm';
 
 // GET /api/telemedicine - List telemedicine sessions (redirects to /sessions logic)
 export async function GET(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       const endOfDay = new Date(date.setHours(23, 59, 59, 999));
       whereClause = and(
         gte(telemedicineSessions.scheduledFor, startOfDay),
-        gte(endOfDay, telemedicineSessions.scheduledFor)
+        lte(telemedicineSessions.scheduledFor, endOfDay)
       );
     }
 

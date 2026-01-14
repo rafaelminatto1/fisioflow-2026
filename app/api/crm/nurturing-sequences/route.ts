@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       where: activeOnly ? eq(nurturingSequences.isActive, true) : undefined,
       with: {
         steps: {
-          orderBy: [nurturingSteps.delayDays, nurturingSteps.order],
+          orderBy: [nurturingSteps.delayHours, nurturingSteps.stepOrder],
         },
       },
       orderBy: [desc(nurturingSequences.createdAt)],
@@ -26,14 +26,14 @@ export async function GET(request: NextRequest) {
       name: seq.name,
       description: seq.description,
       active: seq.isActive,
-      triggers: seq.triggers || [],
+      triggerType: seq.triggerType,
+      triggerDelay: seq.triggerDelay,
       steps: seq.steps.map(step => ({
         id: step.id,
-        delay: step.delayDays,
-        type: step.channel,
+        delayHours: step.delayHours,
+        channel: step.channel,
         subject: step.subject,
-        message: step.content,
-        template: step.template,
+        message: step.message,
       })),
       createdAt: seq.createdAt,
       updatedAt: seq.updatedAt,
@@ -67,19 +67,18 @@ export async function POST(request: NextRequest) {
       name,
       description: description || null,
       isActive: active ?? true,
-      triggers: triggers ?? [],
+      triggerType: Array.isArray(triggers) ? triggers[0] : (triggers || 'manual'),
     }).returning();
 
     // Create steps
     if (steps.length > 0) {
       const stepsToInsert = steps.map((step: any, index: number) => ({
         sequenceId: newSequence[0].id,
-        order: index + 1,
-        delayDays: step.delay ?? 0,
-        channel: step.type || 'whatsapp',
+        stepOrder: index + 1,
+        delayHours: step.delay ?? step.delayHours ?? 0,
+        channel: step.type || step.channel || 'whatsapp',
         subject: step.subject || null,
-        content: step.message || null,
-        template: step.template || null,
+        message: step.message || null,
       }));
 
       await db.insert(nurturingSteps).values(stepsToInsert);

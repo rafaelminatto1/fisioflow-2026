@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     const notifications: any[] = [];
     if (notifyPatients && isWhatsAppAvailable()) {
       const formattedDate = format(slotDate, "dd 'de' MMMM", { locale: ptBR });
-      
+
       for (const match of topMatches) {
         const phone = match.waitlistEntry.patientPhone;
         if (phone) {
@@ -187,16 +187,13 @@ export async function GET(request: NextRequest) {
         startTime: appointments.startTime,
         endTime: appointments.endTime,
         therapistId: appointments.therapistId,
-        updatedAt: appointments.updatedAt,
       })
       .from(appointments)
       .where(
         and(
           eq(appointments.status, 'cancelled'),
           gte(appointments.startTime, now),
-          lte(appointments.startTime, endDate),
-          // Recently cancelled (last 24 hours)
-          gte(appointments.updatedAt, new Date(now.getTime() - 24 * 60 * 60 * 1000))
+          lte(appointments.startTime, endDate)
         )
       );
 

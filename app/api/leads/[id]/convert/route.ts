@@ -53,15 +53,12 @@ export async function POST(
       fullName: lead.name,
       email: lead.email,
       phone: lead.phone,
-      status: 'active',
-      source: lead.source,
-      notes: lead.notes,
-      createdAt: new Date(),
+      isActive: true,
       // Additional fields from request body
       birthDate: body.birthDate || null,
       cpf: body.cpf || null,
       address: body.address || null,
-      condition: body.condition || null,
+      condition: lead.notes || body.condition || null,
     }).returning();
 
     // Update lead status to converted

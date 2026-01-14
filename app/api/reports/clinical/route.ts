@@ -156,8 +156,8 @@ export async function GET(request: NextRequest) {
 
       const [dayResult] = await db
         .select({ count: count() })
-        .from(session)
-        .where(and(gte(session.date, dayStart.toISOString()), lte(session.date, dayEnd.toISOString())));
+        .from(patientSessions)
+        .where(and(gte(patientSessions.date, dayStart.toISOString().split('T')[0]), lte(patientSessions.date, dayEnd.toISOString().split('T')[0])));
 
       sessionTrend.push({
         date: dayStart.toISOString(),

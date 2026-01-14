@@ -357,6 +357,13 @@ export const waitlist = pgTable('waitlist', {
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const waitlistRelations = relations(waitlist, ({ one }) => ({
+	patient: one(patients, {
+		fields: [waitlist.patientId],
+		references: [patients.id],
+	}),
+}));
+
 // --- PACKAGES ---
 
 export const packages = pgTable('packages', {

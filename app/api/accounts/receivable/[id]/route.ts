@@ -101,7 +101,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    
+
     await db.delete(accountsReceivable).where(eq(accountsReceivable.id, id));
 
     return NextResponse.json({ success: true });
@@ -167,13 +167,12 @@ export async function PATCH(
       // Create transaction record
       await db.insert(transactions).values({
         patientId: account[0].patientId,
-        description: `Recebimento: ${account[0].description}`,
+        description: `Recebimento: ${account[0].description} (Ref: Conta a receber #${id})`,
         amount: paidAmount,
         type: 'income',
         category: 'services',
         date: new Date(),
         paymentMethod: paymentMethod,
-        notes: `Ref: Conta a receber #${id}`,
       });
 
       // Send WhatsApp confirmation if patient has phone
@@ -190,8 +189,8 @@ export async function PATCH(
       return NextResponse.json({
         success: true,
         account: updated[0],
-        message: isFullyPaid 
-          ? 'Pagamento completo registrado' 
+        message: isFullyPaid
+          ? 'Pagamento completo registrado'
           : `Pagamento parcial registrado. Restam R$ ${((account[0].amount || 0) - totalPaid).toFixed(2)}`,
         whatsAppSent,
       });

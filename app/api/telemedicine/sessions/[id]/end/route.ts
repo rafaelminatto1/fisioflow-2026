@@ -4,6 +4,7 @@ import { telemedicineSessions, patientSessions, pointsHistory } from '@/db/schem
 import { eq } from 'drizzle-orm';
 import { invalidatePattern } from '@/lib/vercel-kv';
 import { sendSessionSummary, isWhatsAppAvailable } from '@/lib/whatsapp';
+import { nanoid } from 'nanoid';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -14,15 +15,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
     const body = await request.json();
-    const { 
-      notes, 
-      subjective, 
-      objective, 
-      assessment, 
+    const {
+      notes,
+      subjective,
+      objective,
+      assessment,
       plan,
       evaScore,
       sendSummary = false,
-      duration 
+      duration
     } = body;
 
     // Get session with patient details
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Calculate actual duration
-    const startedAt = session.startedAt || session.scheduledFor;
+    const startedAt = session.scheduledFor;
     const actualDuration = duration || Math.round(
       (Date.now() - new Date(startedAt).getTime()) / (1000 * 60)
     );
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     let clinicalSessionId = null;
     if (subjective || objective || assessment || plan) {
       const clinicalSession = await db.insert(patientSessions).values({
+        id: nanoid(),
         patientId: session.patientId,
         date: new Date().toISOString().split('T')[0],
         subjective,

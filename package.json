@@ -25,6 +25,7 @@
     "@stripe/stripe-js": "^8.6.1",
     "@types/html2canvas": "^0.5.35",
     "@types/pg": "^8.16.0",
+    "@types/ws": "^8.18.1",
     "@vercel/blob": "^2.0.0",
     "@vercel/kv": "^3.0.0",
     "better-auth": "^1.4.10",
@@ -48,6 +49,7 @@
     "tailwind-merge": "^3.4.0",
     "three": "0.160.0",
     "uuid": "9.0.1",
+    "ws": "^8.19.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {

@@ -21,28 +21,29 @@ export async function POST(request: NextRequest) {
       where: eq(nurturingSequences.isActive, true),
       with: {
         steps: {
-          orderBy: [nurturingSteps.delayDays, nurturingSteps.order],
+          orderBy: [nurturingSteps.delayHours, nurturingSteps.stepOrder],
         },
       },
     });
 
     // Process each sequence
     for (const sequence of activeSequences) {
-      const triggers = sequence.triggers as string[] || [];
-
-      // Handle different trigger types
-      for (const trigger of triggers) {
-        switch (trigger) {
-          case 'new_lead':
-            await processNewLeadsTrigger(sequence, results);
-            break;
-          case 'inactive_30_days':
-            await processInactivePatientsTrigger(sequence, results);
-            break;
-          case 'after_appointment':
-            // This would be triggered separately after appointments
-            break;
-        }
+      // Handle the trigger type
+      switch (sequence.triggerType) {
+        case 'lead_created':
+        case 'new_lead': // added for compatibility if needed
+          await processNewLeadsTrigger(sequence, results);
+          break;
+        case 'inactive_patient':
+        case 'inactive_30_days': // added for compatibility if needed
+          await processInactivePatientsTrigger(sequence, results);
+          break;
+        case 'after_appointment':
+        case 'no_show':
+        case 'post_discharge':
+        case 'birthday':
+          // These would be implemented separately
+          break;
       }
     }
 
@@ -65,7 +66,7 @@ async function processNewLeadsTrigger(sequence: any, results: any) {
 
   // Find leads that need nurturing
   for (const step of sequence.steps) {
-    const delayMs = step.delayDays * 24 * 60 * 60 * 1000;
+    const delayMs = (step.delayHours || 24) * 60 * 60 * 1000;
     const cutoffDate = new Date(now.getTime() - delayMs);
 
     // Find leads created around the step's delay time that haven't received this step
@@ -110,9 +111,9 @@ async function processNewLeadsTrigger(sequence: any, results: any) {
 
         if (success) {
           results.sent++;
-          
+
           // Update lead status if first contact
-          if (step.order === 1 && lead.status === 'new') {
+          if (step.stepOrder === 1 && lead.status === 'new') {
             await db.update(leads)
               .set({ status: 'contacted', updatedAt: new Date() })
               .where(eq(leads.id, lead.id));
@@ -130,11 +131,10 @@ async function processNewLeadsTrigger(sequence: any, results: any) {
       await db.insert(nurturingLogs).values({
         sequenceId: sequence.id,
         stepId: step.id,
-        targetType: 'lead',
-        targetId: lead.id,
+        leadId: lead.id,
         status: success ? 'sent' : 'failed',
         sentAt: success ? new Date() : null,
-        errorMessage,
+        failedReason: errorMessage,
       });
 
       results.details.push({
@@ -156,7 +156,7 @@ async function processInactivePatientsTrigger(sequence: any, results: any) {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   for (const step of sequence.steps) {
-    const delayMs = step.delayDays * 24 * 60 * 60 * 1000;
+    const delayMs = (step.delayHours || 24) * 60 * 60 * 1000;
     const cutoffDate = new Date(now.getTime() - delayMs);
 
     // Find patients inactive for 30+ days that haven't received this step
@@ -213,11 +213,10 @@ async function processInactivePatientsTrigger(sequence: any, results: any) {
       await db.insert(nurturingLogs).values({
         sequenceId: sequence.id,
         stepId: step.id,
-        targetType: 'patient',
-        targetId: patient.id,
+        patientId: patient.id,
         status: success ? 'sent' : 'failed',
         sentAt: success ? new Date() : null,
-        errorMessage,
+        failedReason: errorMessage,
       });
 
       results.details.push({

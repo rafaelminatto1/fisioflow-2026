@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Generate unique room ID if not exists
     const roomId = session.roomUrl ? session.roomUrl.split('/').pop() : `fisioflow-${nanoid(10)}`;
-    
+
     // Generate room URL (using Whereby-style URLs - can be adapted for other providers)
     // In production, integrate with actual video provider API
     const roomUrl = session.roomUrl || `https://whereby.com/${roomId}`;
@@ -55,7 +55,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
         status: 'in_progress',
         roomUrl,
         roomPassword,
-        startedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(telemedicineSessions.id, id))
@@ -65,12 +64,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
     let patientNotified = false;
     if (notifyPatient && session.patient?.phone && isWhatsAppAvailable()) {
       const message = `Olá ${session.patient.fullName}! 📹\n\nSua sessão de teleconsulta está pronta para começar.\n\n🔗 Link: ${roomUrl}\n🔑 Senha: ${roomPassword}\n\nClique no link para entrar na sala. Te aguardamos!`;
-      
+
       const result = await sendWhatsAppMessage({
         number: session.patient.phone,
         text: message,
       });
-      
+
       patientNotified = result !== null;
     }
 

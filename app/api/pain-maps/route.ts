@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { patientSessions, patients } from '@/db/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { withCache, invalidatePattern } from '@/lib/vercel-kv';
+import { nanoid } from 'nanoid';
 
 interface PainPoint {
   id: string;
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
 
     // Create a session entry with just the pain map
     const newSession = await db.insert(patientSessions).values({
+      id: nanoid(),
       patientId,
       date: date || new Date().toISOString().split('T')[0],
       painMap: painMap as PainMapData,
@@ -150,7 +152,7 @@ function calculatePainMapSummary(history: any[]) {
 
     if (previous > 0) {
       improvement = Math.round(((previous - latest) / previous) * 100);
-      
+
       if (improvement > 10) {
         trend = 'improving';
       } else if (improvement < -10) {

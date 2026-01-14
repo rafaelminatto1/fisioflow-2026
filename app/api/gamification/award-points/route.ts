@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { patients, pointsHistory, pointsRules, badges, achievements } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import { invalidatePattern } from '@/lib/vercel-kv';
 
 // Point actions and their default values
@@ -83,7 +83,6 @@ export async function POST(request: NextRequest) {
       .set({
         totalPoints: newPoints,
         lastActiveDate: new Date(),
-        updatedAt: new Date(),
       })
       .where(eq(patients.id, patientId));
 
@@ -94,7 +93,6 @@ export async function POST(request: NextRequest) {
       source: action || 'manual',
       sourceId: sourceId || null,
       description: pointSource,
-      metadata: metadata || null,
     });
 
     // Check for new achievements/badges
@@ -128,7 +126,7 @@ export async function POST(request: NextRequest) {
 function calculateLevel(points: number): number {
   // Level thresholds
   const thresholds = [0, 100, 300, 600, 1000, 1500, 2500, 4000, 6000, 10000];
-  
+
   for (let i = thresholds.length - 1; i >= 0; i--) {
     if (points >= thresholds[i]) {
       return i + 1;
@@ -163,35 +161,30 @@ async function checkAndAwardAchievements(
 
     let earned = false;
 
-    // Check criteria based on badge type
-    if (badge.criteria) {
-      const criteria = badge.criteria as any;
+    // Points-based badges
+    if (badge.requirementType === 'points_earned' && totalPoints >= badge.requirementValue) {
+      earned = true;
+    }
 
-      // Points-based badges
-      if (criteria.minPoints && totalPoints >= criteria.minPoints) {
+    // Streak-based badges
+    if (badge.requirementType === 'streak_days' && currentStreak >= badge.requirementValue) {
+      earned = true;
+    }
+
+    // Sessions-based badges
+    if (badge.requirementType === 'sessions_completed') {
+      const sessionCount = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(pointsHistory)
+        .where(
+          and(
+            eq(pointsHistory.patientId, patientId),
+            eq(pointsHistory.source, 'session_completed')
+          )
+        );
+
+      if (sessionCount[0]?.count >= badge.requirementValue) {
         earned = true;
-      }
-
-      // Streak-based badges
-      if (criteria.minStreak && currentStreak >= criteria.minStreak) {
-        earned = true;
-      }
-
-      // Action-based badges
-      if (criteria.action && action === criteria.action) {
-        // Check count if needed
-        if (criteria.count) {
-          const actionCount = await db
-            .select({ count: sql<number>`COUNT(*)` })
-            .from(pointsHistory)
-            .where(eq(pointsHistory.patientId, patientId));
-          
-          if (actionCount[0]?.count >= criteria.count) {
-            earned = true;
-          }
-        } else {
-          earned = true;
-        }
       }
     }
 

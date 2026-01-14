@@ -82,7 +82,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    
+
     await db.delete(accountsPayable).where(eq(accountsPayable.id, id));
 
     return NextResponse.json({ success: true });
@@ -135,13 +135,12 @@ export async function PATCH(
 
       // Create transaction record
       await db.insert(transactions).values({
-        description: `Pagamento: ${account[0].description}`,
+        description: `Pagamento: ${account[0].description} (Ref: Conta a pagar #${id})`,
         amount: paidAmount,
         type: 'expense',
         category: account[0].category || 'other',
         date: new Date(),
         paymentMethod: paymentMethod,
-        notes: `Ref: Conta a pagar #${id}`,
       });
 
       return NextResponse.json({

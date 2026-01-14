@@ -62,11 +62,11 @@ const STATUS_CONFIG = {
   not_achieved: { label: 'Não Alcançado', color: 'red', bgColor: 'bg-red-100 text-red-600' },
 };
 
-const TreatmentGoalsTracker: React.FC<TreatmentGoalsTrackerProps> = ({ 
-  goals, 
-  onChange, 
+const TreatmentGoalsTracker: React.FC<TreatmentGoalsTrackerProps> = ({
+  goals,
+  onChange,
   readOnly = false,
-  patientName 
+  patientName
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<TreatmentGoal | null>(null);
@@ -127,9 +127,9 @@ const TreatmentGoalsTracker: React.FC<TreatmentGoalsTrackerProps> = ({
 
   const determineStatus = (goal: TreatmentGoal, currentValue: number): TreatmentGoal['status'] => {
     if (!goal.targetValue) return 'in_progress';
-    
+
     const progress = getProgress(goal.baseline, currentValue, goal.targetValue);
-    
+
     if (goal.category === 'pain') {
       // For pain, lower is better
       if (currentValue <= goal.targetValue) return 'achieved';
@@ -147,11 +147,11 @@ const TreatmentGoalsTracker: React.FC<TreatmentGoalsTrackerProps> = ({
   const getProgress = (baseline: number | undefined, current: number | undefined, target: number | undefined): number => {
     if (current === undefined || target === undefined) return 0;
     const base = baseline ?? 0;
-    
+
     // For metrics where reduction is good (like pain)
     const range = Math.abs(target - base);
     if (range === 0) return current === target ? 100 : 0;
-    
+
     const progress = Math.abs(current - base) / range * 100;
     return Math.min(Math.max(progress, 0), 100);
   };
@@ -285,11 +285,10 @@ const TreatmentGoalsTracker: React.FC<TreatmentGoalsTrackerProps> = ({
                     </div>
                     <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                       <div
-                        className={`h-full transition-all duration-500 ${
-                          progress >= 100 ? 'bg-emerald-500' :
-                          progress >= 50 ? 'bg-blue-500' :
-                          'bg-amber-500'
-                        }`}
+                        className={`h-full transition-all duration-500 ${progress >= 100 ? 'bg-emerald-500' :
+                            progress >= 50 ? 'bg-blue-500' :
+                              'bg-amber-500'
+                          }`}
                         style={{ width: `${Math.min(progress, 100)}%` }}
                       />
                     </div>
@@ -393,14 +392,14 @@ const TreatmentGoalsTracker: React.FC<TreatmentGoalsTrackerProps> = ({
             </div>
             <div className="p-4 overflow-y-auto max-h-[60vh]">
               <p className="text-sm text-slate-500 mb-4">Escolha um template ou crie uma meta personalizada:</p>
-              
+
               <div className="space-y-2 mb-4">
                 {GOAL_TEMPLATES.map((template, idx) => {
                   const category = getCategoryConfig(template.category);
                   return (
                     <button
                       key={idx}
-                      onClick={() => addGoal(template)}
+                      onClick={() => addGoal(template as Partial<TreatmentGoal>)}
                       className="w-full text-left p-3 rounded-lg bg-slate-50 dark:bg-slate-900 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors border border-transparent hover:border-primary/20"
                     >
                       <div className="flex items-center gap-2">
