@@ -15,6 +15,13 @@
       "when": 1768104753699,
       "tag": "0001_windy_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768401757102,
+      "tag": "0002_goofy_jack_power",
+      "breakpoints": true
     }
   ]
 }

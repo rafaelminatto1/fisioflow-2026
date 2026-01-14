@@ -201,6 +201,68 @@ export const patientSessions = pgTable('patient_sessions', {
 		size: number;
 	}>>(),
 	therapistNotes: text('therapist_notes'), // Private notes for therapist
+	// Advanced Evolution Fields
+	vitalSigns: jsonb('vital_signs').$type<{
+		bloodPressureSystolic?: number;
+		bloodPressureDiastolic?: number;
+		heartRate?: number;
+		respiratoryRate?: number;
+		oxygenSaturation?: number;
+		temperature?: number;
+		weight?: number;
+		height?: number;
+		notes?: string;
+	}>(),
+	functionalTests: jsonb('functional_tests').$type<{
+		rangeOfMotion?: Array<{
+			joint: string;
+			movement: string;
+			left?: number;
+			right?: number;
+			normalValue: number;
+		}>;
+		muscleStrength?: Array<{
+			muscle: string;
+			left?: number;
+			right?: number;
+		}>;
+		specialTests?: Array<{
+			name: string;
+			result: 'positive' | 'negative' | 'inconclusive';
+			notes?: string;
+		}>;
+		balance?: {
+			romberg?: 'positive' | 'negative';
+			singleLegStanceLeft?: number;
+			singleLegStanceRight?: number;
+			tandemStance?: number;
+		};
+	}>(),
+	treatmentGoals: jsonb('treatment_goals').$type<Array<{
+		id: string;
+		title: string;
+		description?: string;
+		category: 'pain' | 'mobility' | 'strength' | 'function' | 'quality_of_life';
+		baselineValue?: number;
+		targetValue?: number;
+		currentValue?: number;
+		unit?: string;
+		targetDate?: string;
+		priority: 'low' | 'medium' | 'high';
+		status: 'pending' | 'in_progress' | 'achieved' | 'partially_achieved';
+		milestones?: Array<{ date: string; value: number; notes?: string }>;
+	}>>(),
+	clinicalAlerts: jsonb('clinical_alerts').$type<Array<{
+		id: string;
+		type: 'red_flag' | 'yellow_flag' | 'precaution' | 'contraindication' | 'allergy';
+		title: string;
+		description?: string;
+		severity: 'low' | 'medium' | 'high';
+		isActive: boolean;
+		createdAt: string;
+		resolvedAt?: string;
+		notes?: string;
+	}>>(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
