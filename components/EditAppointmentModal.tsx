@@ -75,6 +75,17 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({ isOpen, onC
   // Lógica crítica: Verifica se é Avaliação pelo Tipo OU pelo Status
   const isEvaluation = selectedType === 'Avaliação' || selectedStatus === 'evaluation';
 
+  // Debug: verificar se o patientId existe
+  useEffect(() => {
+    if (appointment) {
+      console.log('[EditAppointmentModal] appointment:', appointment);
+      console.log('[EditAppointmentModal] patientId:', appointment.patientId);
+      console.log('[EditAppointmentModal] isEvaluation:', isEvaluation);
+      console.log('[EditAppointmentModal] selectedType:', selectedType);
+      console.log('[EditAppointmentModal] selectedStatus:', selectedStatus);
+    }
+  }, [appointment, isEvaluation, selectedType, selectedStatus]);
+
   useEffect(() => {
     if (appointment) {
         const startDate = new Date(appointment.startTime);

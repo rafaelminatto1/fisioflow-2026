@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { patients, appointments, sessions } from '@/db/schema';
+import { patients, appointments, patientSessions } from '@/db/schema';
 import { eq, and, gte, lte, count, sql } from 'drizzle-orm';
-import { subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { subDays } from 'date-fns';
 
 // GET /api/reports/clinical - Get clinical KPI metrics
 export async function GET(request: NextRequest) {
@@ -50,14 +50,20 @@ export async function GET(request: NextRequest) {
       .where(and(gte(patients.createdAt, startDate), lte(patients.createdAt, endDate)));
     const newPatientsThisMonth = newPatientsResult?.count || 0;
 
-    // Total sessions this period
+    // Total sessions this period (using completed appointments)
     const [sessionsResult] = await db
       .select({ count: count() })
-      .from(sessions)
-      .where(and(gte(sessions.date, startDate), lte(sessions.date, endDate)));
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.startTime, startDate),
+          lte(appointments.startTime, endDate),
+          eq(appointments.status, 'completed')
+        )
+      );
     const totalSessionsThisMonth = sessionsResult?.count || 0;
 
-    // Completed appointments this period (for duration calculation)
+    // Get completed appointments for duration calculation
     const completedAppointments = await db
       .select()
       .from(appointments)
@@ -84,9 +90,14 @@ export async function GET(request: NextRequest) {
 
     // Calculate retention rate (patients with more than one visit)
     const [returningPatientsResult] = await db
-      .select({ count: sql<number>`count(distinct ${sessions.patientId})` })
-      .from(sessions)
-      .where(gte(sessions.date, startDate));
+      .select({ count: sql<number>`count(distinct ${appointments.patientId})` })
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.startTime, startDate),
+          eq(appointments.status, 'completed')
+        )
+      );
     const retentionRate = totalSessionsThisMonth > 0
       ? Math.round((returningPatientsResult?.count || 0) / totalSessionsThisMonth * 100)
       : 0;
@@ -145,8 +156,8 @@ export async function GET(request: NextRequest) {
 
       const [dayResult] = await db
         .select({ count: count() })
-        .from(sessions)
-        .where(and(gte(sessions.date, dayStart.toISOString()), lte(sessions.date, dayEnd.toISOString())));
+        .from(session)
+        .where(and(gte(session.date, dayStart.toISOString()), lte(session.date, dayEnd.toISOString())));
 
       sessionTrend.push({
         date: dayStart.toISOString(),

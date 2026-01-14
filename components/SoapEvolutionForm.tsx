@@ -4,11 +4,15 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileTextIcon, CopyIcon, XIcon, CheckCircleIcon, DumbbellIcon, MessageCircleIcon, PaperclipIcon, LockIcon, SparklesIcon } from './Icons';
+import { FileTextIcon, CopyIcon, XIcon, CheckCircleIcon, DumbbellIcon, MessageCircleIcon, PaperclipIcon, LockIcon, SparklesIcon, HeartIcon, TargetIcon, AlertCircleIcon, ActivityIcon } from './Icons';
 import { api } from '../services/api';
 import InteractivePainMap, { PainPoint } from './InteractivePainMap';
 import ExercisesLibrary from './ExercisesLibrary';
 import SoapTemplateSelector from './SoapTemplateSelector';
+import VitalSignsSection, { VitalSigns } from './VitalSignsSection';
+import FunctionalTestsSection, { FunctionalTests } from './FunctionalTestsSection';
+import TreatmentGoalsTracker, { TreatmentGoal } from './TreatmentGoalsTracker';
+import ClinicalAlerts, { ClinicalAlert } from './ClinicalAlerts';
 import { SoapTemplate } from '../types';
 
 // Zod Schema Definition
@@ -39,16 +43,30 @@ interface SoapEvolutionFormProps {
     painMap?: any;
     homeCareExercises?: string[];
     therapistNotes?: string;
+    vitalSigns?: VitalSigns;
+    functionalTests?: FunctionalTests;
+    treatmentGoals?: TreatmentGoal[];
+    clinicalAlerts?: ClinicalAlert[];
   };
 }
 
 const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose, onSubmit, isModal = true, initialData }) => {
-  const [activeTab, setActiveTab] = useState<'soap' | 'pain-map' | 'homecare' | 'notes'>('soap');
+  const [activeTab, setActiveTab] = useState<'soap' | 'vitals' | 'functional' | 'pain-map' | 'goals' | 'alerts' | 'homecare' | 'notes'>('soap');
   const [painPoints, setPainPoints] = useState<PainPoint[]>(initialData?.painMap?.points || []);
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>(initialData?.homeCareExercises || []);
   const [therapistNotes, setTherapistNotes] = useState(initialData?.therapistNotes || '');
   const [attachments, setAttachments] = useState<Array<{ id: string; name: string; url: string; type: string; size: number }>>([]);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  
+  // New state for advanced sections
+  const [vitalSigns, setVitalSigns] = useState<VitalSigns>(initialData?.vitalSigns || {});
+  const [functionalTests, setFunctionalTests] = useState<FunctionalTests>(initialData?.functionalTests || {
+    rangeOfMotion: [],
+    muscleStrength: [],
+    specialTests: [],
+  });
+  const [treatmentGoals, setTreatmentGoals] = useState<TreatmentGoal[]>(initialData?.treatmentGoals || []);
+  const [clinicalAlerts, setClinicalAlerts] = useState<ClinicalAlert[]>(initialData?.clinicalAlerts || []);
 
   const {
     register,
@@ -104,6 +122,11 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
       homeCareExercises: selectedExerciseIds.length > 0 ? selectedExerciseIds : null,
       therapistNotes: therapistNotes || null,
       attachments: attachments.length > 0 ? attachments : null,
+      // New fields
+      vitalSigns: Object.keys(vitalSigns).length > 0 ? vitalSigns : null,
+      functionalTests: (functionalTests.rangeOfMotion.length > 0 || functionalTests.muscleStrength.length > 0 || functionalTests.specialTests.length > 0) ? functionalTests : null,
+      treatmentGoals: treatmentGoals.length > 0 ? treatmentGoals : null,
+      clinicalAlerts: clinicalAlerts.length > 0 ? clinicalAlerts : null,
     };
     onSubmit(fullSessionData);
   };
@@ -167,26 +190,67 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             </div>
           </div>
 
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('soap')}
-              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'soap' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${activeTab === 'soap' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               SOAP
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('vitals')}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${activeTab === 'vitals' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              <HeartIcon className="w-3 h-3" />
+              SINAIS VITAIS
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('functional')}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${activeTab === 'functional' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              <ActivityIcon className="w-3 h-3" />
+              TESTES
+              {(functionalTests.rangeOfMotion.length > 0 || functionalTests.specialTests.length > 0) && (
+                <span className="bg-blue-500 text-white px-1.5 rounded-full text-[10px]">
+                  {functionalTests.rangeOfMotion.length + functionalTests.specialTests.length + functionalTests.muscleStrength.length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('pain-map')}
-              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'pain-map' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === 'pain-map' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               MAPA 3D
-              {painPoints.length > 0 && <span className="bg-primary text-white px-1.5 rounded-full text-[10px]">{painPoints.length}</span>}
+              {painPoints.length > 0 && <span className="bg-red-500 text-white px-1.5 rounded-full text-[10px]">{painPoints.length}</span>}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('goals')}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${activeTab === 'goals' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              <TargetIcon className="w-3 h-3" />
+              METAS
+              {treatmentGoals.length > 0 && <span className="bg-emerald-500 text-white px-1.5 rounded-full text-[10px]">{treatmentGoals.length}</span>}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('alerts')}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${activeTab === 'alerts' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              <AlertCircleIcon className="w-3 h-3" />
+              ALERTAS
+              {clinicalAlerts.filter(a => a.isActive).length > 0 && (
+                <span className="bg-red-500 text-white px-1.5 rounded-full text-[10px]">{clinicalAlerts.filter(a => a.isActive).length}</span>
+              )}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('homecare')}
-              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'homecare' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === 'homecare' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               HOME CARE
               {selectedExerciseIds.length > 0 && <span className="bg-primary text-white px-1.5 rounded-full text-[10px]">{selectedExerciseIds.length}</span>}
@@ -194,7 +258,7 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             <button
               type="button"
               onClick={() => setActiveTab('notes')}
-              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === 'notes' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === 'notes' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               <LockIcon className="w-3 h-3" />
               NOTAS
@@ -313,6 +377,44 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
             </div>
           )}
 
+          {/* TAB: VITAL SIGNS */}
+          {activeTab === 'vitals' && (
+            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-right-4">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <HeartIcon className="w-5 h-5 text-rose-500" />
+                  Sinais Vitais
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Registre os sinais vitais do paciente para acompanhamento clínico
+                </p>
+              </div>
+              <VitalSignsSection
+                value={vitalSigns}
+                onChange={setVitalSigns}
+              />
+            </div>
+          )}
+
+          {/* TAB: FUNCTIONAL TESTS */}
+          {activeTab === 'functional' && (
+            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-right-4">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <ActivityIcon className="w-5 h-5 text-blue-500" />
+                  Avaliação Funcional
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Testes ortopédicos, ADM, força muscular e equilíbrio
+                </p>
+              </div>
+              <FunctionalTestsSection
+                value={functionalTests}
+                onChange={setFunctionalTests}
+              />
+            </div>
+          )}
+
           {/* TAB: PAIN MAP */}
           {activeTab === 'pain-map' && (
             <div className="h-full flex flex-col animate-in fade-in slide-in-from-right-4">
@@ -335,6 +437,27 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
                   <li>• Use os detalhes para documentar completamente a dor do paciente</li>
                 </ul>
               </div>
+            </div>
+          )}
+
+          {/* TAB: TREATMENT GOALS */}
+          {activeTab === 'goals' && (
+            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-right-4">
+              <TreatmentGoalsTracker
+                goals={treatmentGoals}
+                onChange={setTreatmentGoals}
+                patientName={patient.name}
+              />
+            </div>
+          )}
+
+          {/* TAB: CLINICAL ALERTS */}
+          {activeTab === 'alerts' && (
+            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-right-4">
+              <ClinicalAlerts
+                alerts={clinicalAlerts}
+                onChange={setClinicalAlerts}
+              />
             </div>
           )}
 

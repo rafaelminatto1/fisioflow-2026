@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { patients } from '@/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, asc } from 'drizzle-orm';
 import { withCache, invalidatePattern, CacheKeys } from '@/lib/vercel-kv';
 
 // GET /api/patients - List all patients (cached)
@@ -9,31 +9,59 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') === 'true';
+    const sortBy = searchParams.get('sort'); // 'points', 'name', 'date'
 
-    // Cache for 5 minutes (300 seconds)
-    const cacheKey = activeOnly ? 'patients:active' : CacheKeys.PATIENTS;
+    // Cache key based on parameters
+    const cacheKey = `patients:${activeOnly ? 'active' : 'all'}:${sortBy || 'date'}`;
 
     const allPatients = await withCache(
       cacheKey,
       async () => {
+        // Determine sort order
+        let orderBy;
+        switch (sortBy) {
+          case 'points':
+            orderBy = [desc(patients.totalPoints)];
+            break;
+          case 'name':
+            orderBy = [asc(patients.fullName)];
+            break;
+          default:
+            orderBy = [desc(patients.createdAt)];
+        }
 
-        const result = await db.query.patients.findMany({
-          orderBy: [desc(patients.createdAt)],
-          where: activeOnly ? eq(patients.isActive, true) : undefined,
-          with: {
-            tags: {
-              with: {
-                tag: true
+        try {
+          // Try with tags relation first
+          const result = await db.query.patients.findMany({
+            orderBy,
+            where: activeOnly ? eq(patients.isActive, true) : undefined,
+            with: {
+              tags: {
+                with: {
+                  tag: true
+                }
               }
             }
-          }
-        });
+          });
 
-        // Map tags structure to string array to match API contract
-        return result.map(p => ({
-          ...p,
-          tags: p.tags.map((pt: any) => pt.tag.name)
-        }));
+          // Map tags structure to string array to match API contract
+          return result.map(p => ({
+            ...p,
+            tags: p.tags?.map((pt: any) => pt.tag?.name).filter(Boolean) || []
+          }));
+        } catch (tagError) {
+          // Fallback: query without tags if relation fails
+          console.warn('Tags relation failed, querying without tags:', tagError);
+          const result = await db.query.patients.findMany({
+            orderBy,
+            where: activeOnly ? eq(patients.isActive, true) : undefined,
+          });
+
+          return result.map(p => ({
+            ...p,
+            tags: []
+          }));
+        }
       },
       { ttl: 300 } // 5 minutes cache
     );

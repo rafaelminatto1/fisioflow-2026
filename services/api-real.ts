@@ -1069,4 +1069,350 @@ export const api = {
       });
     },
   },
+
+  // Insurance Plans (Convênios)
+  insurancePlans: {
+    list: async (active?: boolean, search?: string): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (active !== undefined) params.append('active', active.toString());
+      if (search) params.append('search', search);
+      const queryString = params.toString();
+      return fetchAPI(`/insurance-plans${queryString ? `?${queryString}` : ''}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/insurance-plans/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/insurance-plans', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/insurance-plans/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/insurance-plans/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // Patient Insurance (Vínculo Paciente-Convênio)
+  patientInsurance: {
+    list: async (patientId: string): Promise<any[]> => {
+      return fetchAPI(`/patient-insurance?patientId=${patientId}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/patient-insurance/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/patient-insurance', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/patient-insurance/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/patient-insurance/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // TISS Guides (Guias TISS)
+  tissGuides: {
+    list: async (filters?: { patientId?: string; insurancePlanId?: string; status?: string; startDate?: string; endDate?: string }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.patientId) params.append('patientId', filters.patientId);
+      if (filters?.insurancePlanId) params.append('insurancePlanId', filters.insurancePlanId);
+      if (filters?.status) params.append('status', filters.status);
+      if (filters?.startDate) params.append('startDate', filters.startDate);
+      if (filters?.endDate) params.append('endDate', filters.endDate);
+      const queryString = params.toString();
+      return fetchAPI(`/tiss-guides${queryString ? `?${queryString}` : ''}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/tiss-guides/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/tiss-guides', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/tiss-guides/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/tiss-guides/${id}`, { method: 'DELETE' });
+    },
+    submit: async (id: string): Promise<any> => {
+      return fetchAPI(`/tiss-guides/${id}/submit`, { method: 'POST' });
+    },
+  },
+
+  // Patient Discharges (Altas)
+  patientDischarges: {
+    list: async (filters?: { patientId?: string; reason?: string; startDate?: string; endDate?: string }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.patientId) params.append('patientId', filters.patientId);
+      if (filters?.reason) params.append('reason', filters.reason);
+      if (filters?.startDate) params.append('startDate', filters.startDate);
+      if (filters?.endDate) params.append('endDate', filters.endDate);
+      const queryString = params.toString();
+      return fetchAPI(`/patient-discharges${queryString ? `?${queryString}` : ''}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/patient-discharges/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/patient-discharges', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/patient-discharges/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/patient-discharges/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // Campaigns (Campanhas)
+  campaigns: {
+    list: async (filters?: { status?: string; type?: string }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.status) params.append('status', filters.status);
+      if (filters?.type) params.append('type', filters.type);
+      const queryString = params.toString();
+      return fetchAPI(`/campaigns${queryString ? `?${queryString}` : ''}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/campaigns/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/campaigns', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/campaigns/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/campaigns/${id}`, { method: 'DELETE' });
+    },
+    send: async (id: string): Promise<any> => {
+      return fetchAPI(`/campaigns/${id}/send`, { method: 'POST' });
+    },
+  },
+
+  // AI Treatment Plans (Planos de Tratamento com IA)
+  aiTreatmentPlans: {
+    list: async (filters?: { patientId?: string; accepted?: boolean }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.patientId) params.append('patientId', filters.patientId);
+      if (filters?.accepted !== undefined) params.append('accepted', filters.accepted.toString());
+      const queryString = params.toString();
+      return fetchAPI(`/ai-treatment-plans${queryString ? `?${queryString}` : ''}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/ai-treatment-plans/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/ai-treatment-plans', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    generateForPatient: async (patientId: string, sessionId?: string): Promise<any> => {
+      return fetchAPI('/ai-treatment-plans', {
+        method: 'POST',
+        body: JSON.stringify({ patientId, sessionId, generateWithAI: true }),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/ai-treatment-plans/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/ai-treatment-plans/${id}`, { method: 'DELETE' });
+    },
+    accept: async (id: string, modifications?: string): Promise<any> => {
+      return fetchAPI(`/ai-treatment-plans/${id}/accept`, {
+        method: 'POST',
+        body: JSON.stringify({ modifications }),
+      });
+    },
+  },
+
+  // NPS Surveys (Pesquisas de Satisfação)
+  npsSurveys: {
+    list: async (filters?: { patientId?: string; startDate?: string; endDate?: string }): Promise<any[]> => {
+      const params = new URLSearchParams();
+      if (filters?.patientId) params.append('patientId', filters.patientId);
+      if (filters?.startDate) params.append('startDate', filters.startDate);
+      if (filters?.endDate) params.append('endDate', filters.endDate);
+      const queryString = params.toString();
+      return fetchAPI(`/nps-surveys${queryString ? `?${queryString}` : ''}`);
+    },
+    getScore: async (startDate?: string, endDate?: string): Promise<any> => {
+      const params = new URLSearchParams({ type: 'score' });
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      return fetchAPI(`/nps-surveys?${params.toString()}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/nps-surveys/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/nps-surveys', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    send: async (patientId: string, sessionId?: string): Promise<any> => {
+      return fetchAPI('/nps-surveys', {
+        method: 'POST',
+        body: JSON.stringify({ patientId, sessionId, sendNow: true }),
+      });
+    },
+    submitResponse: async (id: string, score: number, feedback?: string): Promise<any> => {
+      return fetchAPI(`/nps-surveys/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ score, feedback }),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/nps-surveys/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // WhatsApp Integration
+  whatsapp: {
+    checkStatus: async (): Promise<any> => {
+      return fetchAPI('/whatsapp/status');
+    },
+    sendMessage: async (number: string, text: string): Promise<any> => {
+      return fetchAPI('/whatsapp/send', {
+        method: 'POST',
+        body: JSON.stringify({ number, text }),
+      });
+    },
+    sendAppointmentReminder: async (patientName: string, patientPhone: string, appointmentDate: string, appointmentTime: string): Promise<any> => {
+      return fetchAPI('/whatsapp/send-appointment-reminder', {
+        method: 'POST',
+        body: JSON.stringify({ patientName, patientPhone, appointmentDate, appointmentTime }),
+      });
+    },
+  },
+
+  // Automations (Automações)
+  automations: {
+    processBirthdays: async (): Promise<any> => {
+      return fetchAPI('/automations/birthdays', { method: 'POST' });
+    },
+    getUpcomingBirthdays: async (days?: number): Promise<any> => {
+      const params = days ? `?days=${days}` : '';
+      return fetchAPI(`/automations/birthdays${params}`);
+    },
+    processNoShows: async (hoursAgo?: number): Promise<any> => {
+      return fetchAPI('/automations/no-shows', {
+        method: 'POST',
+        body: JSON.stringify({ hoursAgo }),
+      });
+    },
+    getNoShowStats: async (startDate?: string, endDate?: string): Promise<any> => {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      const queryString = params.toString();
+      return fetchAPI(`/automations/no-shows${queryString ? `?${queryString}` : ''}`);
+    },
+    processInactivePatients: async (inactiveDays?: number): Promise<any> => {
+      return fetchAPI('/automations/inactive-patients', {
+        method: 'POST',
+        body: JSON.stringify({ inactiveDays }),
+      });
+    },
+    getInactivePatients: async (days?: number, limit?: number): Promise<any> => {
+      const params = new URLSearchParams();
+      if (days) params.append('days', days.toString());
+      if (limit) params.append('limit', limit.toString());
+      const queryString = params.toString();
+      return fetchAPI(`/automations/inactive-patients${queryString ? `?${queryString}` : ''}`);
+    },
+    processReminders: async (): Promise<any> => {
+      return fetchAPI('/reminders/process', { method: 'POST' });
+    },
+  },
+
+  // Referrals (Encaminhamentos)
+  referrals: {
+    list: async (patientId?: string): Promise<any[]> => {
+      const params = patientId ? `?patientId=${patientId}` : '';
+      return fetchAPI(`/referrals${params}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/referrals/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/referrals', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/referrals/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/referrals/${id}`, { method: 'DELETE' });
+    },
+  },
+
+  // SOAP Templates
+  soapTemplates: {
+    list: async (category?: string): Promise<any[]> => {
+      const params = category ? `?category=${category}` : '';
+      return fetchAPI(`/soap-templates${params}`);
+    },
+    get: async (id: string): Promise<any> => {
+      return fetchAPI(`/soap-templates/${id}`);
+    },
+    create: async (data: any): Promise<any> => {
+      return fetchAPI('/soap-templates', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any): Promise<any> => {
+      return fetchAPI(`/soap-templates/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string): Promise<void> => {
+      await fetchAPI(`/soap-templates/${id}`, { method: 'DELETE' });
+    },
+  },
 };

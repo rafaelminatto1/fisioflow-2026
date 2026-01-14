@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { appointments, patients, sessions } from '@/db/schema';
+import { appointments, patients } from '@/db/schema';
 import { eq, and, gte, lte, count, sql } from 'drizzle-orm';
 import { startOfDay, endOfDay } from 'date-fns';
 
@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          lte(appointments.startTime, now.toISOString()),
-          gte(appointments.endTime || now, now.toISOString()),
+          lte(appointments.startTime, now),
+          gte(sql`COALESCE(${appointments.endTime}, ${now})`, now),
           eq(appointments.status, 'in_progress')
         )
       );
@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          lte(appointments.startTime, now.toISOString()),
-          gte(appointments.endTime || now, now.toISOString()),
+          lte(appointments.startTime, now),
+          gte(sql`COALESCE(${appointments.endTime}, ${now})`, now),
           eq(appointments.status, 'in_progress')
         )
       );
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          lte(appointments.startTime, now.toISOString()),
-          gte(appointments.endTime || now, now.toISOString()),
+          lte(appointments.startTime, now),
+          gte(sql`COALESCE(${appointments.endTime}, ${now})`, now),
           sql`${appointments.status} IN ('in_progress', 'confirmed', 'checked_in')`
         )
       );
@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          gte(appointments.startTime, todayStart.toISOString()),
-          lte(appointments.startTime, todayEnd.toISOString()),
+          gte(appointments.startTime, todayStart),
+          lte(appointments.startTime, todayEnd),
           eq(appointments.status, 'completed')
         )
       );
@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          gte(appointments.startTime, todayStart.toISOString()),
-          lte(appointments.startTime, todayEnd.toISOString())
+          gte(appointments.startTime, todayStart),
+          lte(appointments.startTime, todayEnd)
         )
       );
 
@@ -76,8 +76,8 @@ export async function GET(request: NextRequest) {
       .from(patients)
       .where(
         and(
-          gte(patients.createdAt, todayStart.toISOString()),
-          lte(patients.createdAt, todayEnd.toISOString())
+          gte(patients.createdAt, todayStart),
+          lte(patients.createdAt, todayEnd)
         )
       );
 
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          gte(appointments.startTime, now.toISOString()),
+          gte(appointments.startTime, now),
           sql`${appointments.status} IN ('scheduled', 'confirmed')`
         )
       )
@@ -104,31 +104,31 @@ export async function GET(request: NextRequest) {
       .from(appointments)
       .where(
         and(
-          gte(appointments.startTime, todayStart.toISOString()),
-          lte(appointments.startTime, todayEnd.toISOString()),
+          gte(appointments.startTime, todayStart),
+          lte(appointments.startTime, todayEnd),
           eq(appointments.status, 'no_show')
         )
       );
 
-    if (noShowCount.count > 2) {
+    if ((noShowCount[0]?.count || 0) > 2) {
       alerts.push({
         id: '1',
         type: 'warning' as const,
-        message: `${noShowCount.count} pacientes não compareceram hoje`,
+        message: `${noShowCount[0]?.count || 0} pacientes não compareceram hoje`,
         time: 'Agora',
       });
     }
 
-    if (activeSessionsResult.count > 0) {
+    if ((activeSessionsResult[0]?.count || 0) > 0) {
       alerts.push({
         id: '2',
         type: 'info' as const,
-        message: `${activeSessionsResult.count} sessões em andamento`,
+        message: `${activeSessionsResult[0]?.count || 0} sessões em andamento`,
         time: 'Agora',
       });
     }
 
-    if (completedTodayResult.count >= scheduledTodayResult.count * 0.8 && scheduledTodayResult.count > 0) {
+    if ((completedTodayResult[0]?.count || 0) >= (scheduledTodayResult[0]?.count || 0) * 0.8 && (scheduledTodayResult[0]?.count || 0) > 0) {
       alerts.push({
         id: '3',
         type: 'success' as const,
@@ -141,20 +141,20 @@ export async function GET(request: NextRequest) {
       activeNow: {
         patients: activePatients.length,
         therapists: activeTherapists.length,
-        sessionsInProgress: activeSessionsResult.count || 0,
+        sessionsInProgress: activeSessionsResult[0]?.count || 0,
       },
       todayMetrics: {
-        completedSessions: completedTodayResult.count || 0,
-        scheduledSessions: scheduledTodayResult.count || 0,
+        completedSessions: completedTodayResult[0]?.count || 0,
+        scheduledSessions: scheduledTodayResult[0]?.count || 0,
         revenue: revenueToday,
-        newPatients: newPatientsTodayResult.count || 0,
+        newPatients: newPatientsTodayResult[0]?.count || 0,
       },
       upcomingAppointments: upcomingAppointments.map((apt) => ({
         id: apt.id,
-        patientName: apt.patientName || 'Paciente',
-        therapist: apt.therapistName || 'Fisioterapeuta',
+        patientName: `Paciente ${apt.patientId.slice(0, 8)}...`,
+        therapist: `Fisioterapeuta ${apt.therapistId.slice(0, 8)}...`,
         time: new Date(apt.startTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        type: apt.type || 'Consulta',
+        type: apt.sessionType || 'Consulta',
       })),
       alerts,
     });

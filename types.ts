@@ -111,6 +111,104 @@ export interface Appointment {
   reminderSent?: boolean;
 }
 
+export interface VitalSigns {
+  bloodPressureSystolic?: number;
+  bloodPressureDiastolic?: number;
+  heartRate?: number;
+  respiratoryRate?: number;
+  temperature?: number;
+  oxygenSaturation?: number;
+  weight?: number;
+  height?: number;
+  bmi?: number;
+  notes?: string;
+}
+
+export interface RangeOfMotion {
+  joint: string;
+  movement: string;
+  left?: number;
+  right?: number;
+  normal: number;
+  unit: string;
+  notes?: string;
+}
+
+export interface MuscleStrength {
+  muscle: string;
+  side: 'left' | 'right' | 'bilateral';
+  grade: number;
+  notes?: string;
+}
+
+export interface SpecialTest {
+  name: string;
+  region: string;
+  result: 'positive' | 'negative' | 'inconclusive';
+  notes?: string;
+}
+
+export interface FunctionalTests {
+  rangeOfMotion: RangeOfMotion[];
+  muscleStrength: MuscleStrength[];
+  specialTests: SpecialTest[];
+  gait?: {
+    pattern: string;
+    assistiveDevice?: string;
+    notes?: string;
+  };
+  balance?: {
+    rombergTest?: 'positive' | 'negative';
+    tandemStance?: number;
+    singleLegStanceLeft?: number;
+    singleLegStanceRight?: number;
+    notes?: string;
+  };
+  functionalScores?: {
+    name: string;
+    score: number;
+    maxScore: number;
+    interpretation?: string;
+  }[];
+}
+
+export interface TreatmentGoal {
+  id: string;
+  title: string;
+  description?: string;
+  category: 'pain' | 'mobility' | 'strength' | 'function' | 'quality_of_life' | 'other';
+  targetValue?: number;
+  currentValue?: number;
+  unit?: string;
+  baseline?: number;
+  targetDate?: string;
+  status: 'pending' | 'in_progress' | 'achieved' | 'partially_achieved' | 'not_achieved';
+  priority: 'high' | 'medium' | 'low';
+  notes?: string;
+  milestones?: {
+    date: string;
+    value: number;
+    notes?: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClinicalAlert {
+  id: string;
+  type: 'red_flag' | 'yellow_flag' | 'precaution' | 'contraindication' | 'allergy' | 'note';
+  title: string;
+  description?: string;
+  category?: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  isActive: boolean;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+  createdBy?: string;
+}
+
 export interface Session {
   id: string;
   patientId: string;
@@ -138,6 +236,11 @@ export interface Session {
     size: number;
   }>;
   therapistNotes?: string;
+  // New fields for enhanced evolution
+  vitalSigns?: VitalSigns;
+  functionalTests?: FunctionalTests;
+  treatmentGoals?: TreatmentGoal[];
+  clinicalAlerts?: ClinicalAlert[];
   createdAt?: string;
   updatedAt?: string;
 }

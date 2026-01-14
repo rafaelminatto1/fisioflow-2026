@@ -163,11 +163,27 @@ export default function AgendaPage() {
         const start = new Date(startIso);
         const end = new Date(start.getTime() + duration * 60000);
 
+        // Find or create patient
+        let patientId: string;
+        // First, try to find existing patient by name
+        const allPatients = await api.patients.list();
+        const existingPatient = allPatients.find(p => p.name.toLowerCase() === data.patientName.toLowerCase());
+        
+        if (existingPatient) {
+            patientId = existingPatient.id;
+        } else {
+            // Create new patient
+            const newPatient = await api.patients.create({
+                fullName: data.patientName
+            });
+            patientId = newPatient.id;
+        }
+
         const newApt = await api.appointments.create({
             startTime: startIso,
             endTime: end.toISOString(),
             duration: duration,
-            patientId: 'p_new',
+            patientId: patientId,
             patientName: data.patientName,
             therapistId: data.physioId,
             therapistName: 'Dr. (Selecionado)',

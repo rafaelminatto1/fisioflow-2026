@@ -15,7 +15,11 @@ import {
   FileTextIcon,
   DumbbellIcon,
   AlertCircleIcon,
-  FilterIcon
+  FilterIcon,
+  HeartIcon,
+  ActivityIcon,
+  TargetIcon,
+  AlertTriangleIcon
 } from './Icons';
 import { api } from '../services/api';
 import { Session } from '../types';
@@ -561,6 +565,29 @@ interface SessionExpandedContentProps {
 
 const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session }) => (
   <div className="border-t border-slate-200 dark:border-slate-700 p-3 md:p-4 space-y-3 md:space-y-4 animate-in slide-in-from-top-2">
+    {/* Clinical Alerts Banner */}
+    {session.clinicalAlerts && session.clinicalAlerts.filter(a => a.isActive).length > 0 && (
+      <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-200 dark:border-red-800">
+        <p className="text-xs font-bold text-red-700 dark:text-red-400 mb-2 flex items-center gap-1">
+          <AlertTriangleIcon className="w-3 h-3" /> Alertas Clínicos Ativos
+        </p>
+        <div className="flex flex-wrap gap-1">
+          {session.clinicalAlerts.filter(a => a.isActive).map(alert => (
+            <span
+              key={alert.id}
+              className={`text-xs px-2 py-0.5 rounded font-medium ${
+                alert.type === 'red_flag' ? 'bg-red-100 text-red-600' :
+                alert.type === 'yellow_flag' ? 'bg-amber-100 text-amber-600' :
+                'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {alert.title}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+
     {/* SOAP Content */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
       <SoapField label="S - Subjetivo" value={session.subjective} color="blue" />
@@ -568,6 +595,112 @@ const SessionExpandedContent: React.FC<SessionExpandedContentProps> = ({ session
       <SoapField label="A - Avaliação" value={session.assessment} color="amber" />
       <SoapField label="P - Plano" value={session.plan} color="purple" />
     </div>
+
+    {/* Vital Signs Summary */}
+    {session.vitalSigns && Object.keys(session.vitalSigns).length > 0 && (
+      <div className="bg-rose-50 dark:bg-rose-900/20 rounded-lg p-3 border border-rose-200 dark:border-rose-800">
+        <p className="text-xs font-bold text-rose-700 dark:text-rose-400 mb-2 flex items-center gap-1">
+          <HeartIcon className="w-3 h-3" /> Sinais Vitais
+        </p>
+        <div className="flex flex-wrap gap-3 text-xs">
+          {session.vitalSigns.bloodPressureSystolic && session.vitalSigns.bloodPressureDiastolic && (
+            <span className="text-slate-700 dark:text-slate-300">
+              <strong>PA:</strong> {session.vitalSigns.bloodPressureSystolic}/{session.vitalSigns.bloodPressureDiastolic} mmHg
+            </span>
+          )}
+          {session.vitalSigns.heartRate && (
+            <span className="text-slate-700 dark:text-slate-300">
+              <strong>FC:</strong> {session.vitalSigns.heartRate} bpm
+            </span>
+          )}
+          {session.vitalSigns.oxygenSaturation && (
+            <span className="text-slate-700 dark:text-slate-300">
+              <strong>SpO₂:</strong> {session.vitalSigns.oxygenSaturation}%
+            </span>
+          )}
+          {session.vitalSigns.temperature && (
+            <span className="text-slate-700 dark:text-slate-300">
+              <strong>Temp:</strong> {session.vitalSigns.temperature}°C
+            </span>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Functional Tests Summary */}
+    {session.functionalTests && (session.functionalTests.rangeOfMotion?.length > 0 || session.functionalTests.specialTests?.length > 0 || session.functionalTests.muscleStrength?.length > 0) && (
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+        <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-1">
+          <ActivityIcon className="w-3 h-3" /> Avaliação Funcional
+        </p>
+        <div className="space-y-2 text-xs">
+          {session.functionalTests.rangeOfMotion && session.functionalTests.rangeOfMotion.length > 0 && (
+            <div>
+              <span className="font-medium text-slate-600 dark:text-slate-400">ADM:</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {session.functionalTests.rangeOfMotion.slice(0, 4).map((rom, idx) => (
+                  <span key={idx} className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                    {rom.joint} {rom.movement}: E{rom.left ?? '-'}° D{rom.right ?? '-'}°
+                  </span>
+                ))}
+                {session.functionalTests.rangeOfMotion.length > 4 && (
+                  <span className="text-slate-500">+{session.functionalTests.rangeOfMotion.length - 4} mais</span>
+                )}
+              </div>
+            </div>
+          )}
+          {session.functionalTests.specialTests && session.functionalTests.specialTests.length > 0 && (
+            <div>
+              <span className="font-medium text-slate-600 dark:text-slate-400">Testes Especiais:</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {session.functionalTests.specialTests.map((test, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`px-2 py-0.5 rounded ${
+                      test.result === 'positive' ? 'bg-red-100 text-red-600' :
+                      test.result === 'negative' ? 'bg-emerald-100 text-emerald-600' :
+                      'bg-amber-100 text-amber-600'
+                    }`}
+                  >
+                    {test.name}: {test.result === 'positive' ? '+' : test.result === 'negative' ? '-' : '?'}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Treatment Goals Summary */}
+    {session.treatmentGoals && session.treatmentGoals.length > 0 && (
+      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3 border border-emerald-200 dark:border-emerald-800">
+        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1">
+          <TargetIcon className="w-3 h-3" /> Metas de Tratamento ({session.treatmentGoals.length})
+        </p>
+        <div className="space-y-1">
+          {session.treatmentGoals.slice(0, 3).map(goal => (
+            <div key={goal.id} className="flex items-center gap-2 text-xs">
+              <span className={`w-2 h-2 rounded-full ${
+                goal.status === 'achieved' ? 'bg-emerald-500' :
+                goal.status === 'in_progress' ? 'bg-blue-500' :
+                goal.status === 'partially_achieved' ? 'bg-amber-500' :
+                'bg-slate-300'
+              }`}></span>
+              <span className="text-slate-700 dark:text-slate-300">{goal.title}</span>
+              {goal.currentValue !== undefined && goal.targetValue !== undefined && (
+                <span className="text-slate-500">
+                  ({goal.currentValue}{goal.unit}/{goal.targetValue}{goal.unit})
+                </span>
+              )}
+            </div>
+          ))}
+          {session.treatmentGoals.length > 3 && (
+            <p className="text-xs text-slate-500">+{session.treatmentGoals.length - 3} mais metas</p>
+          )}
+        </div>
+      </div>
+    )}
 
     {/* Additional Info */}
     <SessionMeta session={session} />
