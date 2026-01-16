@@ -413,7 +413,13 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
             {/* Toolbar */}
             <div className="h-16 border-b border-slate-700 bg-slate-800 flex items-center justify-between px-4 shrink-0">
                 <div className="flex items-center gap-4">
-                    <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-full transition-colors"><XIcon className="w-6 h-6" /></button>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-slate-700 rounded-full transition-colors"
+                        aria-label="Close viewer"
+                    >
+                        <XIcon className="w-6 h-6" />
+                    </button>
                     <div>
                         <h2 className="font-bold text-sm">{asset.filename}</h2>
                         <div className="text-xs text-slate-400 flex items-center gap-2">
@@ -424,20 +430,22 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                 </div>
 
                 {/* Tools */}
-                <div className="flex bg-slate-900 rounded-lg p-1 gap-1">
+                <div className="flex bg-slate-900 rounded-lg p-1 gap-1" role="toolbar" aria-label="Annotation tools">
                     {[
-                        { id: 'pan', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 9l4-4 4 4" /><path d="M5 15l4 4 4-4" /><path d="M9 5v14" /><path d="M15 9l4-4 4 4" /><path d="M15 15l4 4 4-4" /><path d="M19 5v14" /></svg> },
-                        { id: 'ruler', icon: <RulerIcon className="w-5 h-5" /> },
-                        { id: 'angle', icon: <AngleIcon className="w-5 h-5" /> },
-                        { id: 'arrow', icon: <ArrowIcon className="w-5 h-5" /> },
-                        { id: 'circle', icon: <CircleIcon className="w-5 h-5" /> },
-                        { id: 'text', icon: <FileTextIcon className="w-5 h-5" /> }
+                        { id: 'pan', label: 'Pan tool', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 9l4-4 4 4" /><path d="M5 15l4 4 4-4" /><path d="M9 5v14" /><path d="M15 9l4-4 4 4" /><path d="M15 15l4 4 4-4" /><path d="M19 5v14" /></svg> },
+                        { id: 'ruler', label: 'Ruler tool', icon: <RulerIcon className="w-5 h-5" /> },
+                        { id: 'angle', label: 'Angle tool', icon: <AngleIcon className="w-5 h-5" /> },
+                        { id: 'arrow', label: 'Arrow tool', icon: <ArrowIcon className="w-5 h-5" /> },
+                        { id: 'circle', label: 'Circle tool', icon: <CircleIcon className="w-5 h-5" /> },
+                        { id: 'text', label: 'Text tool', icon: <FileTextIcon className="w-5 h-5" /> }
                     ].map(tool => (
                         <button
                             key={tool.id}
                             onClick={() => setActiveTool(tool.id as any)}
                             className={`p-2 rounded-md transition-colors ${activeTool === tool.id ? 'bg-primary text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-                            title={tool.id}
+                            title={tool.label}
+                            aria-label={tool.label}
+                            aria-pressed={activeTool === tool.id}
                         >
                             {tool.icon}
                         </button>
@@ -446,9 +454,22 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3">
-                    <button onClick={() => setAnnotations([])} className="text-red-400 hover:text-red-300 p-2"><TrashIcon className="w-5 h-5" /></button>
+                    <button
+                        onClick={() => setAnnotations([])}
+                        className="text-red-400 hover:text-red-300 p-2"
+                        aria-label="Clear all annotations"
+                        title="Clear all annotations"
+                    >
+                        <TrashIcon className="w-5 h-5" />
+                    </button>
                     <div className="h-6 w-px bg-slate-600"></div>
-                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 hover:bg-slate-700 rounded transition-colors ${isSidebarOpen ? 'text-primary' : 'text-slate-400'}`}>
+                    <button
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className={`p-2 hover:bg-slate-700 rounded transition-colors ${isSidebarOpen ? 'text-primary' : 'text-slate-400'}`}
+                        aria-label="Toggle version history"
+                        aria-expanded={isSidebarOpen}
+                        title="Toggle version history"
+                    >
                         <HistoryIcon className="w-5 h-5" />
                     </button>
                     <button
@@ -481,19 +502,21 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                     {/* Floating Controls */}
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800/90 backdrop-blur border border-slate-700 p-2 rounded-xl flex items-center gap-4 text-slate-300 shadow-xl">
                         <div className="flex items-center gap-2">
-                            <button onClick={() => setScale(s => s * 0.9)} className="p-1 hover:text-white"><ZoomOutIcon className="w-4 h-4" /></button>
+                            <button onClick={() => setScale(s => s * 0.9)} className="p-1 hover:text-white" aria-label="Zoom out"><ZoomOutIcon className="w-4 h-4" /></button>
                             <span className="text-xs font-mono w-10 text-center">{Math.round(scale * 100)}%</span>
-                            <button onClick={() => setScale(s => s * 1.1)} className="p-1 hover:text-white"><ZoomInIcon className="w-4 h-4" /></button>
+                            <button onClick={() => setScale(s => s * 1.1)} className="p-1 hover:text-white" aria-label="Zoom in"><ZoomInIcon className="w-4 h-4" /></button>
                         </div>
                         <div className="w-px h-4 bg-slate-600"></div>
                         <div className="flex items-center gap-2">
-                            <button onClick={() => setRotation(r => r - 90)} className="p-1 hover:text-white"><RefreshCwIcon className="w-4 h-4 -scale-x-100" /></button>
-                            <button onClick={() => setRotation(r => r + 90)} className="p-1 hover:text-white"><RefreshCwIcon className="w-4 h-4" /></button>
+                            <button onClick={() => setRotation(r => r - 90)} className="p-1 hover:text-white" aria-label="Rotate left"><RefreshCwIcon className="w-4 h-4 -scale-x-100" /></button>
+                            <button onClick={() => setRotation(r => r + 90)} className="p-1 hover:text-white" aria-label="Rotate right"><RefreshCwIcon className="w-4 h-4" /></button>
                         </div>
                         <div className="w-px h-4 bg-slate-600"></div>
                         <div className="flex items-center gap-2" title="Brilho / Contraste">
                             <SunIcon className="w-4 h-4 text-amber-400" />
+                            <label htmlFor="brightness-slider" className="sr-only">Brightness</label>
                             <input
+                                id="brightness-slider"
                                 type="range" min="50" max="150"
                                 value={brightness}
                                 onChange={(e) => setBrightness(parseInt(e.target.value))}
@@ -505,9 +528,9 @@ const AssetViewer: React.FC<AssetViewerProps> = ({ asset, onClose }) => {
                     {/* PDF Navigation (if applicable) */}
                     {asset.type === 'pdf' && (
                         <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-slate-800 p-2 rounded-lg text-white">
-                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeftIcon className="w-5 h-5" /></button>
+                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} aria-label="Previous page"><ChevronLeftIcon className="w-5 h-5" /></button>
                             <span className="text-sm">Pág {currentPage} / {numPages}</span>
-                            <button disabled={currentPage >= numPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRightIcon className="w-5 h-5" /></button>
+                            <button disabled={currentPage >= numPages} onClick={() => setCurrentPage(p => p + 1)} aria-label="Next page"><ChevronRightIcon className="w-5 h-5" /></button>
                         </div>
                     )}
                 </div>

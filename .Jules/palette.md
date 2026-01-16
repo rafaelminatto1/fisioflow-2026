@@ -1,0 +1,3 @@
+## 2024-05-23 - Accessibility in Asset Viewer
+**Learning:** The `AssetViewer` component relies heavily on icon-only buttons for tools and navigation (zoom, rotation, pagination) but consistently lacked `aria-label` attributes, making it inaccessible to screen readers.
+**Action:** When implementing or reviewing components with toolbars or floating controls (like image viewers or map editors), explicitly check that every icon-only button has a descriptive `aria-label` and `title`. For toggle states (like sidebar), include `aria-expanded`. For tool selection, use `role="toolbar"`, `aria-label` for the group, and `aria-pressed` for the active tool.
