@@ -59,7 +59,13 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
         <div className="flex-1 space-y-4">
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white flex items-center gap-3">
-              Dashboard <span className="text-gradient">Executivo</span> <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 self-start mt-2">AO VIVO</span>
+              Dashboard <span className="text-gradient">Executivo</span> <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 self-start mt-2 flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                AO VIVO
+              </span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 font-medium mt-1 text-lg">
               Visão consolidada de performance clínica e financeira.
@@ -101,12 +107,17 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
                 disabled={loadingInsight}
                 className="p-1.5 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                 title="Atualizar análise"
+                aria-label="Atualizar análise"
+                aria-busy={loadingInsight}
               >
                 <RefreshCwIcon className={`w-3.5 h-3.5 ${loadingInsight ? 'animate-spin' : ''}`} />
               </button>
             </div>
 
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed italic min-h-[40px] relative z-10">
+            <p
+              className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed italic min-h-[40px] relative z-10"
+              aria-live="polite"
+            >
               "{insight}"
             </p>
 
@@ -129,7 +140,7 @@ export default function DashboardClient({ initialData, initialInsight }: Dashboa
             value={String(kpi.value)}
             trend={kpi.trend}
             Icon={kpi.icon}
-            className="glass-card rounded-2xl p-5 border-slate-200 dark:border-slate-800 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+            className="glass-card rounded-2xl p-5 border-slate-200 dark:border-slate-800 hover:scale-[1.02] transition-all duration-300"
           />
         ))}
       </section>
