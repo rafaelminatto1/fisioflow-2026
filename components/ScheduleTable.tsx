@@ -35,7 +35,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ appointments }) => {
             const time = new Date(apt.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             return (
-              <tr key={apt.id} className="group hover:bg-white/5 transition-all cursor-pointer">
+              <tr key={apt.id} className="group hover:bg-white/5 transition-all">
                 <td className="px-6 py-3 whitespace-nowrap first:rounded-l-xl border-y border-l border-transparent hover:border-white/10">
                   <div className="flex items-center gap-4 pl-2">
                     <div className={`w-1 h-8 rounded-full transition-all group-hover:h-10 group-hover:shadow-[0_0_10px_currentColor] ${
