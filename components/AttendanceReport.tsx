@@ -52,6 +52,7 @@ const AttendanceReport = () => {
                 <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-800 mb-6">Comparecimento por Dia da Semana</h3>
                     <div className="h-[300px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={WEEKDAY_DATA} layout="vertical" barGap={0} barSize={20}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />

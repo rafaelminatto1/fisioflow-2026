@@ -87,6 +87,7 @@ const CRMDashboard = () => {
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-800 mb-6">Funil de Vendas</h3>
                     <div className="h-[300px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart 
                                 data={FUNNEL_DATA} 
@@ -119,6 +120,7 @@ const CRMDashboard = () => {
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-800 mb-6">Origem dos Leads</h3>
                     <div className="h-[300px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie

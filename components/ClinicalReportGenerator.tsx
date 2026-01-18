@@ -276,6 +276,7 @@ const ClinicalReportGenerator = () => {
                                     <div className="mb-8">
                                         <h3 className="text-sm font-bold text-slate-900 border-l-4 border-primary pl-3 mb-4 uppercase">Evolução do Quadro Álgico (EVA)</h3>
                                         <div className="h-64 w-full border border-slate-100 rounded-lg p-2">
+                                             {/* @ts-expect-error - Recharts type definition issue with children */}
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <AreaChart data={chartData}>
                                                     <defs>

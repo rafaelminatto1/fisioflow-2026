@@ -160,6 +160,7 @@ const BillingDashboard = () => {
                         Ticket Médio por Convênio
                     </h3>
                     <div className="flex-1 min-h-[250px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={RENTABILITY_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

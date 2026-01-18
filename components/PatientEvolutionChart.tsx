@@ -65,6 +65,7 @@ const PatientEvolutionChart: React.FC<PatientEvolutionChartProps> = ({ data }) =
       </div>
 
       <div className="flex-1 min-h-[250px] w-full">
+         {/* @ts-expect-error - Recharts type definition issue with children */}
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}

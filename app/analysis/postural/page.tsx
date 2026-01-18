@@ -494,6 +494,7 @@ export default function PosturalAnalysisPage() {
                     <div className="flex-1 flex items-center justify-center relative">
                         <Webcam 
                             audio={false}
+                            // @ts-expect-error - ref type mismatch in library
                             ref={webcamRef}
                             screenshotFormat="image/jpeg"
                             className="h-full w-full object-contain"
