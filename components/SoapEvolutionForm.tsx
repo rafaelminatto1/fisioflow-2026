@@ -146,14 +146,14 @@ const SoapEvolutionForm: React.FC<SoapEvolutionFormProps> = ({ patient, onClose,
       reader.onload = (event) => {
         const newAttachment = {
           id: Date.now().toString() + Math.random(),
-          name: file.name,
+          name: (file as File).name,
           url: event.target?.result as string,
-          type: file.type,
-          size: file.size
+          type: (file as File).type,
+          size: (file as File).size
         };
         setAttachments(prev => [...prev, newAttachment]);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file as Blob);
     });
   };
 

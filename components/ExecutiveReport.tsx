@@ -264,6 +264,7 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
                         </div>
                     </div>
                     <div className="flex-1 w-full min-h-0">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart 
                                 data={initialData.financial.chartData}
@@ -292,6 +293,7 @@ const ExecutiveReport: React.FC<ExecutiveReportProps> = ({ initialData, currentP
                         <p className="text-sm text-slate-500">Equilíbrio estratégico da clínica.</p>
                     </div>
                     <div className="flex-1 w-full min-h-0">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                                 <PolarGrid stroke="#e2e8f0" />

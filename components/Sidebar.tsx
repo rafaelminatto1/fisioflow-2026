@@ -217,7 +217,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
             <span className="text-[10px] font-bold text-primary tracking-widest uppercase">Pro Dashboard</span>
           </div>
         </Link>
-        <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+        <button
+          onClick={onClose}
+          className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          aria-label="Fechar menu"
+        >
           <XIcon className="w-5 h-5" />
         </button>
       </div>
@@ -243,6 +247,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
                     <li key={item.id}>
                       <button
                         onClick={() => toggleExpand(item.id)}
+                        aria-expanded={isExpanded}
                         className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all group ${isActive
                           ? 'text-white bg-white/10 shadow-lg shadow-black/20'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -324,13 +329,19 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
           </div>
 
           <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Link href="/settings" className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg" title="Configurações">
+            <Link
+              href="/settings"
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg"
+              title="Configurações"
+              aria-label="Ir para configurações"
+            >
               <SettingsIcon className="w-4 h-4" />
             </Link>
             <button
               onClick={handleLogout}
               className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white/10 rounded-lg"
               title="Sair"
+              aria-label="Sair do sistema"
             >
               <LogOutIcon className="w-4 h-4" />
             </button>

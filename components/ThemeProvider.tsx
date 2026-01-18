@@ -7,7 +7,7 @@ export const ThemeContext = createContext({
     toggleTheme: () => { },
 });
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children?: React.ReactNode }) {
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
     // Load theme from local storage or system preference on mount

@@ -95,6 +95,7 @@ const AdvancedAnalytics = () => {
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-800 mb-6">Aquisição vs Retenção</h3>
                     <div className="h-[300px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={RETENTION_DATA}>
                                 <defs>
@@ -123,6 +124,7 @@ const AdvancedAnalytics = () => {
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-800 mb-6">Demografia por Faixa Etária</h3>
                     <div className="h-[300px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={DEMOGRAPHICS_DATA} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
@@ -155,6 +157,7 @@ const AdvancedAnalytics = () => {
                         </ul>
                     </div>
                     <div className="w-full md:w-2/3 h-[250px]">
+                         {/* @ts-expect-error - Recharts type definition issue with children */}
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie

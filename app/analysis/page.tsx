@@ -374,6 +374,7 @@ export default function BiomechanicsPage() {
                 {activeTab === 'realtime' ? (
                     <div className="relative w-full h-full max-w-4xl max-h-full flex items-center justify-center bg-black">
                         <Webcam
+                            // @ts-expect-error - ref type mismatch in library
                             ref={webcamRef}
                             className="absolute inset-0 w-full h-full object-contain"
                             mirrored

@@ -45,6 +45,7 @@ const FinancialChart: React.FC<FinancialChartProps> = React.memo(({ data }) => {
       </div>
 
       <div className="flex-1 w-full min-h-[200px] relative z-10">
+         {/* @ts-expect-error - Recharts type definition issue with children */}
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
             <defs>

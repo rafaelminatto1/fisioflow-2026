@@ -183,6 +183,7 @@ const ManagerialAnalysis = () => {
                 </div>
                 
                 <div className="h-[300px]">
+                     {/* @ts-expect-error - Recharts type definition issue with children */}
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={EXPERIMENTAL_DATA} layout="vertical" barGap={4} barSize={24}>
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />

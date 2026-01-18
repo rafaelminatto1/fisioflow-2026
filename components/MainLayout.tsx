@@ -5,7 +5,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { usePathname } from 'next/navigation';
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({ children }: { children?: React.ReactNode }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
 
