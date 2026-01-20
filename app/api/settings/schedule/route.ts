@@ -1,30 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { clinicSettings } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { withCache } from '@/lib/vercel-kv';
+
+// Default schedule settings
+const DEFAULT_SCHEDULE = {
+  workingDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+  workingHours: {
+    start: '08:00',
+    end: '19:00',
+  },
+  lunchBreak: {
+    start: '12:00',
+    end: '13:00',
+  },
+  slotDuration: 60, // minutes
+  appointments: [
+    { day: 'monday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
+    { day: 'tuesday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
+    { day: 'wednesday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
+    { day: 'thursday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
+    { day: 'friday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
+  ],
+};
 
 // GET /api/settings/schedule - Get clinic schedule settings
 export async function GET() {
   try {
-    // TODO: Implement actual schedule retrieval from clinic_settings
-    const schedule = {
-      workingDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-      workingHours: {
-        start: '08:00',
-        end: '19:00',
+    const cacheKey = 'clinic-settings:schedule';
+
+    const schedule = await withCache(
+      cacheKey,
+      async () => {
+        const settings = await db.query.clinicSettings.findFirst({
+          where: eq(clinicSettings.key, 'schedule'),
+        });
+
+        if (settings?.value) {
+          return settings.value;
+        }
+
+        return DEFAULT_SCHEDULE;
       },
-      lunchBreak: {
-        start: '12:00',
-        end: '13:00',
-      },
-      slotDuration: 60, // minutes
-      appointments: [
-        { day: 'monday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
-        { day: 'tuesday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
-        { day: 'wednesday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
-        { day: 'thursday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
-        { day: 'friday', slots: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'] },
-      ],
-    };
+      { ttl: 600 }
+    );
 
     return NextResponse.json(schedule);
   } catch (error) {
