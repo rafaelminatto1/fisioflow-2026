@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { clinicSettings } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 // GET /api/settings/payment-methods - Get payment methods
 export async function GET() {
   try {
-    // TODO: Implement actual payment methods retrieval from clinic_settings
+    const settings = await db.query.clinicSettings.findFirst({
+      where: eq(clinicSettings.key, 'payment_methods'),
+    });
+
+    if (settings?.value) {
+      return NextResponse.json(settings.value);
+    }
+
+    // Default payment methods if not found in DB
     const paymentMethods = [
       { id: '1', name: 'Dinheiro', enabled: true, icon: 'money' },
       { id: '2', name: 'PIX', enabled: true, icon: 'qr-code' },
@@ -38,11 +47,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // TODO: Implement actual payment methods update to clinic_settings
-    // await db.update(clinicSettings).set({
-    //   paymentMethods: methods,
-    //   updatedAt: new Date(),
-    // });
+    const existing = await db.query.clinicSettings.findFirst({
+      where: eq(clinicSettings.key, 'payment_methods'),
+    });
+
+    if (existing) {
+      await db.update(clinicSettings)
+        .set({
+          value: methods,
+          updatedAt: new Date()
+        })
+        .where(eq(clinicSettings.key, 'payment_methods'));
+    } else {
+      await db.insert(clinicSettings).values({
+        key: 'payment_methods',
+        value: methods,
+        category: 'financial',
+        description: 'Clinic payment methods configuration',
+      });
+    }
 
     return NextResponse.json({
       success: true,
