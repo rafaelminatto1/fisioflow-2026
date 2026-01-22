@@ -78,7 +78,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     return (
         <header className="sticky top-0 z-40 h-20 px-8 flex items-center justify-between bg-white/70 backdrop-blur-xl border-b border-slate-200/50 transition-colors duration-300">
             <div className="flex items-center gap-4">
-                <button onClick={onMenuClick} className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                <button
+                    onClick={onMenuClick}
+                    className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                    aria-label="Toggle navigation menu"
+                >
                     <ListIcon className="w-6 h-6" />
                 </button>
                 <div className="hidden md:block">
@@ -96,6 +100,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
                         className={`p-2.5 rounded-xl transition-all relative ${showNotifications ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                        aria-label="Notifications"
+                        aria-expanded={showNotifications}
+                        aria-haspopup="true"
+                        aria-controls="notifications-panel"
                     >
                         {unreadCount > 0 && (
                             <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
@@ -105,7 +113,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
                     {/* Dropdown */}
                     {showNotifications && (
-                        <div className="absolute right-0 top-full mt-4 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
+                        <div
+                            id="notifications-panel"
+                            className="absolute right-0 top-full mt-4 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right"
+                        >
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                                 <h3 className="font-bold text-slate-800 dark:text-white text-sm">Notificações</h3>
                                 {unreadCount > 0 && (
@@ -175,9 +186,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
 
                 <div className="relative" ref={profileRef}>
-                    <div
-                        className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity"
+                    <button
+                        className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity text-left bg-transparent border-none p-0"
                         onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        aria-label="User menu"
+                        aria-expanded={showProfileMenu}
+                        aria-haspopup="true"
+                        aria-controls="profile-menu"
                     >
                         <div className="text-right hidden sm:block">
                             <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Dr. Ricardo M.</p>
@@ -191,11 +206,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                             />
                             <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
                         </div>
-                    </div>
+                    </button>
 
                     {/* Profile Dropdown */}
                     {showProfileMenu && (
-                        <div className="absolute right-0 top-full mt-4 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
+                        <div
+                            id="profile-menu"
+                            className="absolute right-0 top-full mt-4 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right"
+                        >
                             <div className="p-2 space-y-1">
                                 <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
                                     <UsersIcon className="w-4 h-4" />
