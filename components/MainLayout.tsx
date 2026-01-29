@@ -18,6 +18,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
     return (
         <div className="flex min-h-screen bg-slate-50 bg-grid-pattern transition-colors duration-300">
+            <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:p-4 focus:bg-white focus:text-primary focus:font-bold focus:shadow-xl focus:rounded-br-xl transition-all"
+            >
+                Pular para o conteúdo principal
+            </a>
+
             {/* Mobile Menu Overlay */}
             {isMenuOpen && (
                 <div
@@ -34,7 +41,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             {/* Main Content */}
             <div className="flex-1 flex flex-col h-screen overflow-hidden">
                 <Header onMenuClick={() => setIsMenuOpen(true)} />
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+                <main
+                    id="main-content"
+                    tabIndex={-1}
+                    className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth focus:outline-none"
+                >
                     {children}
                 </main>
             </div>
