@@ -179,21 +179,26 @@ const TasksManagerPro: React.FC = () => {
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-slate-900">Templates de Tarefas</h3>
-            <button onClick={() => setShowTemplates(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button onClick={() => setShowTemplates(false)} className="text-slate-400 hover:text-slate-600" aria-label="Fechar templates">✕</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {templates.map(template => (
-              <div key={template.id} className="bg-white p-4 rounded-lg border border-slate-200 hover:border-primary cursor-pointer" onClick={() => handleCreateFromTemplate(template)}>
-                <div className="flex items-center justify-between mb-2">
+              <button
+                key={template.id}
+                type="button"
+                className="bg-white p-4 rounded-lg border border-slate-200 hover:border-primary cursor-pointer w-full text-left transition-all focus:ring-2 focus:ring-primary focus:outline-none"
+                onClick={() => handleCreateFromTemplate(template)}
+              >
+                <span className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600">{template.category}</span>
                   <span className="text-xs text-slate-400">{template.estimatedTime} min</span>
-                </div>
-                <h4 className="font-bold text-slate-900 mb-1">{template.name}</h4>
-                <p className="text-xs text-slate-500 mb-2">{template.description}</p>
+                </span>
+                <span className="block font-bold text-slate-900 mb-1">{template.name}</span>
+                <span className="block text-xs text-slate-500 mb-2">{template.description}</span>
                 {template.checklist.length > 0 && (
-                  <p className="text-xs text-slate-400">{template.checklist.length} itens de checklist</p>
+                  <span className="block text-xs text-slate-400">{template.checklist.length} itens de checklist</span>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -324,7 +329,7 @@ const TasksManagerPro: React.FC = () => {
                           {task.priority === 'high' && <AlertCircleIcon className="w-3 h-3 inline mr-1" />}
                           {task.priority}
                         </span>
-                        <button onClick={() => handleDelete(task.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => handleDelete(task.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Excluir tarefa">
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
@@ -350,13 +355,13 @@ const TasksManagerPro: React.FC = () => {
 
                         <div className="flex gap-1">
                           {col.id !== 'todo' && col.id !== 'review' && (
-                            <button onClick={() => moveTask(task.id, 'todo')} className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xs" title="Mover para A Fazer">←</button>
+                            <button onClick={() => moveTask(task.id, 'todo')} className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xs" title="Mover para A Fazer" aria-label="Mover para A Fazer">←</button>
                           )}
                           {(col.id === 'done' || col.id === 'review') && (
-                            <button onClick={() => moveTask(task.id, 'in_progress')} className="w-6 h-6 rounded bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-600 text-xs" title="Voltar">←</button>
+                            <button onClick={() => moveTask(task.id, 'in_progress')} className="w-6 h-6 rounded bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-600 text-xs" title="Voltar" aria-label="Voltar">←</button>
                           )}
                           {col.id !== 'done' && (
-                            <button onClick={() => moveTask(task.id, col.id === 'todo' ? 'in_progress' : col.id === 'in_progress' ? 'review' : 'done')} className="w-6 h-6 rounded bg-primary hover:bg-sky-600 flex items-center justify-center text-white text-xs shadow-sm" title="Avançar">→</button>
+                            <button onClick={() => moveTask(task.id, col.id === 'todo' ? 'in_progress' : col.id === 'in_progress' ? 'review' : 'done')} className="w-6 h-6 rounded bg-primary hover:bg-sky-600 flex items-center justify-center text-white text-xs shadow-sm" title="Avançar" aria-label="Avançar">→</button>
                           )}
                         </div>
                       </div>
