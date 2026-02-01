@@ -158,6 +158,7 @@ const TasksManagerPro: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setShowTemplates(true)}
             className="flex items-center gap-2 border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors"
           >
@@ -165,6 +166,7 @@ const TasksManagerPro: React.FC = () => {
             Templates
           </button>
           <button
+            type="button"
             onClick={() => setIsAdding(true)}
             className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors shadow-sm"
           >
@@ -179,11 +181,23 @@ const TasksManagerPro: React.FC = () => {
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-slate-900">Templates de Tarefas</h3>
-            <button onClick={() => setShowTemplates(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            <button
+              type="button"
+              onClick={() => setShowTemplates(false)}
+              className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-200 rounded-full transition-colors"
+              aria-label="Fechar templates"
+            >
+              ✕
+            </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {templates.map(template => (
-              <div key={template.id} className="bg-white p-4 rounded-lg border border-slate-200 hover:border-primary cursor-pointer" onClick={() => handleCreateFromTemplate(template)}>
+              <button
+                key={template.id}
+                type="button"
+                className="bg-white p-4 rounded-lg border border-slate-200 hover:border-primary cursor-pointer w-full text-left transition-all focus:ring-2 focus:ring-primary focus:outline-none"
+                onClick={() => handleCreateFromTemplate(template)}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold px-2 py-1 rounded bg-slate-100 text-slate-600">{template.category}</span>
                   <span className="text-xs text-slate-400">{template.estimatedTime} min</span>
@@ -193,7 +207,7 @@ const TasksManagerPro: React.FC = () => {
                 {template.checklist.length > 0 && (
                   <p className="text-xs text-slate-400">{template.checklist.length} itens de checklist</p>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -273,8 +287,8 @@ const TasksManagerPro: React.FC = () => {
             />
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => setIsAdding(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-200 rounded-lg">Cancelar</button>
-            <button onClick={handleAddTask} className="px-6 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-sky-600">Adicionar</button>
+            <button type="button" onClick={() => setIsAdding(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-200 rounded-lg">Cancelar</button>
+            <button type="button" onClick={handleAddTask} className="px-6 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-sky-600">Adicionar</button>
           </div>
         </div>
       )}
@@ -324,7 +338,12 @@ const TasksManagerPro: React.FC = () => {
                           {task.priority === 'high' && <AlertCircleIcon className="w-3 h-3 inline mr-1" />}
                           {task.priority}
                         </span>
-                        <button onClick={() => handleDelete(task.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(task.id)}
+                          className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label="Excluir tarefa"
+                        >
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
@@ -350,13 +369,37 @@ const TasksManagerPro: React.FC = () => {
 
                         <div className="flex gap-1">
                           {col.id !== 'todo' && col.id !== 'review' && (
-                            <button onClick={() => moveTask(task.id, 'todo')} className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xs" title="Mover para A Fazer">←</button>
+                            <button
+                              type="button"
+                              onClick={() => moveTask(task.id, 'todo')}
+                              className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xs"
+                              title="Mover para A Fazer"
+                              aria-label="Mover para A Fazer"
+                            >
+                              ←
+                            </button>
                           )}
                           {(col.id === 'done' || col.id === 'review') && (
-                            <button onClick={() => moveTask(task.id, 'in_progress')} className="w-6 h-6 rounded bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-600 text-xs" title="Voltar">←</button>
+                            <button
+                              type="button"
+                              onClick={() => moveTask(task.id, 'in_progress')}
+                              className="w-6 h-6 rounded bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-600 text-xs"
+                              title="Voltar"
+                              aria-label="Voltar para Em Andamento"
+                            >
+                              ←
+                            </button>
                           )}
                           {col.id !== 'done' && (
-                            <button onClick={() => moveTask(task.id, col.id === 'todo' ? 'in_progress' : col.id === 'in_progress' ? 'review' : 'done')} className="w-6 h-6 rounded bg-primary hover:bg-sky-600 flex items-center justify-center text-white text-xs shadow-sm" title="Avançar">→</button>
+                            <button
+                              type="button"
+                              onClick={() => moveTask(task.id, col.id === 'todo' ? 'in_progress' : col.id === 'in_progress' ? 'review' : 'done')}
+                              className="w-6 h-6 rounded bg-primary hover:bg-sky-600 flex items-center justify-center text-white text-xs shadow-sm"
+                              title="Avançar"
+                              aria-label="Avançar status"
+                            >
+                              →
+                            </button>
                           )}
                         </div>
                       </div>
