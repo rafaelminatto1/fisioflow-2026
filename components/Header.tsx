@@ -78,7 +78,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     return (
         <header className="sticky top-0 z-40 h-20 px-8 flex items-center justify-between bg-white/70 backdrop-blur-xl border-b border-slate-200/50 transition-colors duration-300">
             <div className="flex items-center gap-4">
-                <button onClick={onMenuClick} className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                <button
+                    onClick={onMenuClick}
+                    className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                    aria-label="Abrir menu principal"
+                >
                     <ListIcon className="w-6 h-6" />
                 </button>
                 <div className="hidden md:block">
@@ -96,6 +100,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
                         className={`p-2.5 rounded-xl transition-all relative ${showNotifications ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                        aria-label={showNotifications ? "Fechar notificações" : "Abrir notificações"}
+                        aria-expanded={showNotifications}
+                        aria-haspopup="true"
                     >
                         {unreadCount > 0 && (
                             <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
@@ -151,6 +158,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                                                     onClick={(e) => deleteNotification(notification.id, e)}
                                                     className="absolute top-2 right-2 p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-white dark:bg-slate-800 rounded-full shadow-sm"
                                                     title="Remover"
+                                                    aria-label="Remover notificação"
                                                 >
                                                     <XIcon className="w-3 h-3" />
                                                 </button>
@@ -175,9 +183,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
 
                 <div className="relative" ref={profileRef}>
-                    <div
+                    <button
+                        type="button"
                         className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        aria-label="Menu do usuário"
+                        aria-expanded={showProfileMenu}
+                        aria-haspopup="true"
                     >
                         <div className="text-right hidden sm:block">
                             <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">Dr. Ricardo M.</p>
@@ -191,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                             />
                             <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
                         </div>
-                    </div>
+                    </button>
 
                     {/* Profile Dropdown */}
                     {showProfileMenu && (
