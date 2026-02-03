@@ -217,7 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
             <span className="text-[10px] font-bold text-primary tracking-widest uppercase">Pro Dashboard</span>
           </div>
         </Link>
-        <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+        <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" aria-label="Fechar menu">
           <XIcon className="w-5 h-5" />
         </button>
       </div>
@@ -331,6 +331,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
               onClick={handleLogout}
               className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-white/10 rounded-lg"
               title="Sair"
+              aria-label="Sair"
             >
               <LogOutIcon className="w-4 h-4" />
             </button>
