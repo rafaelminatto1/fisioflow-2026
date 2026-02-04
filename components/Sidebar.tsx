@@ -217,7 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
             <span className="text-[10px] font-bold text-primary tracking-widest uppercase">Pro Dashboard</span>
           </div>
         </Link>
-        <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+        <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" aria-label="Fechar menu">
           <XIcon className="w-5 h-5" />
         </button>
       </div>
@@ -247,6 +247,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
                           ? 'text-white bg-white/10 shadow-lg shadow-black/20'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
                           }`}
+                        aria-expanded={isExpanded}
+                        aria-controls={`submenu-${item.id}`}
                       >
                         <div className="flex items-center gap-3.5">
                           <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-primary' : 'text-slate-500 group-hover:text-slate-300'}`} />
@@ -259,7 +261,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onClose }) => {
                       </button>
 
                       {isExpanded && (
-                        <ul className="mt-2 space-y-1 pl-4 relative">
+                        <ul className="mt-2 space-y-1 pl-4 relative" id={`submenu-${item.id}`}>
                           <div className="absolute left-[29px] top-0 bottom-0 w-px bg-slate-800"></div>
                           {item.subItems.map(sub => (
                             <li key={sub.id} className="relative">
