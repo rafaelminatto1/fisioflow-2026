@@ -148,20 +148,35 @@ export async function GET(request: NextRequest) {
       .limit(5);
 
     // Session trend (daily)
+    const trendStartDate = subDays(now, 13);
+    const trendStartDateStr = trendStartDate.toISOString().split('T')[0];
+    const trendEndDateStr = now.toISOString().split('T')[0];
+
+    const dailyCounts = await db
+      .select({
+        date: patientSessions.date,
+        count: count(),
+      })
+      .from(patientSessions)
+      .where(
+        and(
+          gte(patientSessions.date, trendStartDateStr),
+          lte(patientSessions.date, trendEndDateStr)
+        )
+      )
+      .groupBy(patientSessions.date);
+
+    const countsMap = new Map(dailyCounts.map((d) => [d.date, d.count]));
+
     const sessionTrend = [];
     for (let i = 13; i >= 0; i--) {
       const date = subDays(now, i);
       const dayStart = new Date(date.setHours(0, 0, 0, 0));
-      const dayEnd = new Date(date.setHours(23, 59, 59, 999));
-
-      const [dayResult] = await db
-        .select({ count: count() })
-        .from(patientSessions)
-        .where(and(gte(patientSessions.date, dayStart.toISOString().split('T')[0]), lte(patientSessions.date, dayEnd.toISOString().split('T')[0])));
+      const dateStr = dayStart.toISOString().split('T')[0];
 
       sessionTrend.push({
         date: dayStart.toISOString(),
-        count: dayResult?.count || 0,
+        count: countsMap.get(dateStr) || 0,
       });
     }
 
