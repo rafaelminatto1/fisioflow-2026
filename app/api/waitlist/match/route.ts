@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     if (notifyPatients && isWhatsAppAvailable()) {
       const formattedDate = format(slotDate, "dd 'de' MMMM", { locale: ptBR });
 
-      for (const match of topMatches) {
+      const notificationPromises = topMatches.map(async (match) => {
         const phone = match.waitlistEntry.patientPhone;
         if (phone) {
           const success = await sendWaitlistNotification(
@@ -140,16 +140,17 @@ export async function POST(request: NextRequest) {
             slotTime
           );
 
-          notifications.push({
+          return {
             entryId: match.waitlistEntry.id,
             patientName: match.waitlistEntry.patientName,
             sent: success,
-          });
-
-          // Small delay between notifications
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          };
         }
-      }
+        return null;
+      });
+
+      const results = await Promise.all(notificationPromises);
+      notifications.push(...results.filter((n): n is NonNullable<typeof n> => n !== null));
     }
 
     return NextResponse.json({
