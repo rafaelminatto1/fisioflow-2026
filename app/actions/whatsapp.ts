@@ -386,9 +386,6 @@ export async function processAutomaticReminders(): Promise<{
       } else {
         failed++;
       }
-
-      // Pequeno delay entre envios para evitar rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     return { 
