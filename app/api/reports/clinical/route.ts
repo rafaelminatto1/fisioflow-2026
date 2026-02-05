@@ -63,9 +63,11 @@ export async function GET(request: NextRequest) {
       );
     const totalSessionsThisMonth = sessionsResult?.count || 0;
 
-    // Get completed appointments for duration calculation
-    const completedAppointments = await db
-      .select()
+    // Calculate average session duration
+    const [avgDurationResult] = await db
+      .select({
+        avgDuration: sql<number>`AVG(EXTRACT(EPOCH FROM (${appointments.endTime} - ${appointments.startTime})))`,
+      })
       .from(appointments)
       .where(
         and(
@@ -75,18 +77,9 @@ export async function GET(request: NextRequest) {
         )
       );
 
-    // Calculate average session duration
-    let averageSessionDuration = 45; // default
-    if (completedAppointments.length > 0) {
-      const totalDuration = completedAppointments.reduce((sum, apt) => {
-        if (apt.startTime && apt.endTime) {
-          const duration = new Date(apt.endTime).getTime() - new Date(apt.startTime).getTime();
-          return sum + duration;
-        }
-        return sum;
-      }, 0);
-      averageSessionDuration = Math.round(totalDuration / completedAppointments.length / 60000);
-    }
+    const averageSessionDuration = avgDurationResult?.avgDuration
+      ? Math.round(Number(avgDurationResult.avgDuration) / 60)
+      : 45; // default
 
     // Calculate retention rate (patients with more than one visit)
     const [returningPatientsResult] = await db
@@ -112,7 +105,7 @@ export async function GET(request: NextRequest) {
           eq(appointments.status, 'cancelled')
         )
       );
-    const totalAppointmentsInPeriod = completedAppointments.length + (cancelledResult?.count || 0);
+    const totalAppointmentsInPeriod = totalSessionsThisMonth + (cancelledResult?.count || 0);
     const cancellationRate = totalAppointmentsInPeriod > 0
       ? Math.round(((cancelledResult?.count || 0) / totalAppointmentsInPeriod) * 100)
       : 0;
