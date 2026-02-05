@@ -119,13 +119,13 @@ export async function GET(request: NextRequest) {
     const start = startDate ? new Date(startDate) : startOfDay(new Date(today.getFullYear(), today.getMonth(), 1));
     const end = endDate ? new Date(endDate) : endOfDay(today);
 
-    // Get all appointments in the period
-    const allAppointments = await db
+    // Optimized: Get statistics directly from DB to avoid fetching thousands of rows
+    const [stats] = await db
       .select({
-        id: appointments.id,
-        status: appointments.status,
-        startTime: appointments.startTime,
-        patientId: appointments.patientId,
+        total: sql<number>`count(*)`,
+        noShows: sql<number>`count(case when ${appointments.status} = 'no_show' then 1 end)`,
+        completed: sql<number>`count(case when ${appointments.status} = 'completed' then 1 end)`,
+        cancelled: sql<number>`count(case when ${appointments.status} = 'cancelled' then 1 end)`,
       })
       .from(appointments)
       .where(
@@ -135,22 +135,27 @@ export async function GET(request: NextRequest) {
         )
       );
 
-    const total = allAppointments.length;
-    const noShows = allAppointments.filter(a => a.status === 'no_show').length;
-    const completed = allAppointments.filter(a => a.status === 'completed').length;
-    const cancelled = allAppointments.filter(a => a.status === 'cancelled').length;
+    const total = Number(stats?.total || 0);
+    const noShows = Number(stats?.noShows || 0);
+    const completed = Number(stats?.completed || 0);
+    const cancelled = Number(stats?.cancelled || 0);
 
-    // Get repeat no-show patients
-    const noShowPatients = allAppointments
-      .filter(a => a.status === 'no_show')
-      .reduce((acc: any, a) => {
-        acc[a.patientId!] = (acc[a.patientId!] || 0) + 1;
-        return acc;
-      }, {});
-
-    const repeatNoShowPatients = Object.entries(noShowPatients)
-      .filter(([_, count]) => (count as number) > 1)
-      .map(([patientId, count]) => ({ patientId, noShowCount: count }));
+    // Optimized: Get repeat no-show patients via aggregation
+    const repeatNoShowPatients = await db
+      .select({
+        patientId: appointments.patientId,
+        noShowCount: sql<number>`count(*)::int`,
+      })
+      .from(appointments)
+      .where(
+        and(
+          sql`${appointments.startTime} >= ${start}`,
+          sql`${appointments.startTime} <= ${end}`,
+          eq(appointments.status, 'no_show')
+        )
+      )
+      .groupBy(appointments.patientId)
+      .having(sql`count(*) > 1`);
 
     return NextResponse.json({
       period: {
