@@ -29,8 +29,10 @@ export async function GET(request: NextRequest) {
       rangeEnd = endOfDay(targetDate);
     }
 
+    // Prepare queries for parallel execution
+
     // Get all transactions in the period
-    const allTransactions = await db.select()
+    const transactionsQuery = db.select()
       .from(transactions)
       .where(
         and(
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
       .orderBy(desc(transactions.date));
 
     // Get payments in the period
-    const allPayments = await db.select()
+    const paymentsQuery = db.select()
       .from(payments)
       .where(
         and(
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
       .orderBy(desc(payments.createdAt));
 
     // Get sessions (appointments) in the period
-    const sessions = await db.select()
+    const sessionsQuery = db.select()
       .from(appointments)
       .where(
         and(
@@ -61,44 +63,38 @@ export async function GET(request: NextRequest) {
         )
       );
 
-    // Calculate totals by payment method
-    const cashByMethod: Record<string, number> = {};
-    let totalIncome = 0;
-    let totalExpense = 0;
-    let totalPending = 0;
+    // SQL Aggregation: Transactions grouped by payment method and type
+    const transactionAggQuery = db.select({
+        method: transactions.paymentMethod,
+        type: transactions.type,
+        total: sql<string>`sum(${transactions.amount})`
+    })
+    .from(transactions)
+    .where(
+        and(
+            gte(transactions.date, rangeStart),
+            lte(transactions.date, rangeEnd)
+        )
+    )
+    .groupBy(transactions.paymentMethod, transactions.type);
 
-    // Process transactions
-    for (const txn of allTransactions) {
-      const method = txn.paymentMethod || 'other';
-      if (!cashByMethod[method]) {
-        cashByMethod[method] = 0;
-      }
-
-      if (txn.type === 'income') {
-        cashByMethod[method] += Number(txn.amount);
-        totalIncome += Number(txn.amount);
-      } else if (txn.type === 'expense') {
-        totalExpense += Number(txn.amount);
-      }
-    }
-
-    // Process payments
-    for (const payment of allPayments) {
-      const method = payment.paymentMethod || 'stripe';
-      if (!cashByMethod[method]) {
-        cashByMethod[method] = 0;
-      }
-
-      if (payment.status === 'completed') {
-        cashByMethod[method] += Number(payment.amount);
-        totalIncome += Number(payment.amount);
-      } else if (payment.status === 'pending') {
-        totalPending += Number(payment.amount);
-      }
-    }
+    // SQL Aggregation: Payments grouped by payment method and status
+    const paymentAggQuery = db.select({
+        method: payments.paymentMethod,
+        status: payments.status,
+        total: sql<string>`sum(${payments.amount})`
+    })
+    .from(payments)
+    .where(
+        and(
+            gte(payments.createdAt, rangeStart),
+            lte(payments.createdAt, rangeEnd)
+        )
+    )
+    .groupBy(payments.paymentMethod, payments.status);
 
     // Get overdue accounts receivable
-    const overdueReceivables = await db.select()
+    const overdueReceivablesQuery = db.select()
       .from(accountsReceivable)
       .where(
         and(
@@ -107,12 +103,8 @@ export async function GET(request: NextRequest) {
         )
       );
 
-    const totalOverdue = overdueReceivables.reduce((sum, acc) => {
-      return sum + (Number(acc.amount) - Number(acc.paidAmount));
-    }, 0);
-
     // Get upcoming accounts payable
-    const upcomingPayables = await db.select()
+    const upcomingPayablesQuery = db.select()
       .from(accountsPayable)
       .where(
         and(
@@ -123,15 +115,82 @@ export async function GET(request: NextRequest) {
       .orderBy(sql`${accountsPayable.dueDate} ASC`)
       .limit(20);
 
+    // Get pending accounts receivable
+    const pendingReceivablesQuery = db.select()
+      .from(accountsReceivable)
+      .where(eq(accountsReceivable.status, 'pending'));
+
+    // Execute all queries in parallel
+    const [
+        allTransactions,
+        allPayments,
+        sessions,
+        transactionAggs,
+        paymentAggs,
+        overdueReceivables,
+        upcomingPayables,
+        pendingReceivables
+    ] = await Promise.all([
+        transactionsQuery,
+        paymentsQuery,
+        sessionsQuery,
+        transactionAggQuery,
+        paymentAggQuery,
+        overdueReceivablesQuery,
+        upcomingPayablesQuery,
+        pendingReceivablesQuery
+    ]);
+
+    // Calculate totals from SQL aggregates
+    const cashByMethod: Record<string, number> = {};
+    let totalIncome = 0;
+    let totalExpense = 0;
+    let totalPending = 0;
+
+    // Process transaction aggregates
+    for (const agg of transactionAggs) {
+      const method = agg.method || 'other';
+      const amount = Number(agg.total) || 0;
+
+      if (!cashByMethod[method]) {
+        cashByMethod[method] = 0;
+      }
+
+      if (agg.type === 'income') {
+        cashByMethod[method] += amount;
+        totalIncome += amount;
+      } else if (agg.type === 'expense') {
+        totalExpense += amount;
+      }
+    }
+
+    // Process payment aggregates
+    for (const agg of paymentAggs) {
+      const method = agg.method || 'stripe';
+      const amount = Number(agg.total) || 0;
+
+      if (!cashByMethod[method]) {
+        cashByMethod[method] = 0;
+      }
+
+      if (agg.status === 'completed') {
+        cashByMethod[method] += amount;
+        totalIncome += amount;
+      } else if (agg.status === 'pending') {
+        totalPending += amount;
+      }
+    }
+
+    const totalOverdue = overdueReceivables.reduce((sum, acc) => {
+      return sum + (Number(acc.amount) - Number(acc.paidAmount));
+    }, 0);
+
     const totalUpcomingPayables = upcomingPayables.reduce((sum, acc) => {
       return sum + (Number(acc.amount) - Number(acc.paidAmount));
     }, 0);
 
     // Calculate summary
     const netCash = totalIncome - totalExpense;
-    const pendingReceivables = await db.select()
-      .from(accountsReceivable)
-      .where(eq(accountsReceivable.status, 'pending'));
 
     const totalPendingReceivables = pendingReceivables.reduce((sum, acc) => {
       return sum + (Number(acc.amount) - Number(acc.paidAmount));
